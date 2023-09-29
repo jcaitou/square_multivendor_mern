@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup-project": "npm i && cd client && npm i",
+    "server": "nodemon server",
+    "client": "cd client && npm run dev",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -24,11 +28,13 @@
     "express-validator": "^7.0.1",
     "helmet": "^7.0.0",
     "http-status-codes": "^2.2.0",
+    "json-bigint": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.5",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^4.0.2",
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "square": "^31.0.0"
   }
 }
