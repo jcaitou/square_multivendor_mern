@@ -1,34 +1,44 @@
-import { Outlet } from 'react-router-dom';
-import Wrapper from '../assets/wrappers/Dashboard';
-import { Navbar, BigSidebar, SmallSidebar } from '../components';
+import Wrapper from '../assets/wrappers/Dashboard'
+import { Navbar, BigSidebar, SmallSidebar } from '../components'
+import { useState, createContext, useContext } from 'react'
+import { checkDefaultTheme } from '../utils/checkDefaultTheme'
+import { Outlet, redirect, useLoaderData, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import customFetch from '../utils/customFetch'
 
-import { useState, createContext, useContext } from 'react';
-import { checkDefaultTheme } from '../utils/checkDefaultTheme';
+export const loader = async () => {
+  try {
+    const { data } = await customFetch.get('/users/current-user')
+    return data
+  } catch (error) {
+    return redirect('/')
+  }
+}
 
-const DashboardContext = createContext();
+const DashboardContext = createContext()
 
 const Dashboard = ({ isDarkThemeEnabled }) => {
-  // temp
-  const user = { name: 'john' };
-
-
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [isDarkTheme, setIsDarkTheme] = useState(checkDefaultTheme());
+  const { user } = useLoaderData()
+  const navigate = useNavigate()
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [isDarkTheme, setIsDarkTheme] = useState(checkDefaultTheme())
 
   const toggleDarkTheme = () => {
-    const newDarkTheme = !isDarkTheme;
-    setIsDarkTheme(newDarkTheme);
-    document.body.classList.toggle('dark-theme', newDarkTheme);
-    localStorage.setItem('darkTheme', newDarkTheme);
-  };
+    const newDarkTheme = !isDarkTheme
+    setIsDarkTheme(newDarkTheme)
+    document.body.classList.toggle('dark-theme', newDarkTheme)
+    localStorage.setItem('darkTheme', newDarkTheme)
+  }
 
   const toggleSidebar = () => {
-    setShowSidebar(!showSidebar);
-  };
+    setShowSidebar(!showSidebar)
+  }
 
   const logoutUser = async () => {
-    console.log('logout user');
-  };
+    navigate('/')
+    await customFetch.get('/auth/logout')
+    toast.success('Logging out...')
+  }
   return (
     <DashboardContext.Provider
       value={{
@@ -47,15 +57,15 @@ const Dashboard = ({ isDarkThemeEnabled }) => {
           <div>
             <Navbar />
             <div className='dashboard-page'>
-              <Outlet />
+              <Outlet context={{ user }} />
             </div>
           </div>
         </main>
       </Wrapper>
     </DashboardContext.Provider>
-  );
-};
+  )
+}
 
-export const useDashboardContext = () => useContext(DashboardContext);
+export const useDashboardContext = () => useContext(DashboardContext)
 
-export default Dashboard;
+export default Dashboard

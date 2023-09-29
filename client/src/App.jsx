@@ -1,10 +1,29 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import {
-  HomeLayout,Landing,Register,Login,DashboardLayout,Error,AddJob,Profile,Admin,Stats,AllJobs
+  HomeLayout,
+  Landing,
+  Register,
+  Login,
+  DashboardLayout,
+  Error,
+  AddJob,
+  Profile,
+  Admin,
+  Stats,
+  AllProducts,
+  EditJob,
 } from './pages'
-import { checkDefaultTheme } from './utils/checkDefaultTheme';
+import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
-checkDefaultTheme();
+import { action as registerAction } from './pages/Register'
+import { action as loginAction } from './pages/Login'
+import { action as addProductAction } from './pages/AddJob'
+import { action as editProductAction } from './pages/EditJob'
+import { loader as dashboardLoader } from './pages/DashboardLayout'
+import { loader as allProductsLoader } from './pages/AllProducts'
+import { loader as editProductLoader } from './pages/EditJob'
+
+checkDefaultTheme()
 
 const router = createBrowserRouter([
   {
@@ -19,25 +38,39 @@ const router = createBrowserRouter([
       {
         path: 'register',
         element: <Register />,
+        action: registerAction,
       },
       {
         path: 'login',
         element: <Login />,
+        action: loginAction,
       },
-      {  
+      {
         path: 'dashboard',
         element: <DashboardLayout />,
+        loader: dashboardLoader,
         children: [
           {
             index: true,
-            element: <AddJob />,
+            element: <Stats />,
           },
           { path: 'stats', element: <Stats /> },
           {
-            path: 'all-jobs',
-            element: <AllJobs />,
+            path: 'add-product',
+            element: <AddJob />,
+            action: addProductAction,
           },
-
+          {
+            path: 'all-products',
+            element: <AllProducts />,
+            loader: allProductsLoader,
+          },
+          {
+            path: 'edit-product/:id',
+            element: <EditJob />,
+            loader: editProductLoader,
+            action: editProductAction,
+          },
           {
             path: 'profile',
             element: <Profile />,
@@ -50,9 +83,9 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+])
 
 const App = () => {
-  return <RouterProvider router={router} />;
-};
-export default App;
+  return <RouterProvider router={router} />
+}
+export default App

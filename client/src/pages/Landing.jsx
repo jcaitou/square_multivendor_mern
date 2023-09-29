@@ -13,7 +13,7 @@ const Landing = () => {
         {/* info */}
         <div className='info'>
           <h1>
-            <span>Multivendor</span> for Square
+            <span>Multivendor</span> app
           </h1>
           <p>
             I'm baby wayfarers hoodie next level taiyaki brooklyn cliche blue
