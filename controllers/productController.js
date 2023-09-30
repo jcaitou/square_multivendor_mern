@@ -101,6 +101,25 @@ export const getProduct = async (req, res, next) => {
   /*refactor above */
 }
 
+export const updateProduct = async (req, res, next) => {
+  const key = nanoid()
+  const productData = req.body
+
+  console.log(productData)
+
+  try {
+    const response = await squareClient.catalogApi.upsertCatalogObject({
+      idempotencyKey: key,
+      object: productData,
+    })
+    const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
+    res.status(StatusCodes.OK).json({ parsedResponse })
+  } catch (error) {
+    console.log(error)
+    throw new SquareApiError('Square API error trying to update product')
+  }
+}
+
 export const deleteProduct = async (req, res, next) => {
   const { id: productID } = req.params
 

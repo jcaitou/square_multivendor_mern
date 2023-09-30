@@ -5,7 +5,6 @@ import { useAllProductsContext } from '../pages/AllProducts'
 const ProductsContainer = () => {
   const { data: products } = useAllProductsContext()
 
-  console.log(products)
   // if (jobs.length === 0) {
   //   return (
   //     <Wrapper>

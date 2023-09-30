@@ -6,22 +6,20 @@ import {
   Login,
   DashboardLayout,
   Error,
-  AddJob,
+  AddProduct,
   Profile,
   Admin,
   Stats,
   AllProducts,
-  EditJob,
+  EditProduct,
 } from './pages'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
 import { action as registerAction } from './pages/Register'
 import { action as loginAction } from './pages/Login'
-import { action as addProductAction } from './pages/AddJob'
-import { action as editProductAction } from './pages/EditJob'
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as allProductsLoader } from './pages/AllProducts'
-import { loader as editProductLoader } from './pages/EditJob'
+import { loader as editProductLoader } from './pages/EditProduct'
 
 checkDefaultTheme()
 
@@ -57,8 +55,7 @@ const router = createBrowserRouter([
           { path: 'stats', element: <Stats /> },
           {
             path: 'add-product',
-            element: <AddJob />,
-            action: addProductAction,
+            element: <AddProduct />,
           },
           {
             path: 'all-products',
@@ -67,9 +64,8 @@ const router = createBrowserRouter([
           },
           {
             path: 'edit-product/:id',
-            element: <EditJob />,
+            element: <EditProduct />,
             loader: editProductLoader,
-            action: editProductAction,
           },
           {
             path: 'profile',

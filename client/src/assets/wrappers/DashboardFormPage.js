@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
 const Wrapper = styled.section`
   border-radius: var(--border-radius);
@@ -20,8 +20,14 @@ const Wrapper = styled.section`
     margin-bottom: 0;
   }
   .form-center {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
+  }
+  .form-variation {
     display: grid;
     row-gap: 1rem;
+    width: 100%;
   }
   .form-btn {
     align-self: end;
@@ -30,17 +36,25 @@ const Wrapper = styled.section`
     place-items: center;
   }
   @media (min-width: 992px) {
-    .form-center {
+    /* .form-center {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      column-gap: 1rem;
+    } */
+    .form-variation {
       grid-template-columns: 1fr 1fr;
       align-items: center;
       column-gap: 1rem;
     }
   }
   @media (min-width: 1120px) {
-    .form-center {
+    /* .form-center {
       grid-template-columns: 1fr 1fr 1fr;
+    } */
+    .form-variation {
+      grid-template-columns: 1fr 1fr 1fr 30px;
     }
   }
-`;
+`
 
-export default Wrapper;
+export default Wrapper

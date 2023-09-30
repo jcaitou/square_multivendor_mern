@@ -30,7 +30,7 @@ const Product = (product) => {
         </div> */}
 
         <footer className='actions'>
-          <Link to={`../edit-job/${product.id}`} className='btn edit-btn'>
+          <Link to={`../edit-product/${product.id}`} className='btn edit-btn'>
             Edit
           </Link>
           <Form>
