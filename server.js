@@ -25,7 +25,7 @@ app.use(cookieParser())
 app.use(express.json())
 
 app.use('/api/v1/products', authenticateUser, productRouter)
-app.use('/api/v1/jobs', authenticateUser, jobRouter)
+//app.use('/api/v1/jobs', authenticateUser, jobRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
 app.use('/api/v1/auth', authRouter)
 

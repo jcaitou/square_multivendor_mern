@@ -31,6 +31,7 @@ export const getAllProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
   const key = nanoid()
   const productData = req.body
+  console.log(productData)
 
   /* refactor this into product input validation */
   if (productData.variations.length < 1) {
@@ -123,25 +124,25 @@ export const updateProduct = async (req, res, next) => {
 export const deleteProduct = async (req, res, next) => {
   const { id: productID } = req.params
 
-  /*can technically refactor this part into validation, but the API call to square takes so long that I want to do it all togehter here */
-  try {
-    const retrieveResponse =
-      await squareClient.catalogApi.retrieveCatalogObject(productID, false)
-    const itemVendor =
-      retrieveResponse.result.object.customAttributeValues['vendor_name']
-        .stringValue
-    if (itemVendor != req.user.squareName) {
-      throw new UnauthorizedError('not authorized to access this route')
-    }
-  } catch (error) {
-    throw new NotFoundError(`no product with id : ${productID}`)
-  }
-  /*refactor above */
-
   try {
     const response = await squareClient.catalogApi.deleteCatalogObject(
       productID
     )
+    const parsedResponse = JSONBig.parse(JSONBig.stringify(response))
+    res.status(StatusCodes.OK).json({ parsedResponse })
+  } catch (error) {
+    throw new SquareApiError('error while calling the Square API')
+  }
+}
+
+export const batchDeleteProducts = async (req, res, next) => {
+  const productData = req.body
+
+  // should check if the product ID belongs to that particular vendor
+  try {
+    const response = await squareClient.catalogApi.batchDeleteCatalogObjects({
+      objectIds: productData.idsToDelete,
+    })
     const parsedResponse = JSONBig.parse(JSONBig.stringify(response))
     res.status(StatusCodes.OK).json({ parsedResponse })
   } catch (error) {

@@ -9,13 +9,26 @@ Currently, two official plugins are available:
 
 # Need to add:
 
+Products:
+-delete product
+-batch import / batch update
+-add product photo
+
+Inventory locations:
+-based on vendors' active locations
+-edit individual product inventory
+-batch edit product inventory (aka restock)
+
+Product discounts:
+-add discount rules
+
+Order history & money earned
+
 User (Vendor) model:
 -multiple locations
+-how to register a new vendor?
+-disabled mode (can only view products/orders, cannot edit)
 
 Store model (?):
 -active locations
 -payments to vendors
-
-Product Discounts
-Product inventory
-Order history & money earned

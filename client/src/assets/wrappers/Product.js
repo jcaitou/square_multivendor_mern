@@ -1,17 +1,24 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
 const Wrapper = styled.article`
   background: var(--background-secondary-color);
   border-radius: var(--border-radius);
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   box-shadow: var(--shadow-2);
   header {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--grey-100);
+    border-right: 1px solid var(--grey-100);
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
+  }
+  input[type='checkbox'] {
+    margin-left: 1rem;
+  }
+  label {
+    display: grid;
+    grid-template-columns: 1fr auto;
   }
   .main-icon {
     width: 60px;
@@ -27,6 +34,10 @@ const Wrapper = styled.article`
     margin-right: 2rem;
   }
   .info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     h5 {
       margin-bottom: 0.5rem;
     }
@@ -76,6 +87,6 @@ const Wrapper = styled.article`
   .edit-btn {
     margin-right: 0.5rem;
   }
-`;
+`
 
-export default Wrapper;
+export default Wrapper

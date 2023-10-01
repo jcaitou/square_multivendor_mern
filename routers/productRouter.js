@@ -1,5 +1,10 @@
 import { Router } from 'express'
 const router = Router()
+import {
+  validateProductCreateInput,
+  validateProductUpdateInput,
+  validateProductIdParam,
+} from '../middleware/validationMiddleware.js'
 
 import {
   getAllProducts,
@@ -7,10 +12,19 @@ import {
   getProduct,
   updateProduct,
   deleteProduct,
+  batchDeleteProducts,
 } from '../controllers/productController.js'
 
-router.route('/').get(getAllProducts).post(createProduct)
-router.route('/:id').get(getProduct).patch(updateProduct).delete(deleteProduct)
+router
+  .route('/')
+  .get(getAllProducts)
+  .post(validateProductCreateInput, createProduct)
+router.route('/batch-delete').post(batchDeleteProducts)
+router
+  .route('/:id')
+  .get(getProduct)
+  .patch(validateProductIdParam, validateProductUpdateInput, updateProduct)
+  .delete(validateProductIdParam, deleteProduct)
 
 // router.get('/', getAllJobs);
 // router.post('/', createJob);

@@ -17,6 +17,7 @@ import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
 import { action as registerAction } from './pages/Register'
 import { action as loginAction } from './pages/Login'
+import { action as deleteProductAction } from './pages/DeleteProduct'
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as allProductsLoader } from './pages/AllProducts'
 import { loader as editProductLoader } from './pages/EditProduct'
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
             path: 'edit-product/:id',
             element: <EditProduct />,
             loader: editProductLoader,
+          },
+          {
+            path: 'delete-product/:id',
+            action: deleteProductAction,
           },
           {
             path: 'profile',

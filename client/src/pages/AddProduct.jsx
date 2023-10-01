@@ -20,7 +20,7 @@ const AddProduct = () => {
       id: `${Date.now()}${Math.floor(Math.random() * 10000)}`,
     },
   ])
-  // console.log(variations)
+  console.log(variations)
   // console.log(productTitle)
   const handleAddVariation = () => {
     setVariations([
@@ -42,7 +42,11 @@ const AddProduct = () => {
   const handleVariationChange = (e, index) => {
     const { name, value } = e.target
     const list = [...variations]
-    list[index][name] = value
+    if (name == 'price') {
+      list[index][name] = value * 100
+    } else {
+      list[index][name] = value
+    }
     setVariations(list)
     setVariationEdited(true)
   }
@@ -110,10 +114,10 @@ const AddProduct = () => {
                 onChange={(e) => handleVariationChange(e, index)}
               />
               <FormRow
-                type='text'
+                type='number'
                 name='price'
                 labelText='price'
-                value={variation.price}
+                value={variation.price / 100}
                 onChange={(e) => handleVariationChange(e, index)}
               />
               {variations.length > 1 && index > 0 && (

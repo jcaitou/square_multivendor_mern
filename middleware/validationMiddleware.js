@@ -1,4 +1,5 @@
 import { body, param, validationResult } from 'express-validator'
+import { squareClient } from '../utils/squareUtils.js'
 import {
   BadRequestError,
   NotFoundError,
@@ -29,29 +30,40 @@ const withValidationErrors = (validateValues) => {
   ]
 }
 
-export const validateJobInput = withValidationErrors([
-  body('company').notEmpty().withMessage('company is required'),
-  body('position').notEmpty().withMessage('position is required'),
-  body('jobLocation').notEmpty().withMessage('job location is required'),
-  body('jobStatus')
-    .isIn(Object.values(JOB_STATUS))
-    .withMessage('invalid status value'),
-  body('jobType').isIn(Object.values(JOB_TYPE)).withMessage('invalid job type'),
+export const validateProductCreateInput = withValidationErrors([
+  body('name').notEmpty().withMessage('product name is required'),
+  body('variations')
+    .notEmpty()
+    .withMessage('at least one variation is required'),
 ])
 
-export const validateIdParam = withValidationErrors([
-  param('id').custom(async (value, { req }) => {
-    const isValidId = mongoose.Types.ObjectId.isValid(value)
-    if (!isValidId) throw new BadRequestError('invalid MongoDB id')
-    const job = await Job.findById(value)
-    if (!job) throw new NotFoundError(`no job with id : ${value}`)
+export const validateProductUpdateInput = withValidationErrors([
+  body('itemData.name').notEmpty().withMessage('product name is required'),
+  body('itemData.variations')
+    .notEmpty()
+    .withMessage('at least one variation is required'),
+  body('version').notEmpty().withMessage('version token is required'),
+])
 
-    const isAdmin = req.user.role === 'admin'
-    const isOwner = req.user.userId === job.createdBy.toString()
-    console.log(req.user)
-    console.log(isAdmin, isOwner)
-    if (!isAdmin && !isOwner)
-      throw new UnauthorizedError('not authorized to access this route')
+export const validateProductIdParam = withValidationErrors([
+  param('id').custom(async (value, { req }) => {
+    try {
+      const retrieveResponse =
+        await squareClient.catalogApi.retrieveCatalogObject(value, false)
+      const itemVendor =
+        retrieveResponse.result.object.customAttributeValues['vendor_name']
+          .stringValue
+      if (itemVendor != req.user.squareName) {
+        throw new UnauthorizedError('not authorized to access this route')
+      }
+    } catch (error) {
+      throw new NotFoundError(`no product with id : ${value}`)
+    }
+
+    // const isAdmin = req.user.role === 'admin'
+    // const isOwner = req.user.userId === job.createdBy.toString()
+    // if (!isAdmin && !isOwner)
+    //   throw new UnauthorizedError('not authorized to access this route')
   }),
 ])
 

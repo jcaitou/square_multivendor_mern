@@ -5,6 +5,11 @@ const Wrapper = styled.section`
   width: 100%;
   background: var(--background-secondary-color);
   padding: 3rem 2rem 4rem;
+  header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
   .form-title {
     margin-bottom: 2rem;
   }

@@ -1,4 +1,5 @@
 import { FormRow, FormRowSelect } from '../components'
+import { RiEditLine, RiDeleteBinLine } from 'react-icons/ri'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { useLoaderData } from 'react-router-dom'
 import { JOB_STATUS, JOB_TYPE } from '../../../utils/constants'
@@ -14,18 +15,17 @@ export const loader = async ({ params }) => {
     return data
   } catch (error) {
     toast.error(error.response.data.msg)
-    return redirect('/dashboard/all-jobs')
+    return redirect('/dashboard/all-products')
   }
 }
 
 const EditProduct = () => {
   const { object: product } = useLoaderData()
   const [productData, setProductData] = useState(product)
+
   const navigate = useNavigate()
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
-
-  console.log(productData)
 
   const handleEditProduct = (e, objectProperty) => {
     const newProductData = { ...productData }
@@ -82,8 +82,15 @@ const EditProduct = () => {
 
   return (
     <Wrapper>
-      <Form method='post' className='form' onSubmit={handleEditProductSubmit}>
+      <header>
         <h4 className='form-title'>edit product</h4>
+        <Form method='post' action={`../delete-product/${product.id}`}>
+          <button type='submit' className='btn delete-btn'>
+            <RiDeleteBinLine />
+          </button>
+        </Form>
+      </header>
+      <Form method='post' className='form' onSubmit={handleEditProductSubmit}>
         <div className='form-center'>
           <FormRow
             type='text'
@@ -149,7 +156,7 @@ const EditProduct = () => {
             className='btn btn-block form-btn '
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'submitting...' : 'submit'}
+            {isSubmitting ? 'working...' : 'submit'}
           </button>
         </div>
       </Form>
