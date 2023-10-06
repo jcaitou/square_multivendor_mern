@@ -12,6 +12,7 @@ import {
   Stats,
   AllProducts,
   EditProduct,
+  Inventory,
 } from './pages'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
@@ -21,6 +22,7 @@ import { action as deleteProductAction } from './pages/DeleteProduct'
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as allProductsLoader } from './pages/AllProducts'
 import { loader as editProductLoader } from './pages/EditProduct'
+import { loader as allInventoryLoader } from './pages/Inventory'
 
 checkDefaultTheme()
 
@@ -71,6 +73,11 @@ const router = createBrowserRouter([
           {
             path: 'delete-product/:id',
             action: deleteProductAction,
+          },
+          {
+            path: 'inventory',
+            element: <Inventory />,
+            loader: allInventoryLoader,
           },
           {
             path: 'profile',

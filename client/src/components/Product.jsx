@@ -49,13 +49,6 @@ const Product = ({ product, handleItemDelSelect }) => {
           </div>
         </header>
         <div className='content'>
-          {/* <div className='content-center'>
-          <JobInfo icon={<FaLocationArrow />} text={jobLocation} />
-          <JobInfo icon={<FaCalendarAlt />} text={date} />
-          <JobInfo icon={<FaBriefcase />} text={jobType} />
-          <div className={`status ${jobStatus}`}>{jobStatus}</div>
-        </div> */}
-
           <footer className='actions'>
             <Link to={`../edit-product/${product.id}`} className='btn edit-btn'>
               <RiEditLine />

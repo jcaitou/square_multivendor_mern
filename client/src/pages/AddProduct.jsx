@@ -40,13 +40,10 @@ const AddProduct = () => {
   }
 
   const handleVariationChange = (e, index) => {
+    console.log('called')
     const { name, value } = e.target
     const list = [...variations]
-    if (name == 'price') {
-      list[index][name] = value * 100
-    } else {
-      list[index][name] = value
-    }
+    list[index][name] = value
     setVariations(list)
     setVariationEdited(true)
   }
@@ -62,12 +59,14 @@ const AddProduct = () => {
 
   const handleAddProductSubmit = async (event) => {
     event.preventDefault()
+    const newVariations = JSON.parse(JSON.stringify(variations))
+    for (let i = 0; i < newVariations.length; i++) {
+      newVariations[i].price = Math.round(newVariations[i].price * 100)
+    }
     const productData = {
       name: productTitle,
-      variations: variations,
+      variations: newVariations,
     }
-
-    console.log(productData)
 
     try {
       let response = await customFetch.post('/products', productData)
@@ -117,7 +116,7 @@ const AddProduct = () => {
                 type='number'
                 name='price'
                 labelText='price'
-                value={variation.price / 100}
+                value={variation.price}
                 onChange={(e) => handleVariationChange(e, index)}
               />
               {variations.length > 1 && index > 0 && (

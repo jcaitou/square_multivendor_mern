@@ -9,7 +9,10 @@ import {
 } from '../errors/customError.js'
 import JSONBig from 'json-bigint'
 
+const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
+
 export const getAllProducts = async (req, res) => {
+  console.log(req.user)
   try {
     const response = await squareClient.catalogApi.searchCatalogItems({
       customAttributeFilters: [
@@ -19,11 +22,17 @@ export const getAllProducts = async (req, res) => {
         },
       ],
     })
-    const parsedResponse = JSONBig.parse(
-      JSONBig.stringify(response.result.items)
-    )
+
+    let parsedResponse
+
+    if (response.result?.items) {
+      parsedResponse = JSONBig.parse(JSONBig.stringify(response.result.items))
+    } else {
+      parsedResponse = []
+    }
     res.status(StatusCodes.OK).json(parsedResponse)
   } catch (error) {
+    console.log(error)
     throw new SquareApiError('error while calling the Square API')
   }
 }
@@ -31,6 +40,7 @@ export const getAllProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
   const key = nanoid()
   const productData = req.body
+  const today = new Date(Date.now())
   console.log(productData)
 
   /* refactor this into product input validation */
@@ -75,8 +85,45 @@ export const createProduct = async (req, res) => {
     idempotencyKey: key,
     object: newObject,
   })
-  const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
-  res.status(StatusCodes.CREATED).json({ parsedResponse })
+
+  // get the new variation IDs to initialize inventory to 0
+  const newVariationIds = response.result.idMappings.filter((el) => {
+    var originalId = el.clientObjectId
+    return originalId.includes('variation')
+  })
+
+  const inventoryChanges = newVariationIds
+    .map((el) => {
+      var locationCountObj = vendorLocations.map((location) => {
+        return {
+          type: 'PHYSICAL_COUNT',
+          physicalCount: {
+            catalogObjectId: el.objectId,
+            state: 'IN_STOCK',
+            locationId: location,
+            quantity: '0',
+            occurredAt: today.toISOString(),
+          },
+        }
+      })
+
+      return locationCountObj
+    })
+    .flat()
+
+  const inventoryKey = nanoid()
+  try {
+    const inventoryResponse =
+      await squareClient.inventoryApi.batchChangeInventory({
+        idempotencyKey: inventoryKey,
+        changes: inventoryChanges,
+      })
+    const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
+    console.log(inventoryResponse.result)
+    res.status(StatusCodes.CREATED).json({ parsedResponse })
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 export const getProduct = async (req, res, next) => {
@@ -119,6 +166,78 @@ export const updateProduct = async (req, res, next) => {
     console.log(error)
     throw new SquareApiError('Square API error trying to update product')
   }
+}
+
+export const batchUpdateProducts = async (req, res, next) => {
+  const key = nanoid()
+  const productData = req.body
+
+  let processedIds = [],
+    objects = []
+  for (let i = 0; i < productData.length; i++) {
+    if (productData[i].productId) {
+      if (!processedIds.includes(productData[i].productId)) {
+        processedIds.push(productData[i].productId)
+
+        let currProductResponse =
+          await squareClient.catalogApi.retrieveCatalogObject(
+            productData[i].productId,
+            false
+          )
+        let itemVendor =
+          currProductResponse.result.object.customAttributeValues['vendor_name']
+            .stringValue
+
+        let currProductObject = currProductResponse.result
+
+        console.log(currProductResponse.result)
+        let currProduct = productData.filter((row) => {
+          return productData[i].productId == row.productId
+        })
+        let currProductVariations = currProduct.map((row) => {
+          return {
+            type: 'ITEM_VARIATION',
+            id: row.variationId,
+            itemVariationData: {
+              itemId: row.productId,
+              name: row.variationName,
+              pricingType: 'FIXED_PRICING',
+              sku: row.variationSku,
+              priceMoney: {
+                amount: row.variationPrice,
+              },
+            },
+          }
+        })
+        objects.push({
+          type: 'ITEM',
+          id: productData[i].productId,
+          version: productData[i].version,
+          itemData: {
+            name: productData[i].productName,
+            variations: currProductVariations,
+          },
+        })
+      }
+    } else {
+      //create new product
+    }
+  }
+  console.log(objects)
+
+  // try {
+  //   const response = await squareClient.catalogApi.batchUpsertCatalogObjects({
+  //     idempotencyKey: key,
+  //     batches: [{ objects: objects }],
+  //   })
+  //   const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
+  //   res.status(StatusCodes.OK).json({ parsedResponse })
+  // } catch (error) {
+  //   console.log(error)
+  //   throw new SquareApiError('Square API error trying to update product')
+  // }
+
+  res.status(StatusCodes.OK).json({ objects })
 }
 
 export const deleteProduct = async (req, res, next) => {

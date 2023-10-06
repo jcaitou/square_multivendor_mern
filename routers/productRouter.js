@@ -13,6 +13,7 @@ import {
   updateProduct,
   deleteProduct,
   batchDeleteProducts,
+  batchUpdateProducts,
 } from '../controllers/productController.js'
 
 router
@@ -20,6 +21,7 @@ router
   .get(getAllProducts)
   .post(validateProductCreateInput, createProduct)
 router.route('/batch-delete').post(batchDeleteProducts)
+router.route('/batch-update').post(batchUpdateProducts)
 router
   .route('/:id')
   .get(getProduct)

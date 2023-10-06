@@ -9,15 +9,27 @@ Currently, two official plugins are available:
 
 # Need to add:
 
+Batch product action:
+-create new product and edit existing products work
+-inventory is set to 0 if new variations are added
+-need to add checks: what if price is not a number
+-what if ids are provided but do not match anything?
+
+-need to add results file
+-more testing
+
 Products:
--delete product
--batch import / batch update
 -add product photo
 
 Inventory locations:
 -based on vendors' active locations
 -edit individual product inventory
 -batch edit product inventory (aka restock)
+
+Able to display all inventory counts
+export
+import
+initialize all created products with 0 inventory
 
 Product discounts:
 -add discount rules
@@ -32,3 +44,5 @@ User (Vendor) model:
 Store model (?):
 -active locations
 -payments to vendors
+
+NEXT: WORK ON INVENTORY

@@ -21,6 +21,7 @@ const AllProductsContext = createContext()
 
 const AllProducts = () => {
   const { data } = useLoaderData()
+  console.log(data)
   return (
     <AllProductsContext.Provider value={{ data }}>
       <SearchContainer />

@@ -8,3 +8,6 @@ export { default as NavLinks } from './NavLinks'
 export { default as ThemeToggle } from './ThemeToggle'
 export { default as ProductsContainer } from './ProductsContainer'
 export { default as SearchContainer } from './SearchContainer'
+
+export { default as InventoryProductsContainer } from './InventoryProductsContainer'
+export { default as InventorySearchContainer } from './InventorySearchContainer'
