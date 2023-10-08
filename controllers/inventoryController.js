@@ -8,6 +8,8 @@ import {
 } from '../errors/customError.js'
 import JSONBig from 'json-bigint'
 
+const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
+
 export const getProductsInventory = async (req, res) => {
   try {
     const response = await squareClient.catalogApi.searchCatalogItems({
@@ -34,7 +36,7 @@ export const getProductsInventory = async (req, res) => {
       const inventoryResponse =
         await squareClient.inventoryApi.batchRetrieveInventoryCounts({
           catalogObjectIds: variationMapped,
-          locationIds: ['L1NN4715DCC58', 'LVBCM6VKTYDHH'],
+          locationIds: vendorLocations,
         })
 
       const returnResponse = {

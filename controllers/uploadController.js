@@ -171,7 +171,7 @@ const batchUpdateProducts = async (squareName, squareId) => {
             idempotencyKey: nanoid(),
             object: currProductObject.object,
           })
-          console.log(response.result)
+          //console.log(response.result)
         } catch (error) {
           for (let j = 0; j < organizedProducts[i].length; j++) {
             resultsJSON.push({
@@ -291,7 +291,7 @@ const batchUpdateProducts = async (squareName, squareId) => {
               idempotencyKey: nanoid(),
               changes: inventoryChanges,
             })
-          console.log(inventoryResponse.result)
+          //console.log(inventoryResponse.result)
         } catch (error) {
           for (let j = 0; j < organizedProducts[i].length; j++) {
             resultsJSON.push({
@@ -314,7 +314,7 @@ const batchUpdateProducts = async (squareName, squareId) => {
       })
     }
   }
-  console.log(resultsJSON)
+  //console.log(resultsJSON)
 }
 
 export const startFileAction = async (req, res) => {
