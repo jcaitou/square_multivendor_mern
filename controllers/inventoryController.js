@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
   SquareApiError,
 } from '../errors/customError.js'
+import { nanoid } from 'nanoid'
 import JSONBig from 'json-bigint'
 
 const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
@@ -36,7 +37,7 @@ export const getProductsInventory = async (req, res) => {
       const inventoryResponse =
         await squareClient.inventoryApi.batchRetrieveInventoryCounts({
           catalogObjectIds: variationMapped,
-          locationIds: vendorLocations,
+          locationIds: req.user.locations,
         })
 
       const returnResponse = {
@@ -74,4 +75,22 @@ export const getProductsInventory = async (req, res) => {
   } catch (error) {
     throw new SquareApiError('error while calling the Square API')
   }
+}
+
+export const updateProductsInventory = async (req, res) => {
+  console.log(req.body)
+
+  try {
+    const response = await squareClient.inventoryApi.batchChangeInventory({
+      idempotencyKey: nanoid(),
+      changes: req.body,
+    })
+    const parsedResponse = JSONBig.parse(JSONBig.stringify(response))
+    res.status(StatusCodes.OK).json(parsedResponse)
+  } catch (error) {
+    console.log(error)
+    throw new SquareApiError('error while calling the Square API')
+  }
+
+  //res.status(StatusCodes.OK).json(req.body)
 }

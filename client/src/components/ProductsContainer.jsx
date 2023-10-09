@@ -13,7 +13,6 @@ const ProductsContainer = () => {
   const navigate = useNavigate()
   const [idsToDelete, setIdsToDelete] = useState([])
   const [importData, setImportData] = useState(null)
-  console.log(products)
 
   if (products.length === 0) {
     return (
@@ -33,8 +32,6 @@ const ProductsContainer = () => {
           variationPrice: variation.itemVariationData.priceMoney.amount,
           productId: variation.itemVariationData.itemId.toString(),
           variationId: variation.id.toString(),
-          version: `=""${product.version.toString()}""`,
-          command: 'update',
         }
       })
     })
@@ -71,8 +68,6 @@ const ProductsContainer = () => {
   const handleImportSubmit = async (e) => {
     e.preventDefault()
 
-    console.log(importData)
-
     try {
       let response = await customFetch.post(
         '/products/batch-update',
@@ -91,29 +86,18 @@ const ProductsContainer = () => {
   const handleBatchDeleteProducts = async (e) => {
     e.preventDefault()
 
-    // const checkedInputs = e.target.querySelectorAll(
-    //   'input[type=checkbox]:checked'
-    // )
-    // var idArray = []
-    // for (let i = 0; i < checkedInputs.length; i++) {
-    //   idArray.push(checkedInputs[i].value)
-    // }
-    // console.log(idArray)
-
     const productData = {
       idsToDelete: idsToDelete,
     }
-    console.log(productData)
 
     try {
       let response = await customFetch.post(
         '/products/batch-delete',
         productData
       )
-      console.log(response)
       toast.success('Products deleted successfully')
       setIdsToDelete([])
-      navigate('/dashboard/all-products')
+      navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
       console.log(error)
       toast.error(error?.response?.data?.msg)

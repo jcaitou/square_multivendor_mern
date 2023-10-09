@@ -4,26 +4,34 @@ import { Link } from 'react-router-dom'
 import Wrapper from '../assets/wrappers/Product'
 import JobInfo from './JobInfo'
 import { Form } from 'react-router-dom'
+import React, { Fragment } from 'react'
 import day from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 day.extend(advancedFormat)
 
-const InventoryProduct = ({ product, inventory }) => {
+const InventoryProduct = ({
+  product,
+  inventory,
+  editMode,
+  handleInventoryChange,
+}) => {
   if (product.itemData.variations.length < 2) {
     return (
       <>
         {product.itemData.variations.map((variation) => {
           return (
-            <>
-              <tr class='header-row'>
-                <td>{variation.itemVariationData.name}</td>
+            <Fragment key={variation.id}>
+              <tr className='header-row'>
+                <td>{product.itemData.name}</td>
                 <td>{variation.itemVariationData.sku}</td>
                 <InventoryVariation
                   variation={variation}
                   inventory={inventory}
+                  editMode={editMode}
+                  handleInventoryChange={handleInventoryChange}
                 />
               </tr>
-            </>
+            </Fragment>
           )
         })}
       </>
@@ -31,8 +39,8 @@ const InventoryProduct = ({ product, inventory }) => {
   }
 
   return (
-    <>
-      <tr class='header-row'>
+    <Fragment key={`header_${product.id}`}>
+      <tr className='header-row'>
         <td>{product.itemData.name}</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
@@ -40,20 +48,31 @@ const InventoryProduct = ({ product, inventory }) => {
       </tr>
       {product.itemData.variations.map((variation) => {
         return (
-          <>
-            <tr class='variant-row'>
+          <Fragment key={variation.id}>
+            <tr className='variant-row'>
               <td>{variation.itemVariationData.name}</td>
               <td>{variation.itemVariationData.sku}</td>
-              <InventoryVariation variation={variation} inventory={inventory} />
+              <InventoryVariation
+                variation={variation}
+                inventory={inventory}
+                editMode={editMode}
+                handleInventoryChange={handleInventoryChange}
+                key={`inventoryrow_${variation.id}`}
+              />
             </tr>
-          </>
+          </Fragment>
         )
       })}
-    </>
+    </Fragment>
   )
 }
 
-const InventoryVariation = ({ variation, inventory }) => {
+const InventoryVariation = ({
+  variation,
+  inventory,
+  editMode,
+  handleInventoryChange,
+}) => {
   const variationInventory = inventory.filter((el) => {
     return el.catalogObjectId == variation.id
   })
@@ -68,16 +87,48 @@ const InventoryVariation = ({ variation, inventory }) => {
     return 0
   }
   variationInventory.sort(compare)
-  console.log(variationInventory)
-  const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
-  return (
-    <>
-      {variationInventory.map((inventoryInfo) => {
-        return <td>{inventoryInfo.quantity}</td>
-      })}
-    </>
-  )
+  if (editMode) {
+    return (
+      <>
+        {variationInventory.map((inventoryInfo) => {
+          return (
+            <td
+              key={`${inventoryInfo.locationId}_${inventoryInfo.catalogObjectId}`}
+            >
+              <input
+                type='number'
+                defaultValue={inventoryInfo.quantity}
+                min='0'
+                onChange={(e) =>
+                  handleInventoryChange(
+                    inventoryInfo.catalogObjectId,
+                    inventoryInfo.locationId,
+                    e.target.value,
+                    inventoryInfo.quantity
+                  )
+                }
+              ></input>
+            </td>
+          )
+        })}
+      </>
+    )
+  } else {
+    return (
+      <>
+        {variationInventory.map((inventoryInfo) => {
+          return (
+            <td
+              key={`${inventoryInfo.locationId}_${inventoryInfo.catalogObjectId}`}
+            >
+              {inventoryInfo.quantity}
+            </td>
+          )
+        })}
+      </>
+    )
+  }
 }
 
 export default InventoryProduct

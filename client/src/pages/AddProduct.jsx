@@ -20,8 +20,7 @@ const AddProduct = () => {
       id: `${Date.now()}${Math.floor(Math.random() * 10000)}`,
     },
   ])
-  console.log(variations)
-  // console.log(productTitle)
+
   const handleAddVariation = () => {
     setVariations([
       ...variations,
@@ -40,7 +39,6 @@ const AddProduct = () => {
   }
 
   const handleVariationChange = (e, index) => {
-    console.log('called')
     const { name, value } = e.target
     const list = [...variations]
     list[index][name] = value
@@ -63,13 +61,35 @@ const AddProduct = () => {
     for (let i = 0; i < newVariations.length; i++) {
       newVariations[i].price = Math.round(newVariations[i].price * 100)
     }
-    const productData = {
-      name: productTitle,
-      variations: newVariations,
+
+    var newProductVariations = newVariations.map((variation, index) => ({
+      type: 'ITEM_VARIATION',
+      id: `#variation${index}`,
+      itemVariationData: {
+        name: variation.name || productTitle,
+        sku: variation.sku || '',
+        pricingType: 'FIXED_PRICING',
+        priceMoney: {
+          amount: variation.price || 0,
+          currency: 'CAD',
+        },
+        trackInventory: true,
+        availableForBooking: false,
+        stockable: true,
+      },
+    }))
+
+    var newProductObject = {
+      type: 'ITEM',
+      id: '#newitem',
+      itemData: {
+        name: productTitle,
+        variations: newProductVariations,
+      },
     }
 
     try {
-      let response = await customFetch.post('/products', productData)
+      let response = await customFetch.post('/products', newProductObject)
       console.log(response)
       toast.success('Product added successfully')
       if (response.status >= 200 && response.status <= 299) {

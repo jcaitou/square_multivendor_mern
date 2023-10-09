@@ -37,53 +37,62 @@ export const getAllProducts = async (req, res) => {
   }
 }
 
-export const createProduct = async (req, res) => {
+export const upsertProduct = async (req, res) => {
   const key = nanoid()
   const productData = req.body
   const today = new Date(Date.now())
   console.log(productData)
 
-  /* refactor this into product input validation */
-  if (productData.variations.length < 1) {
-    console.log('at least one variation is required')
-  }
-  /* refactor above */
+  // /* refactor this into product input validation */
+  // if (productData.variations.length < 1) {
+  //   console.log('at least one variation is required')
+  // }
+  // /* refactor above */
 
-  var newProductVariations = productData.variations.map((variation, index) => ({
-    type: 'ITEM_VARIATION',
-    id: `#variation${index}`,
-    itemVariationData: {
-      name: variation.name || productData.name,
-      sku: variation.sku || '',
-      pricingType: 'FIXED_PRICING',
-      priceMoney: {
-        amount: variation.price || 0,
-        currency: 'CAD',
-      },
-      trackInventory: true,
-      availableForBooking: false,
-      stockable: true,
-    },
-  }))
+  // var newProductVariations = productData.variations.map((variation, index) => ({
+  //   type: 'ITEM_VARIATION',
+  //   id: `#variation${index}`,
+  //   itemVariationData: {
+  //     name: variation.name || productData.name,
+  //     sku: variation.sku || '',
+  //     pricingType: 'FIXED_PRICING',
+  //     priceMoney: {
+  //       amount: variation.price || 0,
+  //       currency: 'CAD',
+  //     },
+  //     trackInventory: true,
+  //     availableForBooking: false,
+  //     stockable: true,
+  //   },
+  // }))
 
-  var newObject = {
-    type: 'ITEM',
-    id: '#newitem',
-    customAttributeValues: {
-      vendor_name: {
-        stringValue: req.user.squareName,
-      },
-    },
-    itemData: {
-      name: productData.name,
-      variations: newProductVariations,
-      categoryId: req.user.squareId,
+  // var newObject = {
+  //   type: 'ITEM',
+  //   id: '#newitem',
+  //   customAttributeValues: {
+  //     vendor_name: {
+  //       stringValue: req.user.squareName,
+  //     },
+  //   },
+  //   itemData: {
+  //     name: productData.name,
+  //     variations: newProductVariations,
+  //     categoryId: req.user.squareId,
+  //   },
+  // }
+
+  productData.customAttributeValues = {
+    vendor_name: {
+      stringValue: req.user.squareName,
     },
   }
+  productData.itemData.categoryId = req.user.squareId
+
+  console.log(productData)
 
   const response = await squareClient.catalogApi.upsertCatalogObject({
     idempotencyKey: key,
-    object: newObject,
+    object: productData,
   })
 
   // get the new variation IDs to initialize inventory to 0

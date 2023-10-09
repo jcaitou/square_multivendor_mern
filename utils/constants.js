@@ -29,7 +29,7 @@ export const FILE_UPLOAD_STATUS = {
   COMPLETE_WITH_ERROR: 'error',
 }
 
-export const ACTIVE_LOCATIONS = [
+export const ALL_LOCATIONS = [
   { name: 'Metrotown', id: 'LVBCM6VKTYDHH' },
   { name: 'Richmond Center', id: 'L1NN4715DCC58' },
 ]

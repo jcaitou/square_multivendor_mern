@@ -31,8 +31,8 @@ const withValidationErrors = (validateValues) => {
 }
 
 export const validateProductCreateInput = withValidationErrors([
-  body('name').notEmpty().withMessage('product name is required'),
-  body('variations')
+  body('itemData.name').notEmpty().withMessage('product name is required'),
+  body('itemData.variations')
     .notEmpty()
     .withMessage('at least one variation is required'),
 ])

@@ -6,7 +6,7 @@ import { squareClient } from '../utils/squareUtils.js'
 import csv from 'csvtojson'
 import createCsvWriter from 'csv-writer'
 
-const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
+//const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
 export const batchUpdateProductUploadFile = async (req, res, next) => {
   const fileAction = await FileAction.create({
@@ -20,7 +20,7 @@ export const batchUpdateProductUploadFile = async (req, res, next) => {
   res.status(StatusCodes.CREATED).json({ fileAction })
 }
 
-const batchUpdateProducts = async (squareName, squareId) => {
+const batchUpdateProducts = async (squareName, squareId, vendorLocations) => {
   let processedIds = [],
     organizedProducts = []
 
@@ -330,6 +330,12 @@ export const startFileAction = async (req, res) => {
       new: true,
     }
   )
-  batchUpdateProducts('Beelu Art', '6PLGH667DJ54OVHI4OXFNS2X')
+
+  console.log(req.user)
+  batchUpdateProducts(
+    req.user.squareName,
+    req.user.squareId,
+    req.user.locations
+  )
   res.status(StatusCodes.OK).json({ fileAction: fileAction })
 }

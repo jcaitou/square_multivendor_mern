@@ -8,7 +8,7 @@ import {
 
 import {
   getAllProducts,
-  createProduct,
+  upsertProduct,
   getProduct,
   updateProduct,
   deleteProduct,
@@ -19,13 +19,13 @@ import {
 router
   .route('/')
   .get(getAllProducts)
-  .post(validateProductCreateInput, createProduct)
+  .post(validateProductCreateInput, upsertProduct)
 router.route('/batch-delete').post(batchDeleteProducts)
 router.route('/batch-update').post(batchUpdateProducts)
 router
   .route('/:id')
   .get(getProduct)
-  .patch(validateProductIdParam, validateProductUpdateInput, updateProduct)
+  .patch(validateProductIdParam, validateProductUpdateInput, upsertProduct)
   .delete(validateProductIdParam, deleteProduct)
 
 // router.get('/', getAllJobs);

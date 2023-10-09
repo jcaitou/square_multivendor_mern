@@ -10,10 +10,11 @@ const UserSchema = new mongoose.Schema({
   password: String,
   squareName: String,
   squareId: String,
-  location: {
-    type: String,
-    default: 'my city',
-  },
+  locations: [
+    {
+      type: String,
+    },
+  ],
   role: {
     type: String,
     enum: ['user', 'admin'],

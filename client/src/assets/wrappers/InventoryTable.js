@@ -8,6 +8,9 @@ const Wrapper = styled.article`
   table {
     width: 100%;
   }
+  .variant-row td:first-child {
+    padding-left: 10px;
+  }
 
   header {
     padding: 1rem 1.5rem;

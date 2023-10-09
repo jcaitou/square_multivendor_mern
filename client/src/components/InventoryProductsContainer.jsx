@@ -1,99 +1,154 @@
 import InventoryProduct from './InventoryProduct'
+import StateBar from './StateBar'
 import Wrapper from '../assets/wrappers/InventoryTable'
 import { Form, useNavigate } from 'react-router-dom'
 import { useAllInventoryContext } from '../pages/Inventory'
+import { useDashboardContext } from '../pages/DashboardLayout'
+import { ALL_LOCATIONS } from '../../../utils/constants'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
 
 const ProductsContainer = () => {
   const { data } = useAllInventoryContext()
+  const { user } = useDashboardContext() //need this for the user's active locations later
+
   const products = [...data.items]
   const inventory = [...data.inventory]
-  console.log(inventory)
+  const [editMode, setEditMode] = useState(false)
+  const [showStateBar, setShowStateBar] = useState(false)
+  const [inventoryChanges, setInventoryChanges] = useState([])
   const navigate = useNavigate()
-  const [idsToDelete, setIdsToDelete] = useState([])
 
-  const handleItemDelSelect = (event) => {
-    var newIdsToDelete = [...idsToDelete]
-    if (event.target.checked) {
-      newIdsToDelete.push(event.target.value)
-
-      console.log(event.target.value)
-    } else {
-      newIdsToDelete = idsToDelete.filter(
-        (value) => value != event.target.value
-      )
+  function compare(a, b) {
+    if (a.locationId < b.locationId) {
+      return -1
     }
-    setIdsToDelete(newIdsToDelete)
+    if (a.locationId > b.locationId) {
+      return 1
+    }
+    return 0
+  }
+  const userLocations = user.locations.sort(compare)
+
+  const handleInventoryChange = (
+    variationId,
+    locationId,
+    quantity,
+    originalQty
+  ) => {
+    const newInventoryChanges = inventoryChanges.filter((el) => {
+      return !(
+        el.physicalCount.catalogObjectId == variationId &&
+        el.physicalCount.locationId == locationId
+      )
+    })
+
+    if (quantity == originalQty) {
+      console.log('no change')
+    } else {
+      let today = new Date(Date.now())
+      const inventoryChangeObj = {
+        type: 'PHYSICAL_COUNT',
+        physicalCount: {
+          catalogObjectId: variationId,
+          state: 'IN_STOCK',
+          locationId: locationId,
+          quantity: quantity,
+          occurredAt: today.toISOString(),
+        },
+      }
+
+      newInventoryChanges.push(inventoryChangeObj)
+    }
+
+    setInventoryChanges(newInventoryChanges)
+
+    if (newInventoryChanges.length == 0) {
+      setShowStateBar(false)
+    } else {
+      setShowStateBar(true)
+    }
   }
 
-  const handleBatchDeleteProducts = async (e) => {
-    e.preventDefault()
+  const discardChanges = () => {
+    setEditMode(false)
+    setInventoryChanges([])
+    setShowStateBar(false)
+  }
 
-    // const checkedInputs = e.target.querySelectorAll(
-    //   'input[type=checkbox]:checked'
-    // )
-    // var idArray = []
-    // for (let i = 0; i < checkedInputs.length; i++) {
-    //   idArray.push(checkedInputs[i].value)
-    // }
-    // console.log(idArray)
-
-    const productData = {
-      idsToDelete: idsToDelete,
-    }
-    console.log(productData)
+  const submitInventoryChanges = async (event) => {
+    event.preventDefault()
+    console.log(inventoryChanges)
 
     try {
-      let response = await customFetch.post(
-        '/products/batch-delete',
-        productData
-      )
-      console.log(response)
-      toast.success('Products deleted successfully')
-      setIdsToDelete([])
-      navigate('/dashboard/all-products')
+      await customFetch.post('/inventory/update', inventoryChanges)
+
+      navigate('/dashboard/inventory', { replace: true })
+      toast.success('Inventory edited successfully')
+      discardChanges()
     } catch (error) {
-      console.log(error)
       toast.error(error?.response?.data?.msg)
+      return error
     }
   }
 
-  // if (jobs.length === 0) {
-  //   return (
-  //     <Wrapper>
-  //       <h2>No jobs to display...</h2>
-  //     </Wrapper>
-  //   )
-  // }
+  if (products.length === 0) {
+    return (
+      <Wrapper>
+        <h2>No products to display...</h2>
+      </Wrapper>
+    )
+  }
 
   return (
-    <Wrapper>
-      <div className='products'>
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>SKU</th>
-              <th>Location</th>
-              <th>Location</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => {
-              return (
-                <InventoryProduct
-                  key={product.id}
-                  product={product}
-                  inventory={inventory}
-                />
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    </Wrapper>
+    <>
+      <StateBar
+        showStateBar={showStateBar}
+        discardAction={discardChanges}
+        submitAction={submitInventoryChanges}
+      ></StateBar>
+      <Wrapper>
+        <div className='products'>
+          <button
+            onClick={() => {
+              if (!editMode) {
+                setEditMode(true)
+              } else {
+                discardChanges()
+              }
+            }}
+          >
+            {!editMode ? 'Quick Edit' : 'Discard Changes'}
+          </button>
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>SKU</th>
+                {userLocations.map((location) => {
+                  const loc = ALL_LOCATIONS.find((el) => el.id == location)
+                  return <th key={location}>{loc.name}</th>
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => {
+                return (
+                  <InventoryProduct
+                    key={product.id}
+                    product={product}
+                    inventory={inventory}
+                    handleInventoryChange={handleInventoryChange}
+                    editMode={editMode}
+                  />
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Wrapper>
+    </>
   )
 }
 
