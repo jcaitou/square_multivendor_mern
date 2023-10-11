@@ -46,3 +46,5 @@ Store model (?):
 -payments to vendors
 
 NEXT: WORK ON INVENTORY
+-create discounts
+-batch edit inventory
