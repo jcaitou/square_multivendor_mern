@@ -1,134 +1,74 @@
-import { FaLocationArrow, FaBriefcase, FaCalendarAlt } from 'react-icons/fa'
-import { RiEditLine, RiDeleteBinLine } from 'react-icons/ri'
-import { Link } from 'react-router-dom'
 import Wrapper from '../assets/wrappers/Product'
-import JobInfo from './JobInfo'
-import { Form } from 'react-router-dom'
+
 import React, { Fragment } from 'react'
-import day from 'dayjs'
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-day.extend(advancedFormat)
+import { useDashboardContext } from '../pages/DashboardLayout'
 
-const InventoryProduct = ({
-  product,
-  inventory,
-  editMode,
-  handleInventoryChange,
-}) => {
-  if (product.itemData.variations.length < 2) {
-    return (
-      <>
-        {product.itemData.variations.map((variation) => {
-          return (
-            <Fragment key={variation.id}>
-              <tr className='header-row'>
-                <td>{product.itemData.name}</td>
-                <td>{variation.itemVariationData.sku}</td>
-                <InventoryVariation
-                  variation={variation}
-                  inventory={inventory}
-                  editMode={editMode}
-                  handleInventoryChange={handleInventoryChange}
-                />
-              </tr>
-            </Fragment>
-          )
-        })}
-      </>
-    )
-  }
-
+const InventoryProduct = ({ product, editMode, handleInventoryChange }) => {
   return (
-    <Fragment key={`header_${product.id}`}>
-      <tr className='header-row'>
-        <td>{product.itemData.name}</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-      </tr>
-      {product.itemData.variations.map((variation) => {
+    <>
+      {product.length > 1 && (
+        <tr className='header-row'>
+          <td>{product[0].productName}</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      )}
+
+      {product.map((variation) => {
         return (
-          <Fragment key={variation.id}>
-            <tr className='variant-row'>
-              <td>{variation.itemVariationData.name}</td>
-              <td>{variation.itemVariationData.sku}</td>
+          <Fragment key={variation.variationId}>
+            <tr className={product.length > 1 ? 'variant-row' : 'header-row'}>
+              <td>
+                {product.length > 1
+                  ? variation.variationName
+                  : variation.productName}
+              </td>
+              <td>{variation.variationSku}</td>
               <InventoryVariation
                 variation={variation}
-                inventory={inventory}
                 editMode={editMode}
                 handleInventoryChange={handleInventoryChange}
-                key={`inventoryrow_${variation.id}`}
               />
             </tr>
           </Fragment>
         )
       })}
-    </Fragment>
+    </>
   )
 }
 
-const InventoryVariation = ({
-  variation,
-  inventory,
-  editMode,
-  handleInventoryChange,
-}) => {
-  const variationInventory = inventory.filter((el) => {
-    return el.catalogObjectId == variation.id
-  })
+const InventoryVariation = ({ variation, editMode, handleInventoryChange }) => {
+  const { user } = useDashboardContext()
+  const userLocations = user.locations
 
-  function compare(a, b) {
-    if (a.locationId < b.locationId) {
-      return -1
-    }
-    if (a.locationId > b.locationId) {
-      return 1
-    }
-    return 0
-  }
-  variationInventory.sort(compare)
-
-  if (editMode) {
-    return (
-      <>
-        {variationInventory.map((inventoryInfo) => {
-          return (
-            <td
-              key={`${inventoryInfo.locationId}_${inventoryInfo.catalogObjectId}`}
-            >
+  return (
+    <>
+      {userLocations.map((location) => {
+        return (
+          <td key={`${location}_${variation.variationId}`}>
+            {editMode ? (
               <input
                 type='number'
-                defaultValue={inventoryInfo.quantity}
+                defaultValue={variation[location]}
                 min='0'
                 onChange={(e) =>
                   handleInventoryChange(
-                    inventoryInfo.catalogObjectId,
-                    inventoryInfo.locationId,
+                    variation.variationId,
+                    location,
                     e.target.value,
-                    inventoryInfo.quantity
+                    variation[location]
                   )
                 }
               ></input>
-            </td>
-          )
-        })}
-      </>
-    )
-  } else {
-    return (
-      <>
-        {variationInventory.map((inventoryInfo) => {
-          return (
-            <td
-              key={`${inventoryInfo.locationId}_${inventoryInfo.catalogObjectId}`}
-            >
-              {inventoryInfo.quantity}
-            </td>
-          )
-        })}
-      </>
-    )
-  }
+            ) : (
+              variation[location]
+            )}
+          </td>
+        )
+      })}
+    </>
+  )
 }
 
 export default InventoryProduct

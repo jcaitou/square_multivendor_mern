@@ -45,6 +45,8 @@ Store model (?):
 -active locations
 -payments to vendors
 
-NEXT: WORK ON INVENTORY
--create discounts
--batch edit inventory
+NEXT: WORK ON IMPORT (both inventory and products)
+-connect it to the mongo import object
+
+unused packages:
+primereact

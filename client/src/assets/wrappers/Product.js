@@ -4,11 +4,14 @@ const Wrapper = styled.article`
   background: var(--background-secondary-color);
   border-radius: var(--border-radius);
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   box-shadow: var(--shadow-2);
+
+  &.delete-mode {
+    grid-template-columns: auto 1fr auto;
+  }
   header {
     padding: 1rem 1.5rem;
-    border-right: 1px solid var(--grey-100);
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
@@ -50,6 +53,7 @@ const Wrapper = styled.article`
   }
   .content {
     padding: 1rem 1.5rem;
+    border-left: 1px solid var(--grey-100);
   }
   .content-center {
     display: grid;

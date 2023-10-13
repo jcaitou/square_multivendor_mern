@@ -1,17 +1,31 @@
 import styled from 'styled-components'
 
 const Wrapper = styled.article`
-  background: var(--background-secondary-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-2);
-
   table {
     width: 100%;
+    background: var(--background-secondary-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-2);
   }
   .variant-row td:first-child {
-    padding-left: 10px;
+    padding-left: 1.2rem;
   }
 
+  .inventory-actions {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+    column-gap: 10px;
+    justify-content: space-between;
+  }
+  .import-export-actions {
+    display: flex;
+    -webkit-box-pack: end;
+    justify-content: center;
+    column-gap: 10px;
+  }
+
+  /*
   header {
     padding: 1rem 1.5rem;
     border-right: 1px solid var(--grey-100);
@@ -93,6 +107,7 @@ const Wrapper = styled.article`
   .edit-btn {
     margin-right: 0.5rem;
   }
+  */
 `
 
 export default Wrapper

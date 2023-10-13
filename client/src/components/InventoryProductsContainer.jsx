@@ -1,4 +1,7 @@
 import InventoryProduct from './InventoryProduct'
+import Button from 'react-bootstrap/Button'
+import Modal from 'react-bootstrap/Modal'
+import Table from 'react-bootstrap/Table'
 import StateBar from './StateBar'
 import Wrapper from '../assets/wrappers/InventoryTable'
 import { Form, useNavigate } from 'react-router-dom'
@@ -8,28 +11,23 @@ import { ALL_LOCATIONS } from '../../../utils/constants'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
+import { CSVLink } from 'react-csv'
+import Papa from 'papaparse'
 
 const ProductsContainer = () => {
-  const { data } = useAllInventoryContext()
-  const { user } = useDashboardContext() //need this for the user's active locations later
-
-  const products = [...data.items]
-  const inventory = [...data.inventory]
+  const { data: products } = useAllInventoryContext()
+  const { user } = useDashboardContext()
+  const navigate = useNavigate()
   const [editMode, setEditMode] = useState(false)
   const [showStateBar, setShowStateBar] = useState(false)
   const [inventoryChanges, setInventoryChanges] = useState([])
-  const navigate = useNavigate()
+  //import helpers:
+  const [importInventoryModalShow, setImportInventoryModalShow] =
+    useState(false)
+  const [fileUploaded, setFileUploaded] = useState(false)
+  const [importData, setImportData] = useState(null)
 
-  function compare(a, b) {
-    if (a.locationId < b.locationId) {
-      return -1
-    }
-    if (a.locationId > b.locationId) {
-      return 1
-    }
-    return 0
-  }
-  const userLocations = user.locations.sort(compare)
+  const userLocations = user.locations
 
   const handleInventoryChange = (
     variationId,
@@ -93,12 +91,39 @@ const ProductsContainer = () => {
     }
   }
 
-  if (products.length === 0) {
-    return (
-      <Wrapper>
-        <h2>No products to display...</h2>
-      </Wrapper>
-    )
+  //import inventory functions:
+
+  const handleFileImport = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        complete: function (results) {
+          setImportData(results.data)
+          setFileUploaded(true)
+        },
+      })
+    }
+  }
+
+  const handleImportSubmit = async (e) => {
+    e.preventDefault()
+
+    console.log('submit import form')
+
+    // try {
+    //   let response = await customFetch.post(
+    //     '/products/batch-update',
+    //     importData
+    //   )
+    //   console.log(response.data)
+    //   toast.success('Products deleted successfully')
+
+    //   navigate('/dashboard/all-products')
+    // } catch (error) {
+    //   console.log(error)
+    //   toast.error(error?.response?.data?.msg)
+    // }
   }
 
   return (
@@ -110,45 +135,111 @@ const ProductsContainer = () => {
       ></StateBar>
       <Wrapper>
         <div className='products'>
-          <button
-            onClick={() => {
-              if (!editMode) {
-                setEditMode(true)
-              } else {
-                discardChanges()
-              }
-            }}
-          >
-            {!editMode ? 'Quick Edit' : 'Discard Changes'}
-          </button>
-          <table>
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>SKU</th>
-                {userLocations.map((location) => {
-                  const loc = ALL_LOCATIONS.find((el) => el.id == location)
-                  return <th key={location}>{loc.name}</th>
+          <div className='inventory-actions'>
+            <div className='import-export-actions'>
+              <CSVLink
+                data={products.flat()}
+                filename={'inventory-export.csv'}
+                className='btn'
+              >
+                Export Inventory
+              </CSVLink>
+              <button
+                className='btn'
+                onClick={() => setImportInventoryModalShow(true)}
+              >
+                Import Inventory
+              </button>
+            </div>
+            <div className='batch-actions'>
+              <Button
+                onClick={() => {
+                  if (!editMode) {
+                    setEditMode(true)
+                  } else {
+                    discardChanges()
+                  }
+                }}
+              >
+                {!editMode ? 'Quick Edit' : 'Cancel'}
+              </Button>
+            </div>
+          </div>
+          {products.length === 0 ? (
+            <h2>No products to display...</h2>
+          ) : (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>SKU</th>
+                  {userLocations.map((location) => {
+                    const loc = ALL_LOCATIONS.find((el) => el.id == location)
+                    return <th key={location}>{loc.name}</th>
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => {
+                  return (
+                    <InventoryProduct
+                      key={product[0].productId}
+                      product={product}
+                      handleInventoryChange={handleInventoryChange}
+                      editMode={editMode}
+                    />
+                  )
                 })}
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => {
-                return (
-                  <InventoryProduct
-                    key={product.id}
-                    product={product}
-                    inventory={inventory}
-                    handleInventoryChange={handleInventoryChange}
-                    editMode={editMode}
-                  />
-                )
-              })}
-            </tbody>
-          </table>
+              </tbody>
+            </Table>
+          )}
         </div>
       </Wrapper>
+      <ImportInventoryModal
+        handleFileImport={handleFileImport}
+        handleImportSubmit={handleImportSubmit}
+        fileUploaded={fileUploaded}
+        show={importInventoryModalShow}
+        onHide={() => setImportInventoryModalShow(false)}
+      />
     </>
+  )
+}
+
+function ImportInventoryModal({
+  handleImportSubmit,
+  handleFileImport,
+  fileUploaded,
+  ...props
+}) {
+  return (
+    <Modal
+      {...props}
+      size='lg'
+      aria-labelledby='contained-modal-title-vcenter'
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id='contained-modal-title-vcenter'>
+          Edit Products Inventory by CSV
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Download a <span>sample CSV template</span> to see how you should
+          format your data.
+        </p>
+        <form>
+          <input type={'file'} accept={'.csv'} onChange={handleFileImport} />
+        </form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>Cancel</Button>
+        <Button onClick={handleImportSubmit} disabled={!fileUploaded}>
+          Import CSV
+        </Button>
+      </Modal.Footer>
+    </Modal>
   )
 }
 

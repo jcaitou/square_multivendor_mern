@@ -18,6 +18,20 @@ const StateBarWrapper = styled.nav`
     align-items: center;
     height: 100%;
   }
+  .warning-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 20px;
+  }
+  .action-container {
+    display: flex;
+    -webkit-box-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    align-items: center;
+    column-gap: 20px;
+  }
 `
 
 export default StateBarWrapper

@@ -8,25 +8,29 @@ import day from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 day.extend(advancedFormat)
 
-const Product = ({ product, handleItemDelSelect }) => {
+const Product = ({
+  product,
+  handleItemDelSelect,
+  deleteMode,
+  confirmSingleDeleteProducts,
+}) => {
   const date = day(product.updatedAt).format('MMM Do, YYYY')
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
   })
 
-  const handleProductDelete = (e) => {
-    return null
-  }
-
   return (
-    <Wrapper>
-      <input
-        type='checkbox'
-        id={`product_${product.id}`}
-        value={product.id}
-        onChange={(e) => handleItemDelSelect(e)}
-      ></input>
+    <Wrapper className={deleteMode && 'delete-mode'}>
+      {deleteMode && (
+        <input
+          type='checkbox'
+          id={`product_${product.id}`}
+          value={product.id}
+          onChange={(e) => handleItemDelSelect(e)}
+        ></input>
+      )}
+
       <label htmlFor={`product_${product.id}`}>
         <header>
           <div className='main-icon'>{product.itemData.name.charAt(0)}</div>
@@ -48,21 +52,26 @@ const Product = ({ product, handleItemDelSelect }) => {
             </div>
           </div>
         </header>
-        <div className='content'>
-          <footer className='actions'>
-            <Link to={`../edit-product/${product.id}`} className='btn edit-btn'>
-              <RiEditLine />
-            </Link>
 
-            <button
-              type='submit'
-              className='btn delete-btn'
-              onClick={() => handleProductDelete()}
-            >
-              <RiDeleteBinLine />
-            </button>
-          </footer>
-        </div>
+        {!deleteMode && (
+          <div className='content'>
+            <footer className='actions'>
+              <Link
+                to={`../edit-product/${product.id}`}
+                className='btn edit-btn'
+              >
+                <RiEditLine />
+              </Link>
+              <button
+                type='submit'
+                className='btn delete-btn'
+                onClick={confirmSingleDeleteProducts}
+              >
+                <RiDeleteBinLine />
+              </button>
+            </footer>
+          </div>
+        )}
       </label>
     </Wrapper>
   )

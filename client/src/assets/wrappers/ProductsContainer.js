@@ -14,6 +14,18 @@ const Wrapper = styled.section`
     grid-template-columns: 1fr;
     row-gap: 2rem;
   }
+  .product-actions {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    column-gap: 10px;
+  }
+  .import-export-actions {
+    display: flex;
+    -webkit-box-pack: end;
+    justify-content: center;
+    column-gap: 10px;
+  }
   /* @media (min-width: 1120px) {
     .products {
       grid-template-columns: 1fr 1fr;
