@@ -18,7 +18,7 @@ import User from '../models/UserModel.js'
 
 export const getAllDiscounts = async (req, res) => {
   const discounts = await Discount.find({ createdBy: req.user.userId })
-  console.log(discounts)
+  //console.log(discounts)
   const discountIds = discounts.map((el) => el.pricingRuleId)
 
   try {

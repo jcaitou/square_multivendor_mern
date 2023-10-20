@@ -13,6 +13,9 @@ const Wrapper = styled.section`
   .form-title {
     margin-bottom: 2rem;
   }
+  h5 {
+    margin-top: 1rem;
+  }
   .form {
     margin: 0;
     border-radius: 0;
@@ -53,6 +56,10 @@ const Wrapper = styled.section`
     text-align: center;
   }
 
+  .discount-option {
+    margin-bottom: 1rem;
+  }
+
   .inputs-disabled {
     color: var(--disabled-text-color);
   }
@@ -67,6 +74,9 @@ const Wrapper = styled.section`
   .date-group input[type='date'] {
     max-width: 180px;
   }
+  .date-group input[type='date']:disabled {
+    opacity: 0.7;
+  }
 
   .date-group label {
     justify-self: flex-start;
@@ -80,6 +90,7 @@ const Wrapper = styled.section`
   .discount-option input[type='number'] {
     margin-left: 7px;
     margin-right: 7px;
+    max-width: 70px;
   }
 
   .input-label-group {
