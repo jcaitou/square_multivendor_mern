@@ -12,7 +12,6 @@ import JSONBig from 'json-bigint'
 const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
 export const getAllProducts = async (req, res) => {
-  console.log(req.user)
   try {
     const response = await squareClient.catalogApi.searchCatalogItems({
       customAttributeFilters: [
@@ -41,7 +40,6 @@ export const upsertProduct = async (req, res) => {
   const key = nanoid()
   const productData = req.body
   const today = new Date(Date.now())
-  console.log(productData)
 
   // /* refactor this into product input validation */
   // if (productData.variations.length < 1) {
@@ -88,50 +86,53 @@ export const upsertProduct = async (req, res) => {
   }
   productData.itemData.categoryId = req.user.squareId
 
-  console.log(productData)
-
   const response = await squareClient.catalogApi.upsertCatalogObject({
     idempotencyKey: key,
     object: productData,
   })
 
+  const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
+
   // get the new variation IDs to initialize inventory to 0
-  const newVariationIds = response.result.idMappings.filter((el) => {
-    var originalId = el.clientObjectId
-    return originalId.includes('variation')
-  })
-
-  const inventoryChanges = newVariationIds
-    .map((el) => {
-      var locationCountObj = vendorLocations.map((location) => {
-        return {
-          type: 'PHYSICAL_COUNT',
-          physicalCount: {
-            catalogObjectId: el.objectId,
-            state: 'IN_STOCK',
-            locationId: location,
-            quantity: '0',
-            occurredAt: today.toISOString(),
-          },
-        }
-      })
-
-      return locationCountObj
+  if (response?.result?.idMappings) {
+    const newVariationIds = response.result.idMappings.filter((el) => {
+      var originalId = el.clientObjectId
+      return originalId.includes('variation')
     })
-    .flat()
 
-  const inventoryKey = nanoid()
-  try {
-    const inventoryResponse =
-      await squareClient.inventoryApi.batchChangeInventory({
-        idempotencyKey: inventoryKey,
-        changes: inventoryChanges,
+    const inventoryChanges = newVariationIds
+      .map((el) => {
+        var locationCountObj = vendorLocations.map((location) => {
+          return {
+            type: 'PHYSICAL_COUNT',
+            physicalCount: {
+              catalogObjectId: el.objectId,
+              state: 'IN_STOCK',
+              locationId: location,
+              quantity: '0',
+              occurredAt: today.toISOString(),
+            },
+          }
+        })
+
+        return locationCountObj
       })
-    const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
-    console.log(inventoryResponse.result)
+      .flat()
+
+    const inventoryKey = nanoid()
+    try {
+      const inventoryResponse =
+        await squareClient.inventoryApi.batchChangeInventory({
+          idempotencyKey: inventoryKey,
+          changes: inventoryChanges,
+        })
+      console.log(inventoryResponse.result)
+      res.status(StatusCodes.CREATED).json({ parsedResponse })
+    } catch (error) {
+      console.log(error)
+    }
+  } else {
     res.status(StatusCodes.CREATED).json({ parsedResponse })
-  } catch (error) {
-    console.log(error)
   }
 }
 

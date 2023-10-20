@@ -12,3 +12,5 @@ export { default as SearchContainer } from './SearchContainer'
 export { default as InventoryProductsContainer } from './InventoryProductsContainer'
 export { default as InventorySearchContainer } from './InventorySearchContainer'
 export { default as StateBar } from './StateBar'
+
+export { default as DiscountsContainer } from './DiscountsContainer'

@@ -2,7 +2,7 @@ import { Router } from 'express'
 import multer from 'multer'
 
 import {
-  batchUpdateProductUploadFile,
+  batchUpdateUploadFile,
   startFileAction,
 } from '../controllers/uploadController.js'
 
@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: (req, file, cb) => {
-    cb(null, 'Import-' + Date.now() + '.csv')
+    cb(null, 'Import-' + req.body.type + '-' + Date.now() + '.csv')
   },
 })
 
@@ -21,8 +21,6 @@ const upload = multer({ storage: storage })
 
 const router = Router()
 
-router
-  .route('/product-batch-update')
-  .post(upload.single('product-update'), batchUpdateProductUploadFile)
+router.route('/').post(upload.single('update-file'), batchUpdateUploadFile)
 router.route('/start/:id').post(startFileAction)
 export default router

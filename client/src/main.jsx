@@ -4,8 +4,6 @@ import App from './App.jsx'
 import 'react-toastify/dist/ReactToastify.css'
 import './index.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import 'primereact/resources/themes/lara-light-indigo/theme.css'
-import 'primereact/resources/primereact.min.css'
 
 import { ToastContainer } from 'react-toastify'
 

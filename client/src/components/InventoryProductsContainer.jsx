@@ -16,6 +16,22 @@ import Papa from 'papaparse'
 
 const ProductsContainer = () => {
   const { data: products } = useAllInventoryContext()
+  const today = new Date()
+  const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
+    today.getDate() + 1
+  }`
+  const locationHeaders = ALL_LOCATIONS.map((el) => {
+    return { label: el.name, key: el.id }
+  })
+  const dataHeaders = [
+    { label: 'Product Name', key: 'productName' },
+    { label: 'Product ID', key: 'productId' },
+    { label: 'Variation Name', key: 'variationName' },
+    { label: 'Variation SKU', key: 'variationSku' },
+    { label: 'Variation ID', key: 'variationId' },
+    ...locationHeaders,
+  ]
+
   const { user } = useDashboardContext()
   const navigate = useNavigate()
   const [editMode, setEditMode] = useState(false)
@@ -25,7 +41,7 @@ const ProductsContainer = () => {
   const [importInventoryModalShow, setImportInventoryModalShow] =
     useState(false)
   const [fileUploaded, setFileUploaded] = useState(false)
-  const [importData, setImportData] = useState(null)
+  const [importFile, setImportFile] = useState(null)
 
   const userLocations = user.locations
 
@@ -92,38 +108,28 @@ const ProductsContainer = () => {
   }
 
   //import inventory functions:
-
   const handleFileImport = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      Papa.parse(file, {
-        header: true,
-        complete: function (results) {
-          setImportData(results.data)
-          setFileUploaded(true)
-        },
-      })
-    }
+    setImportFile(e.target.files[0])
   }
 
   const handleImportSubmit = async (e) => {
     e.preventDefault()
 
-    console.log('submit import form')
+    let data = new FormData()
+    data.append('type', 'inventory-recount')
+    data.append('update-file', importFile)
 
-    // try {
-    //   let response = await customFetch.post(
-    //     '/products/batch-update',
-    //     importData
-    //   )
-    //   console.log(response.data)
-    //   toast.success('Products deleted successfully')
-
-    //   navigate('/dashboard/all-products')
-    // } catch (error) {
-    //   console.log(error)
-    //   toast.error(error?.response?.data?.msg)
-    // }
+    try {
+      let response = await customFetch.post('/upload', data)
+      console.log(response.data)
+      toast.success('Batch update has started')
+      setImportInventoryModalShow(false)
+      setImportFile(null)
+      navigate('/dashboard/inventory', { replace: true })
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.response?.data?.msg)
+    }
   }
 
   return (
@@ -139,7 +145,8 @@ const ProductsContainer = () => {
             <div className='import-export-actions'>
               <CSVLink
                 data={products.flat()}
-                filename={'inventory-export.csv'}
+                headers={dataHeaders}
+                filename={`inventory-export-${dateString}.csv`}
                 className='btn'
               >
                 Export Inventory
@@ -198,7 +205,7 @@ const ProductsContainer = () => {
       <ImportInventoryModal
         handleFileImport={handleFileImport}
         handleImportSubmit={handleImportSubmit}
-        fileUploaded={fileUploaded}
+        importFile={importFile}
         show={importInventoryModalShow}
         onHide={() => setImportInventoryModalShow(false)}
       />
@@ -209,7 +216,7 @@ const ProductsContainer = () => {
 function ImportInventoryModal({
   handleImportSubmit,
   handleFileImport,
-  fileUploaded,
+  importFile,
   ...props
 }) {
   return (
@@ -235,7 +242,7 @@ function ImportInventoryModal({
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.onHide}>Cancel</Button>
-        <Button onClick={handleImportSubmit} disabled={!fileUploaded}>
+        <Button onClick={handleImportSubmit} disabled={importFile == null}>
           Import CSV
         </Button>
       </Modal.Footer>

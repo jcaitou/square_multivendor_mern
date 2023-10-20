@@ -13,6 +13,8 @@ import {
   AllProducts,
   EditProduct,
   Inventory,
+  AllDiscounts,
+  AddDiscount,
 } from './pages'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
@@ -23,6 +25,7 @@ import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as allProductsLoader } from './pages/AllProducts'
 import { loader as editProductLoader } from './pages/EditProduct'
 import { loader as allInventoryLoader } from './pages/Inventory'
+import { loader as allDiscountsLoader } from './pages/AllDiscounts'
 
 checkDefaultTheme()
 
@@ -78,6 +81,15 @@ const router = createBrowserRouter([
             path: 'inventory',
             element: <Inventory />,
             loader: allInventoryLoader,
+          },
+          {
+            path: 'discounts',
+            element: <AllDiscounts />,
+            loader: allDiscountsLoader,
+          },
+          {
+            path: 'add-discount',
+            element: <AddDiscount />,
           },
           {
             path: 'profile',

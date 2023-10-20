@@ -40,6 +40,66 @@ const Wrapper = styled.section`
     display: grid;
     place-items: center;
   }
+
+  .form-choice {
+    display: grid;
+    row-gap: 1rem;
+    width: 100%;
+  }
+
+  .choice-group {
+    width: 100%;
+    justify-self: center;
+    text-align: center;
+  }
+
+  .inputs-disabled {
+    color: var(--disabled-text-color);
+  }
+
+  .date-group {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 10px;
+  }
+
+  .date-group input[type='date'] {
+    max-width: 180px;
+  }
+
+  .date-group label {
+    justify-self: flex-start;
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    margin-right: 10px;
+  }
+
+  .discount-option input[type='number'] {
+    margin-left: 7px;
+    margin-right: 7px;
+  }
+
+  .input-label-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .discount-option input:not(:checked) + span {
+    color: var(--disabled-text-color);
+  }
+
+  @media (min-width: 750px) {
+    .form-choice {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      column-gap: 1rem;
+    }
+  }
   @media (min-width: 992px) {
     /* .form-center {
       grid-template-columns: 1fr 1fr;

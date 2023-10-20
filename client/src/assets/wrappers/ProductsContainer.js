@@ -20,7 +20,7 @@ const Wrapper = styled.section`
     justify-content: space-between;
     column-gap: 10px;
   }
-  .import-export-actions {
+  .grouped-actions {
     display: flex;
     -webkit-box-pack: end;
     justify-content: center;

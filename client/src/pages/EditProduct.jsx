@@ -1,11 +1,12 @@
-import { FormRow, FormRowSelect, StateBar } from '../components'
+import { FormRow, StateBar } from '../components'
 import { RiEditLine, RiDeleteBinLine } from 'react-icons/ri'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { useLoaderData } from 'react-router-dom'
-import { JOB_STATUS, JOB_TYPE } from '../../../utils/constants'
 import { Form, useNavigation, useNavigate, redirect } from 'react-router-dom'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
+import Modal from 'react-bootstrap/Modal'
+import Button from 'react-bootstrap/Button'
 import customFetch from '../utils/customFetch'
 import _ from 'lodash'
 
@@ -52,6 +53,21 @@ const EditProduct = () => {
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
 
+  //delete helpers:
+  const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
+  const handleDeleteProduct = async () => {
+    setConfirmDeleteModalShow(false)
+    try {
+      let response = await customFetch.delete(`/products/${product.id}`)
+      toast.success('Product deleted successfully')
+      navigate('/dashboard/all-products', { replace: true })
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.response?.data?.msg)
+    }
+  }
+
+  //edit helpers:
   const discardChanges = () => {
     setProductTitle(product.itemData.name)
     setProductVariations(generateInitialProductVariations(product))
@@ -88,10 +104,23 @@ const EditProduct = () => {
     }
     newProductVariations.push(newVariation)
     setProductVariations(newProductVariations)
+    setShowStateBar(true)
   }
 
   const handleDeleteVariation = (index) => {
     const newProductVariations = productVariations.toSpliced(index, 1)
+    let newVars = newProductVariations.filter((el) => {
+      return el.id.includes('#variation')
+    }).length
+    if (
+      newVars == 0 &&
+      newProductVariations.length == product.itemData.variations.length
+    ) {
+      setShowStateBar(false)
+    } else {
+      setShowStateBar(true)
+    }
+    console.log(newVars)
     setProductVariations(newProductVariations)
   }
 
@@ -116,7 +145,7 @@ const EditProduct = () => {
     try {
       await customFetch.patch(`/products/${productData.id}`, productData)
       toast.success('Product edited successfully')
-      navigate('/dashboard/all-products')
+      navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
       toast.error(error?.response?.data?.msg)
       return error
@@ -133,11 +162,13 @@ const EditProduct = () => {
       <Wrapper>
         <header>
           <h4 className='form-title'>edit product</h4>
-          <Form method='post' action={`../delete-product/${product.id}`}>
-            <button type='submit' className='btn delete-btn'>
-              <RiDeleteBinLine />
-            </button>
-          </Form>
+          <button
+            type='submit'
+            className='btn delete-btn'
+            onClick={() => setConfirmDeleteModalShow(true)}
+          >
+            <RiDeleteBinLine />
+          </button>
         </header>
         <Form method='post' className='form' onSubmit={handleEditProductSubmit}>
           <div className='form-center'>
@@ -208,7 +239,36 @@ const EditProduct = () => {
           </div>
         </Form>
       </Wrapper>
+      <ConfirmDeleteModal
+        handleDeleteProduct={handleDeleteProduct}
+        show={confirmDeleteModalShow}
+        onHide={() => setConfirmDeleteModalShow(false)}
+      />
     </>
+  )
+}
+
+function ConfirmDeleteModal({ handleDeleteProduct, ...props }) {
+  return (
+    <Modal
+      {...props}
+      size='lg'
+      aria-labelledby='contained-modal-title-vcenter'
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id='contained-modal-title-vcenter'>
+          Delete Product
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Are you sure you want to delete the selected product?</p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>No</Button>
+        <Button onClick={handleDeleteProduct}>Yes</Button>
+      </Modal.Footer>
+    </Modal>
   )
 }
 

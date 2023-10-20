@@ -1,0 +1,5 @@
+Product Name,Product ID,Variation Name,Variation SKU,Variation ID,Metrotown,Richmond Center,status,message
+asd,RUT6XEJ77WFM42XF6IANDVUR,editing,1234,KJWPMDQWTUYDSU5QT7O54OPWs,60,60,Failed,ID does not match any existing product
+asd,RUT6XEJ77WFM42XF6IANDVUR,anoter new var2,asevd,FZ3P7UG5SRYYIGNLUKLWO7TA,10,10,OK,Inventory updated successfully for 2 location(s)
+,,,,D6GOURCOFFN2FKCU3MNTEFO3,20,20,Failed,Not authorized to edit this product
+,,,,DQTVBXX7H3LTHL6QZA2DL2BP,60,30,Failed,Not authorized to edit this product

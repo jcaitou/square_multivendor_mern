@@ -21,7 +21,7 @@ router
   .get(getAllProducts)
   .post(validateProductCreateInput, upsertProduct)
 router.route('/batch-delete').post(batchDeleteProducts)
-router.route('/batch-update').post(batchUpdateProducts)
+//router.route('/batch-update').post(batchUpdateProducts)
 router
   .route('/:id')
   .get(getProduct)

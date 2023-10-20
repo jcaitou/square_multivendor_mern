@@ -75,6 +75,7 @@ html {
   --background-color: var(--grey-50);
   --text-color: var(--grey-900);
   --bs-body-color: var(--text-color);
+  --disabled-text-color: #bbbbbb;
   --background-secondary-color: var(--white);
   --text-secondary-color: var(--grey-500);
 }
@@ -87,6 +88,7 @@ html {
   /*added by jas: */
   --bs-body-bg: var(--dark-mode-bg-color);
   --bs-body-color: var(--dark-mode-text-color);
+  --disabled-text-color: #bbbbbb;
   --bs-table-bg: var(--dark-mode-bg-color);
   --bs-table-color: var(--dark-mode-text-color);
 }

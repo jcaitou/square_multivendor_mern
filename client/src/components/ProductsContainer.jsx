@@ -1,7 +1,7 @@
 import Product from './Product'
 import StateBar from './StateBar'
 import Wrapper from '../assets/wrappers/ProductsContainer'
-import { Form, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAllProductsContext } from '../pages/AllProducts'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
@@ -13,11 +13,14 @@ import Modal from 'react-bootstrap/Modal'
 
 const ProductsContainer = () => {
   const { data: products } = useAllProductsContext()
+  const today = new Date()
+  const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
+    today.getDate() + 1
+  }`
   const navigate = useNavigate()
   //import helpers:
-  const [importData, setImportData] = useState(null)
+  const [importFile, setImportFile] = useState(null)
   const [importProductsModalShow, setImportProductsModalShow] = useState(false)
-  const [fileUploaded, setFileUploaded] = useState(false)
   //single delete helpers:
   const [confirmSingleDeleteModalShow, setConfirmSingleDeleteModalShow] =
     useState(false)
@@ -64,30 +67,23 @@ const ProductsContainer = () => {
   }
 
   const handleFileImport = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      Papa.parse(file, {
-        header: true,
-        complete: function (results) {
-          setImportData(results.data)
-          setFileUploaded(true)
-        },
-      })
-    }
+    setImportFile(e.target.files[0])
   }
 
   const handleImportSubmit = async (e) => {
     e.preventDefault()
 
-    try {
-      let response = await customFetch.post(
-        '/products/batch-update',
-        importData
-      )
-      console.log(response.data)
-      //toast.success('Products deleted successfully')
+    let data = new FormData()
+    data.append('type', 'product')
+    data.append('update-file', importFile)
 
-      //navigate('/dashboard/all-products')
+    try {
+      let response = await customFetch.post('/upload', data)
+      console.log(response.data)
+      toast.success('Batch update has started')
+      setImportProductsModalShow(false)
+      setImportFile(null)
+      navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
       console.log(error)
       toast.error(error?.response?.data?.msg)
@@ -137,7 +133,6 @@ const ProductsContainer = () => {
   const handleBatchDeleteProducts = async (e) => {
     e.preventDefault()
     console.log('start delete process')
-    setConfirmDeleteModalShow(false)
 
     if (idsToDelete.length > 0) {
       const productData = {
@@ -150,7 +145,9 @@ const ProductsContainer = () => {
           productData
         )
         toast.success('Products deleted successfully')
+        setConfirmDeleteModalShow(false)
         setIdsToDelete([])
+        setDeleteMode(false)
         navigate('/dashboard/all-products', { replace: true })
       } catch (error) {
         console.log(error)
@@ -169,8 +166,12 @@ const ProductsContainer = () => {
       ></StateBar>
       <Wrapper>
         <div className='product-actions'>
-          <div className='import-export-actions'>
-            <CSVLink data={variationsData} className='btn'>
+          <div className='grouped-actions'>
+            <CSVLink
+              data={variationsData}
+              filename={`products-export-${dateString}.csv`}
+              className='btn'
+            >
               Export Products
             </CSVLink>
             <button
@@ -181,15 +182,20 @@ const ProductsContainer = () => {
             </button>
           </div>
 
-          <button
-            type='submit'
-            className='btn delete-btn'
-            onClick={
-              deleteMode ? confirmDeleteProducts : startBatchDeleteProducts
-            }
-          >
-            {deleteMode ? 'Delete All' : 'Batch Delete Prodcuts'}
-          </button>
+          <div className='grouped-actions'>
+            <button
+              type='submit'
+              className='btn delete-btn'
+              onClick={
+                deleteMode ? confirmDeleteProducts : startBatchDeleteProducts
+              }
+            >
+              {deleteMode ? 'Delete All' : 'Batch Delete Products'}
+            </button>
+            <Link to={'../add-product'} className='btn'>
+              Add Product
+            </Link>
+          </div>
         </div>
         <div className='products'>
           {products.map((product) => {
@@ -210,9 +216,12 @@ const ProductsContainer = () => {
       <ImportProductsModal
         handleFileImport={handleFileImport}
         handleImportSubmit={handleImportSubmit}
-        fileUploaded={fileUploaded}
+        importFile={importFile}
         show={importProductsModalShow}
-        onHide={() => setImportProductsModalShow(false)}
+        onHide={() => {
+          setImportProductsModalShow(false)
+          setImportFile(null)
+        }}
       />
       <ConfirmBatchDeleteModal
         handleBatchDeleteProducts={handleBatchDeleteProducts}
@@ -305,7 +314,7 @@ function ConfirmBatchDeleteModal({ handleBatchDeleteProducts, ...props }) {
 function ImportProductsModal({
   handleImportSubmit,
   handleFileImport,
-  fileUploaded,
+  importFile,
   ...props
 }) {
   return (
@@ -331,7 +340,7 @@ function ImportProductsModal({
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.onHide}>Cancel</Button>
-        <Button onClick={handleImportSubmit} disabled={!fileUploaded}>
+        <Button onClick={handleImportSubmit} disabled={importFile == null}>
           Import CSV
         </Button>
       </Modal.Footer>
