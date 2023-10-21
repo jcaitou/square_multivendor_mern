@@ -12,7 +12,6 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
 import { CSVLink } from 'react-csv'
-import Papa from 'papaparse'
 
 const ProductsContainer = () => {
   const { data: products } = useAllInventoryContext()

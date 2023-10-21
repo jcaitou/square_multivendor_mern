@@ -53,7 +53,6 @@ const Wrapper = styled.section`
   .choice-group {
     width: 100%;
     justify-self: center;
-    text-align: center;
   }
 
   .discount-option {
@@ -91,6 +90,11 @@ const Wrapper = styled.section`
     margin-left: 7px;
     margin-right: 7px;
     max-width: 70px;
+  }
+
+  .product-selection-button {
+    margin-left: 10px;
+    margin-bottom: 5px;
   }
 
   .input-label-group {

@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify'
-import { DiscountsContainer, SearchContainer } from '../components'
+import { DiscountsContainer } from '../components'
 import customFetch from '../utils/customFetch'
 import { useLoaderData } from 'react-router-dom'
 import { useContext, createContext } from 'react'
@@ -24,7 +24,6 @@ const AllDiscounts = () => {
   console.log(data)
   return (
     <AllDiscountsContext.Provider value={{ data }}>
-      <SearchContainer />
       <DiscountsContainer />
     </AllDiscountsContext.Provider>
   )

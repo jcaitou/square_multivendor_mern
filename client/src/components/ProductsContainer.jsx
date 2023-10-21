@@ -7,7 +7,6 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
 import { CSVLink } from 'react-csv'
-import Papa from 'papaparse'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 
