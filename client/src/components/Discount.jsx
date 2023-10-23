@@ -1,18 +1,33 @@
 import Wrapper from '../assets/wrappers/Discount'
 import { RiEditLine, RiDeleteBinLine } from 'react-icons/ri'
 import { Link } from 'react-router-dom'
+import { useDashboardContext } from '../pages/DashboardLayout'
 
-const Discount = ({ discount }) => {
-  const fromDate = new Date(discount.pricingRuleData.validFromDate)
-  const toDate = new Date(discount.pricingRuleData.validUntilDate)
-  const today = new Date()
+const Discount = ({ discount, confirmDeleteDiscount }) => {
+  const { user } = useDashboardContext()
+  let fromDate,
+    toDate,
+    today = new Date()
   let status = 'unset'
-  if (today > fromDate && today < toDate) {
-    status = 'active'
-    console.log('✅ date is between the 2 dates')
+  console.log(fromDate)
+  if (
+    discount?.pricingRuleData?.validFromDate &&
+    discount?.pricingRuleData?.validUntilDate
+  ) {
+    fromDate = new Date(discount.pricingRuleData.validFromDate)
+    toDate = new Date(discount.pricingRuleData.validUntilDate)
+    if (today > fromDate && today < toDate) {
+      status = 'active'
+      console.log('✅ date is between the 2 dates')
+    } else if (today < fromDate) {
+      status = 'scheduled'
+    } else if (today > toDate) {
+      status = 'ended'
+    }
   } else {
-    console.log('⛔️ date is not in the range')
+    status = 'always active'
   }
+
   // const CADMoney = new Intl.NumberFormat('en-CA', {
   //   style: 'currency',
   //   currency: 'CAD',
@@ -24,14 +39,18 @@ const Discount = ({ discount }) => {
         <header>
           <div className='info'>
             <div className='discount-title'>
-              <h5>{discount.pricingRuleData.name}</h5>
+              <h5>
+                {discount.pricingRuleData.name.replace(`[${user.name}] `, '')}
+              </h5>
             </div>
             <div className='discount-status'>
               <p>{status}</p>
-              <div className='discount-dates'>
-                <p>Starts: {discount.pricingRuleData.validFromDate}</p>
-                <p>Ends: {discount.pricingRuleData.validUntilDate}</p>
-              </div>
+              {status != 'always active' && (
+                <div className='discount-dates'>
+                  <p>Starts: {discount.pricingRuleData.validFromDate}</p>
+                  <p>Ends: {discount.pricingRuleData.validUntilDate}</p>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -39,7 +58,11 @@ const Discount = ({ discount }) => {
           <Link to={`../edit-product/${discount.id}`} className='btn edit-btn'>
             <RiEditLine />
           </Link>
-          <button type='submit' className='btn delete-btn'>
+          <button
+            type='submit'
+            className='btn delete-btn'
+            onClick={confirmDeleteDiscount}
+          >
             <RiDeleteBinLine />
           </button>
         </footer>

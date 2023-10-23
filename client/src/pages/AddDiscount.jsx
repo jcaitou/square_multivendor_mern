@@ -67,13 +67,13 @@ const AddDiscount = () => {
     }
 
     let pricingRuleData = {
-      name: `${user.name}: ${formData.get('title')}`,
+      name: `[${user.name}] ${formData.get('title')}`,
       discountId: '#new_discount',
       matchProductsId: '#new_match_products',
     }
 
     let discountData = {
-      name: `${user.name}: ${formData.get('title')}`,
+      name: `[${user.name}] ${formData.get('title')}`,
       modifyTaxBasis: 'MODIFY_TAX_BASIS',
     }
 
@@ -87,13 +87,17 @@ const AddDiscount = () => {
     }
 
     if (formData.get('condition') == 'purchase-items') {
-      productSetData.quantityMin = formData.get('min-items')
+      if (formData.get('num-items-condition') == 'exact') {
+        productSetData.quantityExact = formData.get('min-items')
+      } else if (formData.get('num-items-condition') == 'min') {
+        productSetData.quantityMin = formData.get('min-items')
+      }
     }
 
     if (formData.get('eligible-items') == 'all-items') {
       productSetData.productIdsAny = [user.squareId]
     } else {
-      //list all specific items
+      productSetData.productIdsAny = selectedProducts
     }
 
     if (formData.get('discount-details') == 'percentage') {
@@ -107,45 +111,49 @@ const AddDiscount = () => {
       }
     }
 
-    console.log(pricingRuleData, discountData, productSetData)
-    // const newVariations = JSON.parse(JSON.stringify(variations))
-    // for (let i = 0; i < newVariations.length; i++) {
-    //   newVariations[i].price = Math.round(newVariations[i].price * 100)
-    // }
+    if (formData.get('min-spend') == 'min-spend-true') {
+      pricingRuleData.minimumOrderSubtotalMoney = {
+        amount: Math.round(parseFloat(formData.get('min-spend-amount')) * 100),
+        currency: 'CAD',
+      }
+    }
 
-    // var newProductVariations = newVariations.map((variation, index) => ({
-    //   type: 'ITEM_VARIATION',
-    //   id: `#variation${index}`,
-    //   itemVariationData: {
-    //     name: variation.name || productTitle,
-    //     sku: variation.sku || '',
-    //     pricingType: 'FIXED_PRICING',
-    //     priceMoney: {
-    //       amount: variation.price || 0,
-    //       currency: 'CAD',
-    //     },
-    //     trackInventory: true,
-    //     availableForBooking: false,
-    //     stockable: true,
-    //   },
-    // }))
+    let pricingRuleObj = {
+      type: 'PRICING_RULE',
+      id: '#new_pricing_rule',
+      pricingRuleData: pricingRuleData,
+    }
 
-    // var newProductObject = {
-    //   type: 'ITEM',
-    //   id: '#newitem',
-    //   itemData: {
-    //     name: productTitle,
-    //     variations: newProductVariations,
-    //   },
-    // }
+    let discountObj = {
+      type: 'DISCOUNT',
+      id: '#new_discount',
+      discountData: discountData,
+    }
+
+    let productSetObj = {
+      type: 'PRODUCT_SET',
+      id: '#new_match_products',
+      productSetData: productSetData,
+    }
+
+    console.log(
+      pricingRuleData,
+      discountData,
+      productSetData,
+      formData.get('min-spend')
+    )
 
     // try {
-    //   let response = await customFetch.post('/products', newProductObject)
+    //   let response = await customFetch.post('/discounts', [
+    //     pricingRuleObj,
+    //     discountObj,
+    //     productSetObj,
+    //   ])
     //   console.log(response)
-    //   toast.success('Product added successfully')
+    //   toast.success('Discount added successfully')
     //   if (response.status >= 200 && response.status <= 299) {
     //     setTimeout(() => {
-    //       navigate('/dashboard/all-products', { replace: true })
+    //       navigate('/dashboard/discounts', { replace: true })
     //     }, '1000')
     //   }
     // } catch (error) {
@@ -227,7 +235,11 @@ const AddDiscount = () => {
                     }}
                   />
                   <span>
-                    <label htmlFor='purchase-items'>Purchase exactly </label>
+                    <label htmlFor='purchase-items'>Purchase</label>
+                    <select name='num-items-condition' id='num-items-condition'>
+                      <option value='exact'>exactly</option>
+                      <option value='min'>at least</option>
+                    </select>
                     <input
                       type='number'
                       name='min-items'
@@ -251,7 +263,7 @@ const AddDiscount = () => {
                   />
                   <span>
                     <label htmlFor='no-condition'>
-                      No condition, the discount applies to:
+                      Purchase any number of items out of:
                     </label>
                   </span>
                 </div>
@@ -366,7 +378,7 @@ const AddDiscount = () => {
                   <label htmlFor='min-spend-true'>Spend at least $ </label>
                   <input
                     type='number'
-                    name='min-spend'
+                    name='min-spend-amount'
                     min='0'
                     required={minSpend}
                     disabled={minSpend == null}

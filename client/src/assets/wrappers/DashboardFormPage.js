@@ -91,6 +91,10 @@ const Wrapper = styled.section`
     margin-right: 7px;
     max-width: 70px;
   }
+  .discount-option select {
+    margin-left: 7px;
+    margin-right: 7px;
+  }
 
   .product-selection-button {
     margin-left: 10px;

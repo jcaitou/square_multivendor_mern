@@ -10,10 +10,15 @@ import {
   getAllDiscounts,
   upsertDiscount,
   getDiscount,
+  deleteDiscount,
 } from '../controllers/discountController.js'
 
 router.route('/').get(getAllDiscounts).post(upsertDiscount)
 
-router.route('/:id').get(getDiscount).patch(upsertDiscount)
+router
+  .route('/:id')
+  .get(getDiscount)
+  .patch(upsertDiscount)
+  .delete(deleteDiscount)
 
 export default router
