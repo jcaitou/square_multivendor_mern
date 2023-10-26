@@ -1,4 +1,3 @@
-import { FormRow } from '../components'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import ProductSelectionWrapper from '../assets/wrappers/ProductSelectionTable'
 import {
@@ -6,7 +5,6 @@ import {
   useNavigation,
   useNavigate,
   useLoaderData,
-  redirect,
 } from 'react-router-dom'
 import { useDashboardContext } from './DashboardLayout'
 import { useState, Fragment } from 'react'
@@ -15,13 +13,18 @@ import customFetch from '../utils/customFetch'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import Table from 'react-bootstrap/Table'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
-export const loader = async ({ request }) => {
+export const loader = async ({ request, params }) => {
   try {
-    const { data } = await customFetch.get('/products')
-    console.log(data)
+    const {
+      data: { items, cursor, matchedVariationIds },
+    } = await customFetch.get('/products')
+    const { data: discount } = await customFetch.get(`/discounts/${params.id}`)
     return {
-      data,
+      items,
+      cursor,
+      discount,
     }
   } catch (error) {
     toast.error(error?.response?.data?.msg)
@@ -29,20 +32,52 @@ export const loader = async ({ request }) => {
   }
 }
 
-const AddDiscount = () => {
-  const { data: products } = useLoaderData()
+const EditDiscount = () => {
+  const { items: products, cursor: cursorTemp, discount } = useLoaderData()
+
+  const [loadedProducts, setLoadedProducts] = useState(products)
+  const [cursor, setCursor] = useState(cursorTemp)
+
+  const originalPricingRule = discount.objects.filter(
+    (el) => el.type === 'PRICING_RULE'
+  )[0]
+  const originalDiscount = discount.objects.filter(
+    (el) => el.type === 'DISCOUNT'
+  )[0]
+  const originalProductSet = discount.objects.filter(
+    (el) => el.type === 'PRODUCT_SET'
+  )[0]
+
+  //console.log(originalPricingRule, originalDiscount, originalProductSet, cursor)
+
   const { user } = useDashboardContext()
   const navigate = useNavigate()
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
 
-  const [alwaysActive, setAlwaysActive] = useState(false)
-  const [condition, setCondition] = useState('purchase-items')
+  const [alwaysActive, setAlwaysActive] = useState(
+    originalPricingRule?.pricingRuleData?.validFromDate == null
+  )
+  const [condition, setCondition] = useState(
+    originalProductSet.productSetData.quantityExact > 0 ||
+      originalProductSet.productSetData.quantityMin > 0
+      ? 'purchase-items'
+      : 'no-condition'
+  )
   const [conditionNum, setConditionNum] = useState(null)
-  const [details, setDetails] = useState('percentage')
+  const [details, setDetails] = useState(
+    originalDiscount.discountData.percentage ? 'percentage' : 'amount'
+  )
   const [detailsNum, setDetailsNum] = useState(null)
-  const [minSpend, setMinSpend] = useState(null)
-  const [selectedProducts, setSelectedProducts] = useState([])
+  const [minSpend, setMinSpend] = useState(
+    originalPricingRule.pricingRuleData.minimumOrderSubtotalMoney != null
+  )
+  const defaultAllItems =
+    originalProductSet.productSetData.productIdsAny.length == 1 &&
+    originalProductSet.productSetData.productIdsAny[0] == user.squareId
+  const [selectedProducts, setSelectedProducts] = useState(
+    defaultAllItems ? [] : originalProductSet.productSetData.productIdsAny
+  )
   const [selectProductsModalShow, setSelectProductsModalShow] = useState(false)
 
   const selectProducts = () => {
@@ -68,8 +103,8 @@ const AddDiscount = () => {
 
     let pricingRuleData = {
       name: `[${user.name}] ${formData.get('title')}`,
-      discountId: '#new_discount',
-      matchProductsId: '#new_match_products',
+      discountId: originalDiscount.id,
+      matchProductsId: originalProductSet.id,
     }
 
     let discountData = {
@@ -120,19 +155,22 @@ const AddDiscount = () => {
 
     let pricingRuleObj = {
       type: 'PRICING_RULE',
-      id: '#new_pricing_rule',
+      id: originalPricingRule.id,
+      version: originalPricingRule.version,
       pricingRuleData: pricingRuleData,
     }
 
     let discountObj = {
       type: 'DISCOUNT',
-      id: '#new_discount',
+      id: originalDiscount.id,
+      version: originalDiscount.version,
       discountData: discountData,
     }
 
     let productSetObj = {
       type: 'PRODUCT_SET',
-      id: '#new_match_products',
+      id: originalProductSet.id,
+      version: originalProductSet.version,
       productSetData: productSetData,
     }
 
@@ -143,14 +181,15 @@ const AddDiscount = () => {
       formData.get('min-spend')
     )
 
+    console.log([pricingRuleObj, discountObj, productSetObj])
+
     try {
-      let response = await customFetch.post('/discounts', {
-        pricingRuleObj,
-        discountObj,
-        productSetObj,
-      })
+      let response = await customFetch.patch(
+        `/discounts/${originalProductSet.id}`,
+        { pricingRuleObj, discountObj, productSetObj }
+      )
       console.log(response)
-      toast.success('Discount added successfully')
+      toast.success('Discount edited successfully')
       if (response.status >= 200 && response.status <= 299) {
         setTimeout(() => {
           navigate('/dashboard/discounts', { replace: true })
@@ -171,10 +210,25 @@ const AddDiscount = () => {
           id='discount-form'
           onSubmit={handleAddProductSubmit}
         >
-          <h4 className='form-title'>add discount</h4>
+          <h4 className='form-title'>edit discount</h4>
 
           <div className='form-center'>
-            <FormRow type='text' name='title' labelText='discount name' />
+            <div className='form-row'>
+              <label htmlFor='title' className='form-label'>
+                discount name
+              </label>
+              <input
+                type='text'
+                id='title'
+                name='title'
+                className='form-input'
+                required
+                defaultValue={originalPricingRule.pricingRuleData.name.replace(
+                  `[${user.name}] `,
+                  ''
+                )}
+              />
+            </div>
 
             <h5>When should the discount be active?</h5>
 
@@ -193,6 +247,9 @@ const AddDiscount = () => {
                   name='discount-start'
                   required={!alwaysActive}
                   disabled={alwaysActive}
+                  defaultValue={
+                    originalPricingRule.pricingRuleData.validFromDate
+                  }
                 />
 
                 <label htmlFor='discount-end'>End date:</label>
@@ -202,6 +259,9 @@ const AddDiscount = () => {
                   name='discount-end'
                   required={!alwaysActive}
                   disabled={alwaysActive}
+                  defaultValue={
+                    originalPricingRule.pricingRuleData.validUntilDate
+                  }
                 />
               </div>
 
@@ -212,6 +272,10 @@ const AddDiscount = () => {
                     name='always-active'
                     id='always-active'
                     value='true'
+                    defaultChecked={
+                      originalPricingRule?.pricingRuleData?.validFromDate ==
+                      null
+                    }
                     onChange={() => {
                       setAlwaysActive(!alwaysActive)
                     }}
@@ -229,14 +293,27 @@ const AddDiscount = () => {
                     name='condition'
                     value='purchase-items'
                     id='purchase-items'
-                    defaultChecked
+                    defaultChecked={
+                      originalProductSet.productSetData.quantityExact > 0 ||
+                      originalProductSet.productSetData.quantityMin > 0
+                    }
                     onChange={(e) => {
                       setCondition(e.target.value)
                     }}
                   />
                   <span>
                     <label htmlFor='purchase-items'>Purchase</label>
-                    <select name='num-items-condition' id='num-items-condition'>
+                    <select
+                      name='num-items-condition'
+                      id='num-items-condition'
+                      defaultValue={
+                        originalProductSet.productSetData.quantityExact > 0
+                          ? 'exact'
+                          : originalProductSet.productSetData.quantityMin > 0
+                          ? 'min'
+                          : ''
+                      }
+                    >
                       <option value='exact'>exactly</option>
                       <option value='min'>at least</option>
                     </select>
@@ -244,6 +321,10 @@ const AddDiscount = () => {
                       type='number'
                       name='min-items'
                       min='0'
+                      defaultValue={
+                        originalProductSet.productSetData.quantityExact ||
+                        originalProductSet.productSetData.quantityMin
+                      }
                       required={condition == 'purchase-items'}
                       disabled={condition != 'purchase-items'}
                     />
@@ -257,6 +338,10 @@ const AddDiscount = () => {
                     name='condition'
                     value='no-condition'
                     id='no-condition'
+                    defaultChecked={
+                      originalProductSet.productSetData.quantityExact == null &&
+                      originalProductSet.productSetData.quantityMin == null
+                    }
                     onChange={(e) => {
                       setCondition(e.target.value)
                     }}
@@ -276,7 +361,7 @@ const AddDiscount = () => {
                     name='eligible-items'
                     value='all-items'
                     id='all-items'
-                    defaultChecked
+                    defaultChecked={defaultAllItems}
                   />
                   <span>
                     <label htmlFor='all-items'>All Items</label>
@@ -289,6 +374,7 @@ const AddDiscount = () => {
                     name='eligible-items'
                     id='specific-items'
                     value='specific-items'
+                    defaultChecked={!defaultAllItems}
                   />
                   <span>
                     <label htmlFor='specific-items'>
@@ -318,7 +404,9 @@ const AddDiscount = () => {
                 name='discount-details'
                 id='percentage'
                 value='percentage'
-                defaultChecked
+                defaultChecked={
+                  originalDiscount.discountData.percentage != null
+                }
                 onChange={(e) => {
                   setDetails(e.target.value)
                 }}
@@ -331,6 +419,7 @@ const AddDiscount = () => {
                   min='0'
                   max='100'
                   step='0.1'
+                  defaultValue={originalDiscount.discountData.percentage}
                   required={details == 'percentage'}
                   disabled={details != 'percentage'}
                 />
@@ -343,6 +432,9 @@ const AddDiscount = () => {
                 name='discount-details'
                 id='amount'
                 value='amount'
+                defaultChecked={
+                  originalDiscount.discountData.amountMoney != null
+                }
                 onChange={(e) => {
                   setDetails(e.target.value)
                 }}
@@ -354,6 +446,12 @@ const AddDiscount = () => {
                   name='amount-off'
                   min='0'
                   step='0.01'
+                  defaultValue={
+                    originalDiscount.discountData.amountMoney?.amount
+                      ? originalDiscount.discountData.amountMoney?.amount /
+                        100.0
+                      : ''
+                  }
                   required={details == 'amount'}
                   disabled={details != 'amount'}
                 />
@@ -370,6 +468,10 @@ const AddDiscount = () => {
                   name='min-spend'
                   value='min-spend-true'
                   id='min-spend-true'
+                  defaultChecked={
+                    originalPricingRule.pricingRuleData
+                      .minimumOrderSubtotalMoney != null
+                  }
                   onChange={(e) => {
                     setMinSpend(e.target.value)
                   }}
@@ -380,6 +482,13 @@ const AddDiscount = () => {
                     type='number'
                     name='min-spend-amount'
                     min='0'
+                    defaultValue={
+                      originalPricingRule.pricingRuleData
+                        ?.minimumOrderSubtotalMoney?.amount
+                        ? originalPricingRule.pricingRuleData
+                            ?.minimumOrderSubtotalMoney?.amount / 100.0
+                        : ''
+                    }
                     required={minSpend}
                     disabled={minSpend == null}
                   />
@@ -392,7 +501,10 @@ const AddDiscount = () => {
                   name='min-spend'
                   value='min-spend-false'
                   id='min-spend-false'
-                  defaultChecked
+                  defaultChecked={
+                    originalPricingRule.pricingRuleData
+                      .minimumOrderSubtotalMoney == null
+                  }
                   onChange={(e) => {
                     setMinSpend(null)
                   }}
@@ -416,7 +528,10 @@ const AddDiscount = () => {
 
       <ProductSelectionModal
         show={selectProductsModalShow}
-        products={products}
+        loadedProducts={loadedProducts}
+        setLoadedProducts={setLoadedProducts}
+        cursor={cursor}
+        setCursor={setCursor}
         selectedProducts={selectedProducts}
         selectProducts={selectProducts}
         onHide={() => setSelectProductsModalShow(false)}
@@ -426,7 +541,10 @@ const AddDiscount = () => {
 }
 
 function ProductSelectionModal({
-  products,
+  loadedProducts,
+  setLoadedProducts,
+  cursor,
+  setCursor,
   selectedProducts,
   selectProducts,
   ...props
@@ -471,102 +589,120 @@ function ProductSelectionModal({
             onChange={(e) => productSearch(e)}
           />
           <div className='product-selection-table' id='product-selection-table'>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type='checkbox'
-                      name='all-products'
-                      id='all-products'
-                      value='all-products'
-                      onChange={(e) => {
-                        let allCheckboxes = document.querySelectorAll(
-                          '#product-selection-table input[type="checkbox"][name="product-selection"]'
-                        )
-                        allCheckboxes.forEach((checkbox) => {
-                          checkbox.checked = e.target.checked
-                        })
-                      }}
-                    />
-                  </th>
-                  <th>Name</th>
-                  <th>SKU</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => {
-                  let priceMin, priceMax
-                  if (product.itemData.variations.length != 1) {
-                    priceMin = product.itemData.variations.reduce(function (
-                      prev,
-                      curr
-                    ) {
-                      return prev.itemVariationData.priceMoney.amount <
-                        curr.itemVariationData.priceMoney.amount
-                        ? prev
-                        : curr
-                    })
-                    priceMax = product.itemData.variations.reduce(function (
-                      prev,
-                      curr
-                    ) {
-                      return prev.itemVariationData.priceMoney.amount <
-                        curr.itemVariationData.priceMoney.amount
-                        ? curr
-                        : prev
-                    })
-                  }
-                  return (
-                    <Fragment key={product.id}>
-                      <tr data-product={product.itemData.name}>
-                        <td>
-                          <input
-                            type='checkbox'
-                            name='product-selection'
-                            id={product.id}
-                            value={product.id}
-                            defaultChecked={selectedProducts.includes(
-                              product.id
-                            )}
-                          />
-                        </td>
-                        <td className='has-label'>
-                          <label htmlFor={product.id}>
-                            {product.itemData.name}
-                          </label>
-                        </td>
-                        <td className='has-label'>
-                          <label htmlFor={product.id}>
-                            {product.itemData.variations.length == 1
-                              ? product.itemData.variations[0].itemVariationData
-                                  .sku
-                              : `${product.itemData.variations.length} variations`}
-                          </label>
-                        </td>
-                        <td className='has-label'>
-                          <label htmlFor={product.id}>
-                            {product.itemData.variations.length == 1
-                              ? CADMoney.format(
-                                  product.itemData.variations[0]
-                                    .itemVariationData.priceMoney.amount / 100
-                                )
-                              : `${CADMoney.format(
-                                  priceMin.itemVariationData.priceMoney.amount /
-                                    100
-                                )} - ${CADMoney.format(
-                                  priceMax.itemVariationData.priceMoney.amount /
-                                    100
-                                )}`}
-                          </label>
-                        </td>
-                      </tr>
-                    </Fragment>
-                  )
-                })}
-              </tbody>
-            </Table>
+            <InfiniteScroll
+              dataLength={loadedProducts.length}
+              next={async () => {
+                //console.log(products, cursor)
+                const { data } = await customFetch.get(
+                  `/products?cursor=${cursor}`
+                )
+                setLoadedProducts(loadedProducts.concat(data.items))
+                setCursor(data.cursor)
+                console.log(data)
+                //console.log(products)
+                return
+              }}
+              hasMore={cursor != ''}
+              scrollableTarget='product-selection-table'
+              loader={<h4>Loading...</h4>}
+            >
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>
+                      <input
+                        type='checkbox'
+                        name='all-products'
+                        id='all-products'
+                        value='all-products'
+                        onChange={(e) => {
+                          let allCheckboxes = document.querySelectorAll(
+                            '#product-selection-table input[type="checkbox"][name="product-selection"]'
+                          )
+                          allCheckboxes.forEach((checkbox) => {
+                            checkbox.checked = e.target.checked
+                          })
+                        }}
+                      />
+                    </th>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loadedProducts.map((product) => {
+                    let priceMin, priceMax
+                    if (product.itemData.variations.length != 1) {
+                      priceMin = product.itemData.variations.reduce(function (
+                        prev,
+                        curr
+                      ) {
+                        return prev.itemVariationData.priceMoney.amount <
+                          curr.itemVariationData.priceMoney.amount
+                          ? prev
+                          : curr
+                      })
+                      priceMax = product.itemData.variations.reduce(function (
+                        prev,
+                        curr
+                      ) {
+                        return prev.itemVariationData.priceMoney.amount <
+                          curr.itemVariationData.priceMoney.amount
+                          ? curr
+                          : prev
+                      })
+                    }
+                    return (
+                      <Fragment key={product.id}>
+                        <tr data-product={product.itemData.name}>
+                          <td>
+                            <input
+                              type='checkbox'
+                              name='product-selection'
+                              id={product.id}
+                              value={product.id}
+                              defaultChecked={selectedProducts.includes(
+                                product.id
+                              )}
+                            />
+                          </td>
+                          <td className='has-label'>
+                            <label htmlFor={product.id}>
+                              {product.itemData.name}
+                            </label>
+                          </td>
+                          <td className='has-label'>
+                            <label htmlFor={product.id}>
+                              {product.itemData.variations.length == 1
+                                ? product.itemData.variations[0]
+                                    .itemVariationData.sku
+                                : `${product.itemData.variations.length} variations`}
+                            </label>
+                          </td>
+                          <td className='has-label'>
+                            <label htmlFor={product.id}>
+                              {product.itemData.variations.length == 1
+                                ? CADMoney.format(
+                                    product.itemData.variations[0]
+                                      .itemVariationData.priceMoney.amount / 100
+                                  )
+                                : `${CADMoney.format(
+                                    priceMin.itemVariationData.priceMoney
+                                      .amount / 100
+                                  )} - ${CADMoney.format(
+                                    priceMax.itemVariationData.priceMoney
+                                      .amount / 100
+                                  )}`}
+                            </label>
+                          </td>
+                        </tr>
+                      </Fragment>
+                    )
+                  })}
+                </tbody>
+              </Table>
+            </InfiniteScroll>
           </div>
         </Modal.Body>
         <Modal.Footer>
@@ -577,4 +713,4 @@ function ProductSelectionModal({
   )
 }
 
-export default AddDiscount
+export default EditDiscount

@@ -15,6 +15,7 @@ import discountRouter from './routers/discountRouter.js'
 import authRouter from './routers/authRouter.js'
 import userRouter from './routers/userRouter.js'
 import uploadRouter from './routers/uploadRouter.js'
+import webhookRouter from './routers/webhookRouter.js'
 
 //middleware
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js'
@@ -34,6 +35,7 @@ app.use('/api/v1/upload', authenticateUser, uploadRouter)
 //app.use('/api/v1/jobs', authenticateUser, jobRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/webhooks', webhookRouter)
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' })

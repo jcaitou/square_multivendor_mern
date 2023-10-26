@@ -12,9 +12,12 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
 import { CSVLink } from 'react-csv'
+import PageBtnContainer from './PageBtnContainer'
 
 const ProductsContainer = () => {
-  const { data: products } = useAllInventoryContext()
+  const {
+    data: { organizedItems: products, cursor },
+  } = useAllInventoryContext()
   const today = new Date()
   const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
     today.getDate() + 1
@@ -200,6 +203,7 @@ const ProductsContainer = () => {
             </Table>
           )}
         </div>
+        <PageBtnContainer cursor={cursor} />
       </Wrapper>
       <ImportInventoryModal
         handleFileImport={handleFileImport}

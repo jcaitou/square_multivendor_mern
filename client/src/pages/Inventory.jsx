@@ -11,10 +11,16 @@ import {
 
 export const loader = async ({ request }) => {
   try {
-    const { data } = await customFetch.get('/inventory')
-    console.log(data)
+    const params = Object.fromEntries([
+      ...new URL(request.url).searchParams.entries(),
+    ])
+    const { data } = await customFetch.get('/inventory', {
+      params,
+    })
+
     return {
       data,
+      searchValues: { ...params },
     }
   } catch (error) {
     toast.error(error?.response?.data?.msg)
@@ -25,10 +31,10 @@ export const loader = async ({ request }) => {
 const AllInventoryContext = createContext()
 
 const Inventory = () => {
-  const { data } = useLoaderData()
+  const { data, searchValues } = useLoaderData()
 
   return (
-    <AllInventoryContext.Provider value={{ data }}>
+    <AllInventoryContext.Provider value={{ data, searchValues }}>
       <InventorySearchContainer />
       <InventoryProductsContainer />
     </AllInventoryContext.Provider>

@@ -7,7 +7,6 @@ import { useContext, createContext } from 'react'
 export const loader = async ({ request }) => {
   try {
     const { data } = await customFetch.get('/discounts')
-    console.log(data)
     return {
       data,
     }

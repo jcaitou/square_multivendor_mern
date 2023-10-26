@@ -6,10 +6,17 @@ import { useContext, createContext } from 'react'
 
 export const loader = async ({ request }) => {
   try {
-    const { data } = await customFetch.get('/products')
-    console.log(data)
+    const params = Object.fromEntries([
+      ...new URL(request.url).searchParams.entries(),
+    ])
+
+    const { data } = await customFetch.get('/products', {
+      params,
+    })
+
     return {
       data,
+      searchValues: { ...params },
     }
   } catch (error) {
     toast.error(error?.response?.data?.msg)
@@ -20,10 +27,9 @@ export const loader = async ({ request }) => {
 const AllProductsContext = createContext()
 
 const AllProducts = () => {
-  const { data } = useLoaderData()
-  console.log(data)
+  const { data, searchValues } = useLoaderData()
   return (
-    <AllProductsContext.Provider value={{ data }}>
+    <AllProductsContext.Provider value={{ data, searchValues }}>
       <SearchContainer />
       <ProductsContainer />
     </AllProductsContext.Provider>

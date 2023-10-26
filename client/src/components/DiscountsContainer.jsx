@@ -55,24 +55,26 @@ const DiscountsContainer = () => {
   }
   return (
     <>
-      <div className='product-actions'>
-        <div className='grouped-actions'>
-          <Link to={'../add-discount'} className='btn'>
-            Add Discount
-          </Link>
+      <Wrapper>
+        <div className='product-actions'>
+          <div className='grouped-actions'>
+            <Link to={'../add-discount'} className='btn'>
+              Add Discount
+            </Link>
+          </div>
         </div>
-      </div>
-      <div className='discounts'>
-        {discounts.map((discount) => {
-          return (
-            <Discount
-              key={discount.id}
-              discount={discount}
-              confirmDeleteDiscount={() => confirmDeleteDiscount(discount.id)}
-            />
-          )
-        })}
-      </div>
+        <div className='discounts'>
+          {discounts.map((discount) => {
+            return (
+              <Discount
+                key={discount.id}
+                discount={discount}
+                confirmDeleteDiscount={() => confirmDeleteDiscount(discount.id)}
+              />
+            )
+          })}
+        </div>
+      </Wrapper>
 
       <ConfirmDiscountDeleteModal
         handleDeleteDiscount={handleDeleteDiscount}

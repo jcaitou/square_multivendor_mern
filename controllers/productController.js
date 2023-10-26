@@ -12,20 +12,35 @@ import JSONBig from 'json-bigint'
 const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
 export const getAllProducts = async (req, res) => {
+  const { search, cursor } = req.query
+
+  let searchQuery = {
+    limit: 10,
+    customAttributeFilters: [
+      {
+        key: 'vendor_name',
+        stringFilter: req.user.squareName,
+      },
+    ],
+  }
+
+  if (search) {
+    searchQuery.textFilter = search
+  }
+
+  if (cursor) {
+    searchQuery.cursor = cursor
+  }
+
   try {
-    const response = await squareClient.catalogApi.searchCatalogItems({
-      customAttributeFilters: [
-        {
-          key: 'vendor_name',
-          stringFilter: req.user.squareName,
-        },
-      ],
-    })
+    const response = await squareClient.catalogApi.searchCatalogItems(
+      searchQuery
+    )
 
     let parsedResponse
 
-    if (response.result?.items) {
-      parsedResponse = JSONBig.parse(JSONBig.stringify(response.result.items))
+    if (response.result) {
+      parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
     } else {
       parsedResponse = []
     }

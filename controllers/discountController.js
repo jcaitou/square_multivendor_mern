@@ -46,12 +46,14 @@ export const getAllDiscounts = async (req, res) => {
 }
 
 export const upsertDiscount = async (req, res) => {
+  let { pricingRuleObj, discountObj, productSetObj } = req.body
+  console.log(req.body)
   try {
     const response = await squareClient.catalogApi.batchUpsertCatalogObjects({
       idempotencyKey: nanoid(),
       batches: [
         {
-          objects: req.body,
+          objects: [pricingRuleObj, discountObj, productSetObj],
         },
       ],
     })
@@ -109,14 +111,20 @@ export const upsertDiscount = async (req, res) => {
 }
 
 export const getDiscount = async (req, res) => {
-  const discount = await Discount.findOne({ pricingRuleId: req.params.id })
-  console.log(discount)
+  const discount = await Discount.findOne({
+    pricingRuleId: req.params.id,
+    createdBy: req.user.userId,
+  })
 
   try {
-    const response = await squareClient.catalogApi.retrieveCatalogObject(
-      req.params.id,
-      true
-    )
+    const response = await squareClient.catalogApi.batchRetrieveCatalogObjects({
+      objectIds: [
+        discount.pricingRuleId,
+        discount.discountId,
+        discount.productSetId,
+      ],
+      includeRelatedObjects: false,
+    })
     let parsedResponse
     if (response.result) {
       parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))

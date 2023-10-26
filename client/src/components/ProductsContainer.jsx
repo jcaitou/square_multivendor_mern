@@ -9,9 +9,12 @@ import customFetch from '../utils/customFetch'
 import { CSVLink } from 'react-csv'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
+import PageBtnContainer from './PageBtnContainer'
 
 const ProductsContainer = () => {
-  const { data: products } = useAllProductsContext()
+  const { data } = useAllProductsContext()
+  const products = data?.items
+  const cursor = data?.cursor
   const today = new Date()
   const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
     today.getDate() + 1
@@ -30,7 +33,7 @@ const ProductsContainer = () => {
   const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
   const [selectMoreProductsShow, setSelectMoreProductsShow] = useState(false)
 
-  if (products.length === 0) {
+  if (!products || products.length === 0) {
     return (
       <Wrapper>
         <h2>No products to display...</h2>
@@ -211,6 +214,7 @@ const ProductsContainer = () => {
             )
           })}
         </div>
+        <PageBtnContainer cursor={cursor} />
       </Wrapper>
       <ImportProductsModal
         handleFileImport={handleFileImport}

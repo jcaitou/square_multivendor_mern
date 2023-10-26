@@ -9,7 +9,8 @@ const Wrapper = styled.section`
     font-weight: 700;
     margin-bottom: 1.5rem;
   }
-  .products {
+  .products,
+  .discounts {
     display: grid;
     grid-template-columns: 1fr;
     row-gap: 2rem;
@@ -26,11 +27,5 @@ const Wrapper = styled.section`
     justify-content: center;
     column-gap: 10px;
   }
-  /* @media (min-width: 1120px) {
-    .products {
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-    }
-  } */
 `
 export default Wrapper

@@ -15,6 +15,7 @@ import {
   Inventory,
   AllDiscounts,
   AddDiscount,
+  EditDiscount,
 } from './pages'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
@@ -27,6 +28,7 @@ import { loader as editProductLoader } from './pages/EditProduct'
 import { loader as allInventoryLoader } from './pages/Inventory'
 import { loader as allDiscountsLoader } from './pages/AllDiscounts'
 import { loader as addDiscountLoader } from './pages/AddDiscount'
+import { loader as editDiscountLoader } from './pages/EditDiscount'
 
 checkDefaultTheme()
 
@@ -92,6 +94,11 @@ const router = createBrowserRouter([
             path: 'add-discount',
             element: <AddDiscount />,
             loader: addDiscountLoader,
+          },
+          {
+            path: 'edit-discount/:id',
+            element: <EditDiscount />,
+            loader: editDiscountLoader,
           },
           {
             path: 'profile',

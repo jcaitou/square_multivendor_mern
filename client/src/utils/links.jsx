@@ -12,13 +12,19 @@ import {
 } from 'react-icons/md'
 
 const links = [
-  { text: 'orders', path: 'add-product', icon: <FaWpforms /> },
   { text: 'all products', path: 'all-products', icon: <MdOutlineInventory2 /> },
   { text: 'inventory', path: 'inventory', icon: <MdOutlineInventory /> },
   { text: 'discounts', path: 'discounts', icon: <MdOutlineDiscount /> },
-  { text: 'stats', path: '.', icon: <IoBarChartSharp /> },
-  { text: 'profile', path: 'profile', icon: <ImProfile /> },
-  { text: 'admin', path: 'admin', icon: <MdAdminPanelSettings /> },
 ]
+
+// const links = [
+//   { text: 'orders', path: 'add-product', icon: <FaWpforms /> },
+//   { text: 'all products', path: 'all-products', icon: <MdOutlineInventory2 /> },
+//   { text: 'inventory', path: 'inventory', icon: <MdOutlineInventory /> },
+//   { text: 'discounts', path: 'discounts', icon: <MdOutlineDiscount /> },
+//   { text: 'stats', path: '.', icon: <IoBarChartSharp /> },
+//   { text: 'profile', path: 'profile', icon: <ImProfile /> },
+//   { text: 'admin', path: 'admin', icon: <MdAdminPanelSettings /> },
+// ]
 
 export default links

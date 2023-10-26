@@ -10,18 +10,35 @@ import { nanoid } from 'nanoid'
 import JSONBig from 'json-bigint'
 
 export const getProductsInventory = async (req, res) => {
-  const response = await squareClient.catalogApi.searchCatalogItems({
+  const { search, cursor } = req.query
+
+  let searchQuery = {
+    limit: 10,
     customAttributeFilters: [
       {
         key: 'vendor_name',
         stringFilter: req.user.squareName,
       },
     ],
-  })
+  }
+
+  if (search) {
+    searchQuery.textFilter = search
+  }
+
+  if (cursor) {
+    searchQuery.cursor = cursor
+  }
+
+  const response = await squareClient.catalogApi.searchCatalogItems(searchQuery)
 
   if (!response) {
     throw new SquareApiError('error while obtaining products info')
   }
+
+  //const tempResponse = JSONBig.parse(JSONBig.stringify(response.result))
+  // console.log(response.result.items.length)
+  // return res.status(StatusCodes.OK).json(tempResponse)
 
   const variationMapped = response.result.items
     .map((catalogItem) => {
@@ -49,7 +66,7 @@ export const getProductsInventory = async (req, res) => {
   //   inventory: inventoryResponse.result.counts,
   // }
 
-  const organizedResponse = response.result.items.map((catalogItem) => {
+  const organizedItems = response.result.items.map((catalogItem) => {
     var variationList = catalogItem.itemData.variations.map((variation) => {
       return {
         productName: catalogItem.itemData.name,
@@ -61,21 +78,23 @@ export const getProductsInventory = async (req, res) => {
     })
     return variationList
   })
-  for (let i = 0; i < organizedResponse.length; i++) {
-    for (let j = 0; j < organizedResponse[i].length; j++) {
+  for (let i = 0; i < organizedItems.length; i++) {
+    for (let j = 0; j < organizedItems[i].length; j++) {
       const variationInventory = inventoryResponse.result.counts.filter(
         (inventoryObj) => {
           return (
-            inventoryObj.catalogObjectId == organizedResponse[i][j].variationId
+            inventoryObj.catalogObjectId == organizedItems[i][j].variationId
           )
         }
       )
       for (let k = 0; k < variationInventory.length; k++) {
-        organizedResponse[i][j][variationInventory[k].locationId] =
+        organizedItems[i][j][variationInventory[k].locationId] =
           variationInventory[k].quantity
       }
     }
   }
+
+  const organizedResponse = { organizedItems, cursor: response.result.cursor }
 
   const parsedResponse = JSONBig.parse(JSONBig.stringify(organizedResponse))
 

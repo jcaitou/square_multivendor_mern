@@ -9,16 +9,20 @@ const Discount = ({ discount, confirmDeleteDiscount }) => {
     toDate,
     today = new Date()
   let status = 'unset'
-  console.log(fromDate)
+
   if (
     discount?.pricingRuleData?.validFromDate &&
     discount?.pricingRuleData?.validUntilDate
   ) {
-    fromDate = new Date(discount.pricingRuleData.validFromDate)
-    toDate = new Date(discount.pricingRuleData.validUntilDate)
-    if (today > fromDate && today < toDate) {
+    fromDate = new Date(
+      discount.pricingRuleData.validFromDate + 'T00:00:00+08:00'
+    )
+    toDate = new Date(
+      discount.pricingRuleData.validUntilDate + 'T23:59:59+08:00'
+    )
+
+    if (today >= fromDate && today <= toDate) {
       status = 'active'
-      console.log('✅ date is between the 2 dates')
     } else if (today < fromDate) {
       status = 'scheduled'
     } else if (today > toDate) {
@@ -27,11 +31,6 @@ const Discount = ({ discount, confirmDeleteDiscount }) => {
   } else {
     status = 'always active'
   }
-
-  // const CADMoney = new Intl.NumberFormat('en-CA', {
-  //   style: 'currency',
-  //   currency: 'CAD',
-  // })
 
   return (
     <Wrapper>
@@ -43,7 +42,9 @@ const Discount = ({ discount, confirmDeleteDiscount }) => {
                 {discount.pricingRuleData.name.replace(`[${user.name}] `, '')}
               </h5>
             </div>
-            <div className='discount-status'>
+            <div
+              className={`discount-status status-${status.replace(' ', '-')}`}
+            >
               <p>{status}</p>
               {status != 'always active' && (
                 <div className='discount-dates'>
@@ -55,7 +56,7 @@ const Discount = ({ discount, confirmDeleteDiscount }) => {
           </div>
         </header>
         <footer className='actions'>
-          <Link to={`../edit-product/${discount.id}`} className='btn edit-btn'>
+          <Link to={`../edit-discount/${discount.id}`} className='btn edit-btn'>
             <RiEditLine />
           </Link>
           <button
