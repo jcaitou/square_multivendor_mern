@@ -36,7 +36,6 @@ Agenda needs to be set up for certain functions:
 -(?) order webhook
 
 unused packages:
-papaparse(?)
 
 Adding new user:
 -only doable with 'admin' role
