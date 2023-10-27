@@ -8,12 +8,15 @@ const FileActionSchema = new mongoose.Schema(
       default: FILE_TYPE.PRODUCT_UPDATE,
     },
     fileName: String,
+    fileUrl: String,
+    filePublicId: String,
     status: {
       type: String,
       enum: Object.values(FILE_UPLOAD_STATUS),
       default: FILE_UPLOAD_STATUS.IDLE,
     },
-    resultsFileName: String,
+    resultsFileUrl: String,
+    resultsFilePublicId: String,
     createdBy: {
       type: mongoose.Types.ObjectId,
       ref: 'User',

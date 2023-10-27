@@ -12,10 +12,11 @@ import JSONBig from 'json-bigint'
 const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
 export const getAllProducts = async (req, res) => {
+  console.log(req.user)
   const { search, cursor } = req.query
 
   let searchQuery = {
-    limit: 10,
+    limit: 100,
     customAttributeFilters: [
       {
         key: 'vendor_name',
@@ -94,12 +95,23 @@ export const upsertProduct = async (req, res) => {
   //   },
   // }
 
+  for (let i = 0; i < productData.itemData.variations.length; i++) {
+    productData.itemData.variations[i].customAttributeValues = {
+      vendor_name: {
+        stringValue: req.user.squareName,
+      },
+    }
+  }
+
   productData.customAttributeValues = {
     vendor_name: {
       stringValue: req.user.squareName,
     },
   }
   productData.itemData.categoryId = req.user.squareId
+
+  // console.log(productData.itemData.variations)
+  // return res.status(StatusCodes.CREATED).json({ productData })
 
   const response = await squareClient.catalogApi.upsertCatalogObject({
     idempotencyKey: key,
@@ -191,78 +203,6 @@ export const updateProduct = async (req, res, next) => {
     console.log(error)
     throw new SquareApiError('Square API error trying to update product')
   }
-}
-
-export const batchUpdateProducts = async (req, res, next) => {
-  const key = nanoid()
-  const productData = req.body
-
-  let processedIds = [],
-    objects = []
-  for (let i = 0; i < productData.length; i++) {
-    if (productData[i].productId) {
-      if (!processedIds.includes(productData[i].productId)) {
-        processedIds.push(productData[i].productId)
-
-        let currProductResponse =
-          await squareClient.catalogApi.retrieveCatalogObject(
-            productData[i].productId,
-            false
-          )
-        let itemVendor =
-          currProductResponse.result.object.customAttributeValues['vendor_name']
-            .stringValue
-
-        let currProductObject = currProductResponse.result
-
-        console.log(currProductResponse.result)
-        let currProduct = productData.filter((row) => {
-          return productData[i].productId == row.productId
-        })
-        let currProductVariations = currProduct.map((row) => {
-          return {
-            type: 'ITEM_VARIATION',
-            id: row.variationId,
-            itemVariationData: {
-              itemId: row.productId,
-              name: row.variationName,
-              pricingType: 'FIXED_PRICING',
-              sku: row.variationSku,
-              priceMoney: {
-                amount: row.variationPrice,
-              },
-            },
-          }
-        })
-        objects.push({
-          type: 'ITEM',
-          id: productData[i].productId,
-          version: productData[i].version,
-          itemData: {
-            name: productData[i].productName,
-            variations: currProductVariations,
-          },
-        })
-      }
-    } else {
-      //create new product
-    }
-  }
-  console.log(objects)
-
-  // try {
-  //   const response = await squareClient.catalogApi.batchUpsertCatalogObjects({
-  //     idempotencyKey: key,
-  //     batches: [{ objects: objects }],
-  //   })
-  //   const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
-  //   res.status(StatusCodes.OK).json({ parsedResponse })
-  // } catch (error) {
-  //   console.log(error)
-  //   throw new SquareApiError('Square API error trying to update product')
-  // }
-
-  res.status(StatusCodes.OK).json({ objects })
 }
 
 export const deleteProduct = async (req, res, next) => {

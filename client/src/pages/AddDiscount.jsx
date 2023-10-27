@@ -1,6 +1,5 @@
 import { FormRow } from '../components'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
-import ProductSelectionWrapper from '../assets/wrappers/ProductSelectionTable'
 import {
   Form,
   useNavigation,
@@ -12,16 +11,16 @@ import { useDashboardContext } from './DashboardLayout'
 import { useState, Fragment } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
-import Table from 'react-bootstrap/Table'
+import ProductSelectionModal from '../components/ProductSelectionModal'
 
 export const loader = async ({ request }) => {
   try {
-    const { data } = await customFetch.get('/products')
-    console.log(data)
+    const {
+      data: { items, cursor, matchedVariationIds },
+    } = await customFetch.get('/products')
     return {
-      data,
+      items,
+      cursor,
     }
   } catch (error) {
     toast.error(error?.response?.data?.msg)
@@ -30,8 +29,11 @@ export const loader = async ({ request }) => {
 }
 
 const AddDiscount = () => {
-  const { data: products } = useLoaderData()
+  const { items: products, cursor: cursorTemp } = useLoaderData()
   const { user } = useDashboardContext()
+  const [loadedProducts, setLoadedProducts] = useState(products)
+  const [cursor, setCursor] = useState(cursorTemp)
+
   const navigate = useNavigate()
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
@@ -416,164 +418,15 @@ const AddDiscount = () => {
 
       <ProductSelectionModal
         show={selectProductsModalShow}
-        products={products}
+        loadedProducts={loadedProducts}
+        setLoadedProducts={setLoadedProducts}
+        cursor={cursor}
+        setCursor={setCursor}
         selectedProducts={selectedProducts}
         selectProducts={selectProducts}
         onHide={() => setSelectProductsModalShow(false)}
       />
     </>
-  )
-}
-
-function ProductSelectionModal({
-  products,
-  selectedProducts,
-  selectProducts,
-  ...props
-}) {
-  const CADMoney = new Intl.NumberFormat('en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-  })
-
-  const productSearch = (e) => {
-    console.log(e.target.value)
-    const searchQuery = e.target.value.toLowerCase()
-    const allRows = document.querySelectorAll(
-      '#product-selection-table tbody tr'
-    )
-    allRows.forEach((row) => {
-      if (row.dataset.product.toLowerCase().includes(searchQuery)) {
-        row.style.display = 'table-row'
-      } else {
-        row.style.display = 'none'
-      }
-    })
-  }
-
-  return (
-    <Modal
-      {...props}
-      size='lg'
-      aria-labelledby='contained-modal-title-vcenter'
-      centered
-    >
-      <ProductSelectionWrapper>
-        <Modal.Header closeButton>
-          <Modal.Title id='contained-modal-title-vcenter'>
-            Select Products
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <input
-            type='search'
-            name='search'
-            onChange={(e) => productSearch(e)}
-          />
-          <div className='product-selection-table' id='product-selection-table'>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type='checkbox'
-                      name='all-products'
-                      id='all-products'
-                      value='all-products'
-                      onChange={(e) => {
-                        let allCheckboxes = document.querySelectorAll(
-                          '#product-selection-table input[type="checkbox"][name="product-selection"]'
-                        )
-                        allCheckboxes.forEach((checkbox) => {
-                          checkbox.checked = e.target.checked
-                        })
-                      }}
-                    />
-                  </th>
-                  <th>Name</th>
-                  <th>SKU</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => {
-                  let priceMin, priceMax
-                  if (product.itemData.variations.length != 1) {
-                    priceMin = product.itemData.variations.reduce(function (
-                      prev,
-                      curr
-                    ) {
-                      return prev.itemVariationData.priceMoney.amount <
-                        curr.itemVariationData.priceMoney.amount
-                        ? prev
-                        : curr
-                    })
-                    priceMax = product.itemData.variations.reduce(function (
-                      prev,
-                      curr
-                    ) {
-                      return prev.itemVariationData.priceMoney.amount <
-                        curr.itemVariationData.priceMoney.amount
-                        ? curr
-                        : prev
-                    })
-                  }
-                  return (
-                    <Fragment key={product.id}>
-                      <tr data-product={product.itemData.name}>
-                        <td>
-                          <input
-                            type='checkbox'
-                            name='product-selection'
-                            id={product.id}
-                            value={product.id}
-                            defaultChecked={selectedProducts.includes(
-                              product.id
-                            )}
-                          />
-                        </td>
-                        <td className='has-label'>
-                          <label htmlFor={product.id}>
-                            {product.itemData.name}
-                          </label>
-                        </td>
-                        <td className='has-label'>
-                          <label htmlFor={product.id}>
-                            {product.itemData.variations.length == 1
-                              ? product.itemData.variations[0].itemVariationData
-                                  .sku
-                              : `${product.itemData.variations.length} variations`}
-                          </label>
-                        </td>
-                        <td className='has-label'>
-                          <label htmlFor={product.id}>
-                            {product.itemData.variations.length == 1
-                              ? CADMoney.format(
-                                  product.itemData.variations[0]
-                                    .itemVariationData.priceMoney.amount / 100
-                                )
-                              : `${CADMoney.format(
-                                  priceMin.itemVariationData.priceMoney.amount /
-                                    100
-                                )} - ${CADMoney.format(
-                                  priceMax.itemVariationData.priceMoney.amount /
-                                    100
-                                )}`}
-                          </label>
-                        </td>
-                      </tr>
-                    </Fragment>
-                  )
-                })}
-              </tbody>
-            </Table>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={selectProducts}>Done</Button>
-        </Modal.Footer>
-      </ProductSelectionWrapper>
-    </Modal>
   )
 }
 

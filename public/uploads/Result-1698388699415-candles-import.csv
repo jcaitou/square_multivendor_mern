@@ -1,0 +1,7 @@
+productName,variationName,variationSku,variationPrice,productId,variationId,status,message
+Blue Candle,,Candle-1,2000,#new_product0,#product0_variation0,Failed,Error calling Square API
+Red Candle,,Candle-2,2000,#new_product1,#product1_variation0,Failed,Error calling Square API
+Yellow Candle,,Candle-3,2000,#new_product2,#product2_variation0,Failed,Error calling Square API
+Black Candle,,Candle-4,2000,#new_product3,#product3_variation0,Failed,Error calling Square API
+Grey Candle,,Candle-5,2000,#new_product4,#product4_variation0,Failed,Error calling Square API
+White Candle,,Candle-6,2000,#new_product5,#product5_variation0,Failed,Error calling Square API

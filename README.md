@@ -9,31 +9,6 @@ Currently, two official plugins are available:
 
 # Need to add:
 
-Batch product action:
--create new product and edit existing products work
--inventory is set to 0 if new variations are added
--need to add checks: what if price is not a number
--what if ids are provided but do not match anything?
-
--need to add results file
--more testing
-
-Products:
--add product photo
-
-Inventory locations:
--based on vendors' active locations
--edit individual product inventory
--batch edit product inventory (aka restock)
-
-Able to display all inventory counts
-export
-import
-initialize all created products with 0 inventory
-
-Product discounts:
--add discount rules
-
 Order history & money earned
 
 User (Vendor) model:
@@ -45,8 +20,29 @@ Store model (?):
 -active locations
 -payments to vendors
 
-NEXT: WORK ON IMPORT (both inventory and products)
--connect it to the mongo import object
+Export: option to export page only, or all items (by email)
+
+Discount function: opt-in for vendors
+
+Barcode generation
+
+Report bug feature
+
+Low in stock warning
+
+Agenda needs to be set up for certain functions:
+-full product export (email)
+-full inventory export
+-(?) order webhook
 
 unused packages:
-primereact
+papaparse(?)
+
+Adding new user:
+-only doable with 'admin' role
+-squareId needs to be created first
+
+-Display all orders
+-Display details about one order
+-Display all file actions
+-admin page: change password

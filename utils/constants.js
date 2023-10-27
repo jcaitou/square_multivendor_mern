@@ -19,7 +19,8 @@ export const JOB_SORT_BY = {
 
 export const FILE_TYPE = {
   PRODUCT_UPDATE: 'product',
-  INVENTORY_UPDATE: 'inventory',
+  INVENTORY_RECOUNT: 'inventory-recount',
+  INVENTORY_UPDATE: 'inventory-update',
 }
 
 export const FILE_UPLOAD_STATUS = {

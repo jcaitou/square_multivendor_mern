@@ -13,7 +13,7 @@ export const getProductsInventory = async (req, res) => {
   const { search, cursor } = req.query
 
   let searchQuery = {
-    limit: 10,
+    limit: 100,
     customAttributeFilters: [
       {
         key: 'vendor_name',
@@ -35,10 +35,10 @@ export const getProductsInventory = async (req, res) => {
   if (!response) {
     throw new SquareApiError('error while obtaining products info')
   }
-
-  //const tempResponse = JSONBig.parse(JSONBig.stringify(response.result))
-  // console.log(response.result.items.length)
-  // return res.status(StatusCodes.OK).json(tempResponse)
+  if (!response.result.items) {
+    //const organizedResponse = { organizedItems, cursor: response.result.cursor }
+    return res.status(StatusCodes.OK).json({ organizedItems: [], cursor: '' })
+  }
 
   const variationMapped = response.result.items
     .map((catalogItem) => {
@@ -60,11 +60,6 @@ export const getProductsInventory = async (req, res) => {
   if (!inventoryResponse) {
     throw new SquareApiError('error while obtaining inventory counts')
   }
-
-  // const returnResponse = {
-  //   items: response.result.items,
-  //   inventory: inventoryResponse.result.counts,
-  // }
 
   const organizedItems = response.result.items.map((catalogItem) => {
     var variationList = catalogItem.itemData.variations.map((variation) => {
@@ -102,8 +97,6 @@ export const getProductsInventory = async (req, res) => {
 }
 
 export const updateProductsInventory = async (req, res) => {
-  console.log(req.body)
-
   try {
     const response = await squareClient.inventoryApi.batchChangeInventory({
       idempotencyKey: nanoid(),

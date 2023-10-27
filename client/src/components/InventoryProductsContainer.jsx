@@ -122,7 +122,7 @@ const ProductsContainer = () => {
     data.append('update-file', importFile)
 
     try {
-      let response = await customFetch.post('/upload', data)
+      let response = await customFetch.post('/uploads', data)
       console.log(response.data)
       toast.success('Batch update has started')
       setImportInventoryModalShow(false)

@@ -13,7 +13,7 @@ import PageBtnContainer from './PageBtnContainer'
 
 const ProductsContainer = () => {
   const { data } = useAllProductsContext()
-  const products = data?.items
+  const products = data?.items || []
   const cursor = data?.cursor
   const today = new Date()
   const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
@@ -32,14 +32,6 @@ const ProductsContainer = () => {
   const [deleteMode, setDeleteMode] = useState(false)
   const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
   const [selectMoreProductsShow, setSelectMoreProductsShow] = useState(false)
-
-  if (!products || products.length === 0) {
-    return (
-      <Wrapper>
-        <h2>No products to display...</h2>
-      </Wrapper>
-    )
-  }
 
   const variationsData = products
     .map((product) => {
@@ -80,7 +72,7 @@ const ProductsContainer = () => {
     data.append('update-file', importFile)
 
     try {
-      let response = await customFetch.post('/upload', data)
+      let response = await customFetch.post('/uploads', data)
       console.log(response.data)
       toast.success('Batch update has started')
       setImportProductsModalShow(false)
@@ -199,6 +191,7 @@ const ProductsContainer = () => {
             </Link>
           </div>
         </div>
+        {products.length === 0 && <h2>No products to display...</h2>}
         <div className='products'>
           {products.map((product) => {
             return (

@@ -1,25 +1,26 @@
 import mongoose from 'mongoose'
 
-const OrderSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  phone: {
-    type: String,
-    default: '0000000000',
+const OrderSchema = new mongoose.Schema(
+  {
+    orderId: String,
+    location: String,
+    orderDate: Date,
+    orderItems: [
+      {
+        itemName: String,
+        itemVariationId: String,
+        quantity: Number,
+        basePrice: Number,
+        totalDiscount: Number,
+        totalMoney: Number,
+        itemVendor: {
+          type: mongoose.Types.ObjectId,
+          ref: 'User',
+        },
+      },
+    ],
   },
-  password: String,
-  squareName: String,
-  orderDate: Date,
-  soldBy: {
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-  },
-})
-
-UserSchema.methods.toJSON = function () {
-  var obj = this.toObject()
-  delete obj.password
-  return obj
-}
+  { timestamps: true }
+)
 
 export default mongoose.model('Order', OrderSchema)
