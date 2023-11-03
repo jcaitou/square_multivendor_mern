@@ -17,12 +17,27 @@ import {
 import User from '../models/UserModel.js'
 
 export const getAllDiscounts = async (req, res) => {
-  const discounts = await Discount.find({ createdBy: req.user.userId })
+  const queryObj = { createdBy: req.user.userId }
+  // setup pagination
+  const page = Number(req.query.page) || 1
+  const limit = Number(req.query.limit) || 50
+  const skip = (page - 1) * limit
+
+  const discounts = await Discount.find(queryObj).skip(skip).limit(limit)
+  const totalItems = await Discount.countDocuments(queryObj)
+  const numOfPages = Math.ceil(totalItems / limit)
+
   console.log(discounts)
 
   if (discounts.length == 0) {
-    return res.status(StatusCodes.OK).json(discounts)
+    return res.status(StatusCodes.OK).json({
+      discounts,
+      totalItems: 0,
+      numOfPages: 1,
+      currentPage: 1,
+    })
   }
+
   const discountIds = discounts.map((el) => el.pricingRuleId)
 
   try {
@@ -38,7 +53,12 @@ export const getAllDiscounts = async (req, res) => {
       parsedResponse = []
     }
 
-    res.status(StatusCodes.OK).json(parsedResponse)
+    res.status(StatusCodes.OK).json({
+      discounts: parsedResponse,
+      totalItems,
+      numOfPages,
+      currentPage: page,
+    })
   } catch (error) {
     console.log(error)
     throw new SquareApiError('error while calling the Square API')

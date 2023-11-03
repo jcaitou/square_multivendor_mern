@@ -5,6 +5,7 @@ import {
   Register,
   Login,
   DashboardLayout,
+  AdminLayout,
   Error,
   AddProduct,
   Profile,
@@ -16,19 +17,28 @@ import {
   AllDiscounts,
   AddDiscount,
   EditDiscount,
+  FileActions,
+  ChangePassword,
+  AllOrders,
 } from './pages'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
 import { action as registerAction } from './pages/Register'
 import { action as loginAction } from './pages/Login'
 import { action as deleteProductAction } from './pages/DeleteProduct'
+import { action as changePasswordAction } from './pages/ChangePassword'
+
 import { loader as dashboardLoader } from './pages/DashboardLayout'
+import { loader as adminLayoutLoader } from './pages/AdminLayout'
+
 import { loader as allProductsLoader } from './pages/AllProducts'
 import { loader as editProductLoader } from './pages/EditProduct'
 import { loader as allInventoryLoader } from './pages/Inventory'
 import { loader as allDiscountsLoader } from './pages/AllDiscounts'
 import { loader as addDiscountLoader } from './pages/AddDiscount'
 import { loader as editDiscountLoader } from './pages/EditDiscount'
+import { loader as fileActionLoader } from './pages/FileActions'
+import { loader as allOrdersLoader } from './pages/AllOrders'
 
 checkDefaultTheme()
 
@@ -41,11 +51,6 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Landing />,
-      },
-      {
-        path: 'register',
-        element: <Register />,
-        action: registerAction,
       },
       {
         path: 'login',
@@ -101,12 +106,40 @@ const router = createBrowserRouter([
             loader: editDiscountLoader,
           },
           {
+            path: 'all-orders',
+            element: <AllOrders />,
+            loader: allOrdersLoader,
+          },
+          {
+            path: 'file-actions',
+            element: <FileActions />,
+            loader: fileActionLoader,
+          },
+
+          {
+            path: 'change-password',
+            element: <ChangePassword />,
+            action: changePasswordAction,
+          },
+          {
             path: 'profile',
             element: <Profile />,
           },
+          // {
+          //   path: 'admin',
+          //   element: <Admin />,
+          // },
           {
             path: 'admin',
-            element: <Admin />,
+            element: <AdminLayout />,
+            loader: adminLayoutLoader,
+            children: [
+              {
+                path: 'register',
+                element: <Register />,
+                action: registerAction,
+              },
+            ],
           },
         ],
       },

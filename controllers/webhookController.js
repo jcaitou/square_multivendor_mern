@@ -6,6 +6,7 @@ import Order from '../models/OrderModel.js'
 import User from '../models/UserModel.js'
 
 export const createOrder = async (req, res) => {
+  console.log(req.body.data)
   const orderId = req.body.data.id
 
   const responseTemp = await squareClient.ordersApi.retrieveOrder(orderId)
@@ -16,8 +17,19 @@ export const createOrder = async (req, res) => {
 
   const response = JSONBig.parse(JSONBig.stringify(responseTemp))
 
+  console.log(response.result.order)
+  if (!response?.result?.order?.lineItems) {
+    throw new SquareApiError('no variation ID defined')
+  }
+
+  //return res.status(StatusCodes.CREATED).json({ msg })
+
   const orderItemsPromise = response.result.order.lineItems.map(
     async (item) => {
+      if (!item?.catalogObjectId) {
+        // throw new SquareApiError('no variation ID defined')
+        return res.status(StatusCodes.CREATED).json({ msg: 'ok' })
+      }
       const itemResponse = await squareClient.catalogApi.retrieveCatalogObject(
         item.catalogObjectId,
         false
@@ -28,7 +40,7 @@ export const createOrder = async (req, res) => {
       }
       let vendorName =
         itemResponse.result.object.customAttributeValues.vendor_name.stringValue
-      const user = await User.findOne({ squareName: vendorName })
+      const user = await User.findOne({ name: vendorName })
 
       if (!user) {
         throw new NotFoundError('user not found')
@@ -52,7 +64,7 @@ export const createOrder = async (req, res) => {
     orderDate: response.result.order.updatedAt,
     orderItems: orderItems,
   }
-
+  console.log(orderInfo)
   const newOrder = await Order.create(orderInfo)
 
   return res.status(StatusCodes.CREATED).json({ newOrder })
@@ -98,7 +110,7 @@ export const updateOrder = async (req, res) => {
       }
       let vendorName =
         itemResponse.result.object.customAttributeValues.vendor_name.stringValue
-      const user = await User.findOne({ squareName: vendorName })
+      const user = await User.findOne({ name: vendorName })
 
       if (!user) {
         throw new NotFoundError('user not found')

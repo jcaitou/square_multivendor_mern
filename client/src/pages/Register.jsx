@@ -1,8 +1,17 @@
-import { Logo, FormRow } from '../components'
+import { FormRow } from '../components'
 import Wrapper from '../assets/wrappers/RegisterAndLoginPage'
-import { Form, redirect, useNavigation, Link } from 'react-router-dom'
+import { Fragment } from 'react'
+import { ALL_LOCATIONS } from '../../../utils/constants'
+import {
+  Form,
+  redirect,
+  useNavigate,
+  useNavigation,
+  Link,
+} from 'react-router-dom'
 import customFetch from '../utils/customFetch'
 import { toast } from 'react-toastify'
+import { useDashboardContext } from './DashboardLayout'
 
 export const action = async ({ request }) => {
   const formData = await request.formData()
@@ -10,7 +19,7 @@ export const action = async ({ request }) => {
   try {
     await customFetch.post('/auth/register', data)
     toast.success('Registration successful')
-    return redirect('/login')
+    return redirect('/dashboard')
   } catch (error) {
     toast.error(error?.response?.data?.msg)
     return error
@@ -18,31 +27,38 @@ export const action = async ({ request }) => {
 }
 
 const Register = () => {
+  const { user } = useDashboardContext()
+  const navigate = useNavigate()
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
-  return (
-    <Wrapper>
-      <Form method='post' className='form'>
-        <Logo />
-        <h4>Register</h4>
-        <FormRow type='text' name='name' />
-        <FormRow type='text' name='lastName' labelText='last name' />
-        <FormRow type='text' name='location' />
-        <FormRow type='email' name='email' />
 
-        <FormRow type='password' name='password' />
+  return (
+    <>
+      <h4>Register</h4>
+      <Form method='post' className='form'>
+        <FormRow type='text' name='name' labelText='Vendor Name' />
+        <FormRow type='email' name='email' />
+        {ALL_LOCATIONS.map((location) => {
+          return (
+            <Fragment key={location.id}>
+              <input
+                type='checkbox'
+                name='locations'
+                id={`locations-${location.id}`}
+                value={location.id}
+              />
+              <label htmlFor={`locations-${location.id}`}>
+                {location.name}
+              </label>
+            </Fragment>
+          )
+        })}
 
         <button type='submit' className='btn btn-block' disabled={isSubmitting}>
           {isSubmitting ? 'submitting...' : 'submit'}
         </button>
-        <p>
-          Already a member?
-          <Link to='/login' className='member-btn'>
-            Login
-          </Link>
-        </p>
       </Form>
-    </Wrapper>
+    </>
   )
 }
 export default Register

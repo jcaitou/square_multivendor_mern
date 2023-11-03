@@ -8,7 +8,6 @@ const UserSchema = new mongoose.Schema({
     default: '0000000000',
   },
   password: String,
-  squareName: String,
   squareId: String,
   locations: [
     {

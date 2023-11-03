@@ -13,8 +13,8 @@ export const authenticateUser = (req, res, next) => {
   }
 
   try {
-    const { userId, role, squareName, squareId, locations } = verifyJWT(token)
-    req.user = { userId, role, squareName, squareId, locations }
+    const { userId, role, name, squareId, locations } = verifyJWT(token)
+    req.user = { userId, role, name, squareId, locations }
     next()
   } catch (error) {
     throw new UnauthenticatedError('authentication invalid (cookie is invalid)')

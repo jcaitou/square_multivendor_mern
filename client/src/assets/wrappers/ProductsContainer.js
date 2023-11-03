@@ -10,7 +10,8 @@ const Wrapper = styled.section`
     margin-bottom: 1.5rem;
   }
   .products,
-  .discounts {
+  .discounts,
+  .file-actions {
     display: grid;
     grid-template-columns: 1fr;
     row-gap: 2rem;

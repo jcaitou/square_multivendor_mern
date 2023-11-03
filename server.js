@@ -16,7 +16,10 @@ import orderRouter from './routers/orderRouter.js'
 import authRouter from './routers/authRouter.js'
 import userRouter from './routers/userRouter.js'
 import uploadRouter from './routers/uploadRouter.js'
+import exportRouter from './routers/exportRouter.js'
 import webhookRouter from './routers/webhookRouter.js'
+
+import testOrdersRouter from './routers/testOrdersRouter.js'
 
 //public
 import { dirname } from 'path'
@@ -49,9 +52,12 @@ app.use('/api/v1/inventory', authenticateUser, inventoryRouter)
 app.use('/api/v1/discounts', authenticateUser, discountRouter)
 app.use('/api/v1/orders', authenticateUser, orderRouter)
 app.use('/api/v1/uploads', authenticateUser, uploadRouter)
+app.use('/api/v1/exports', authenticateUser, exportRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/webhooks', webhookRouter)
+
+app.use('/api/v1/generate-orders', testOrdersRouter)
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' })

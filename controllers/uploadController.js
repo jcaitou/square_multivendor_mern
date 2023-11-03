@@ -27,7 +27,7 @@ export const batchUpdateUploadFile = async (req, res, next) => {
 
   const cloudinaryResponse = await cloudinary.v2.uploader.upload(
     req.file.path,
-    { resource_type: 'auto' }
+    { resource_type: 'auto', use_filename: true }
   )
   //await fs.unlink(req.file.path)
 
@@ -44,7 +44,7 @@ export const batchUpdateUploadFile = async (req, res, next) => {
 
   if (req.body.type == 'product') {
     agenda.now('product import', {
-      squareName: req.user.squareName,
+      squareName: req.user.name,
       squareId: req.user.squareId,
       locations: req.user.locations,
       filename: req.file.filename,
@@ -53,7 +53,7 @@ export const batchUpdateUploadFile = async (req, res, next) => {
     })
   } else if (req.body.type == 'inventory-recount') {
     agenda.now('inventory recount', {
-      squareName: req.user.squareName,
+      squareName: req.user.name,
       squareId: req.user.squareId,
       locations: req.user.locations,
       filename: req.file.filename,
@@ -80,12 +80,5 @@ export const startFileAction = async (req, res) => {
       new: true,
     }
   )
-
-  //console.log(req.user)
-  // batchUpdateProducts(
-  //   req.user.squareName,
-  //   req.user.squareId,
-  //   req.user.locations
-  // )
   res.status(StatusCodes.OK).json({ fileAction: fileAction })
 }

@@ -7,10 +7,13 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import customFetch from '../utils/customFetch'
 import { toast } from 'react-toastify'
+import PageBtnContainer from '../components/PageBtnContainer'
 
 const DiscountsContainer = () => {
-  const { data: discounts } = useAllDiscountsContext()
-  console.log(discounts.length)
+  const {
+    data: { discounts, numOfPages, totalItems, currentPage },
+  } = useAllDiscountsContext()
+  console.log(discounts, numOfPages, totalItems, currentPage)
 
   const [confirmDeleteDiscountModalShow, setConfirmDeleteDiscountModalShow] =
     useState(false)
@@ -74,6 +77,9 @@ const DiscountsContainer = () => {
             )
           })}
         </div>
+        {discounts.length > 0 && (
+          <PageBtnContainer numOfPages={numOfPages} currentPage={currentPage} />
+        )}
       </Wrapper>
 
       <ConfirmDiscountDeleteModal

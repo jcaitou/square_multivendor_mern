@@ -13,7 +13,7 @@ import path from 'path'
 import cloudinary from 'cloudinary'
 
 export default (agenda) => {
-  agenda.define('product import', async function (job) {
+  agenda.define('product import', async function (job, done) {
     // your code goes here
     const {
       squareName,
@@ -409,7 +409,7 @@ export default (agenda) => {
 
     const cloudinaryResponse = await cloudinary.v2.uploader.upload(
       resultFilepath,
-      { resource_type: 'auto' }
+      { resource_type: 'auto', use_filename: true }
     )
 
     const updatedFileAction = await FileAction.findByIdAndUpdate(
@@ -425,5 +425,6 @@ export default (agenda) => {
         new: true,
       }
     )
+    done()
   })
 }

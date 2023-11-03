@@ -56,7 +56,7 @@ function ProductSelectionModal({
           />
           <div className='product-selection-table' id='product-selection-table'>
             <InfiniteScroll
-              dataLength={loadedProducts.length}
+              dataLength={loadedProducts?.length || 0}
               next={async () => {
                 //console.log(products, cursor)
                 const { data } = await customFetch.get(
@@ -97,75 +97,77 @@ function ProductSelectionModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {loadedProducts.map((product) => {
-                    let priceMin, priceMax
-                    if (product.itemData.variations.length != 1) {
-                      priceMin = product.itemData.variations.reduce(function (
-                        prev,
-                        curr
-                      ) {
-                        return prev.itemVariationData.priceMoney.amount <
-                          curr.itemVariationData.priceMoney.amount
-                          ? prev
-                          : curr
-                      })
-                      priceMax = product.itemData.variations.reduce(function (
-                        prev,
-                        curr
-                      ) {
-                        return prev.itemVariationData.priceMoney.amount <
-                          curr.itemVariationData.priceMoney.amount
-                          ? curr
-                          : prev
-                      })
-                    }
-                    return (
-                      <Fragment key={product.id}>
-                        <tr data-product={product.itemData.name}>
-                          <td>
-                            <input
-                              type='checkbox'
-                              name='product-selection'
-                              id={product.id}
-                              value={product.id}
-                              defaultChecked={selectedProducts.includes(
-                                product.id
-                              )}
-                            />
-                          </td>
-                          <td className='has-label'>
-                            <label htmlFor={product.id}>
-                              {product.itemData.name}
-                            </label>
-                          </td>
-                          <td className='has-label'>
-                            <label htmlFor={product.id}>
-                              {product.itemData.variations.length == 1
-                                ? product.itemData.variations[0]
-                                    .itemVariationData.sku
-                                : `${product.itemData.variations.length} variations`}
-                            </label>
-                          </td>
-                          <td className='has-label'>
-                            <label htmlFor={product.id}>
-                              {product.itemData.variations.length == 1
-                                ? CADMoney.format(
-                                    product.itemData.variations[0]
-                                      .itemVariationData.priceMoney.amount / 100
-                                  )
-                                : `${CADMoney.format(
-                                    priceMin.itemVariationData.priceMoney
-                                      .amount / 100
-                                  )} - ${CADMoney.format(
-                                    priceMax.itemVariationData.priceMoney
-                                      .amount / 100
-                                  )}`}
-                            </label>
-                          </td>
-                        </tr>
-                      </Fragment>
-                    )
-                  })}
+                  {loadedProducts &&
+                    loadedProducts.map((product) => {
+                      let priceMin, priceMax
+                      if (product.itemData.variations.length != 1) {
+                        priceMin = product.itemData.variations.reduce(function (
+                          prev,
+                          curr
+                        ) {
+                          return prev.itemVariationData.priceMoney.amount <
+                            curr.itemVariationData.priceMoney.amount
+                            ? prev
+                            : curr
+                        })
+                        priceMax = product.itemData.variations.reduce(function (
+                          prev,
+                          curr
+                        ) {
+                          return prev.itemVariationData.priceMoney.amount <
+                            curr.itemVariationData.priceMoney.amount
+                            ? curr
+                            : prev
+                        })
+                      }
+                      return (
+                        <Fragment key={product.id}>
+                          <tr data-product={product.itemData.name}>
+                            <td>
+                              <input
+                                type='checkbox'
+                                name='product-selection'
+                                id={product.id}
+                                value={product.id}
+                                defaultChecked={selectedProducts.includes(
+                                  product.id
+                                )}
+                              />
+                            </td>
+                            <td className='has-label'>
+                              <label htmlFor={product.id}>
+                                {product.itemData.name}
+                              </label>
+                            </td>
+                            <td className='has-label'>
+                              <label htmlFor={product.id}>
+                                {product.itemData.variations.length == 1
+                                  ? product.itemData.variations[0]
+                                      .itemVariationData.sku
+                                  : `${product.itemData.variations.length} variations`}
+                              </label>
+                            </td>
+                            <td className='has-label'>
+                              <label htmlFor={product.id}>
+                                {product.itemData.variations.length == 1
+                                  ? CADMoney.format(
+                                      product.itemData.variations[0]
+                                        .itemVariationData.priceMoney.amount /
+                                        100
+                                    )
+                                  : `${CADMoney.format(
+                                      priceMin.itemVariationData.priceMoney
+                                        .amount / 100
+                                    )} - ${CADMoney.format(
+                                      priceMax.itemVariationData.priceMoney
+                                        .amount / 100
+                                    )}`}
+                              </label>
+                            </td>
+                          </tr>
+                        </Fragment>
+                      )
+                    })}
                 </tbody>
               </Table>
             </InfiniteScroll>

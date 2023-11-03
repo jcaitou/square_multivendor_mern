@@ -51,7 +51,7 @@ export const validateProductIdParam = withValidationErrors([
       const itemVendor =
         retrieveResponse.result.object.customAttributeValues['vendor_name']
           .stringValue
-      if (itemVendor != req.user.squareName) {
+      if (itemVendor != req.user.name) {
         throw new UnauthorizedError('not authorized to access this route')
       }
     } catch (error) {
@@ -78,14 +78,35 @@ export const validateRegisterInput = withValidationErrors([
         throw new BadRequestError('email already exists')
       }
     }),
+  // body('password')
+  //   .notEmpty()
+  //   .withMessage('password is required')
+  //   .isLength({ min: 8 })
+  //   .withMessage('password must be at least 8 characters long'),
+  body('locations').notEmpty().withMessage('locations is required'),
+  // body('squareId').notEmpty().withMessage('square ID is required'),
+])
+
+export const validatePasswordInput = withValidationErrors([
   body('password')
     .notEmpty()
     .withMessage('password is required')
     .isLength({ min: 8 })
     .withMessage('password must be at least 8 characters long'),
-  //body('location').notEmpty().withMessage('location is required'),
-  body('squareName').notEmpty().withMessage('square name is required'),
-  body('squareId').notEmpty().withMessage('square ID is required'),
+])
+
+export const validatePasswordUpdateInput = withValidationErrors([
+  body('oldPassword').notEmpty().withMessage('Old password is required'),
+  body('newPassword')
+    .exists({ checkFalsy: true })
+    .withMessage('New password is required')
+    .isLength({ min: 8 })
+    .withMessage('password must be at least 8 characters long'),
+  body('confirmNewPassword')
+    .exists({ checkFalsy: true })
+    .withMessage('Confirm your new password')
+    .custom((value, { req }) => value === req.body.newPassword)
+    .withMessage('The passwords do not match'),
 ])
 
 export const validateLoginInput = withValidationErrors([

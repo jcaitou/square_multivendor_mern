@@ -12,7 +12,6 @@ import JSONBig from 'json-bigint'
 const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
 export const getAllProducts = async (req, res) => {
-  console.log(req.user)
   const { search, cursor } = req.query
 
   let searchQuery = {
@@ -20,7 +19,7 @@ export const getAllProducts = async (req, res) => {
     customAttributeFilters: [
       {
         key: 'vendor_name',
-        stringFilter: req.user.squareName,
+        stringFilter: req.user.name,
       },
     ],
   }
@@ -85,7 +84,7 @@ export const upsertProduct = async (req, res) => {
   //   id: '#newitem',
   //   customAttributeValues: {
   //     vendor_name: {
-  //       stringValue: req.user.squareName,
+  //       stringValue: req.user.name,
   //     },
   //   },
   //   itemData: {
@@ -98,14 +97,14 @@ export const upsertProduct = async (req, res) => {
   for (let i = 0; i < productData.itemData.variations.length; i++) {
     productData.itemData.variations[i].customAttributeValues = {
       vendor_name: {
-        stringValue: req.user.squareName,
+        stringValue: req.user.name,
       },
     }
   }
 
   productData.customAttributeValues = {
     vendor_name: {
-      stringValue: req.user.squareName,
+      stringValue: req.user.name,
     },
   }
   productData.itemData.categoryId = req.user.squareId
@@ -173,7 +172,7 @@ export const getProduct = async (req, res, next) => {
     const itemVendor =
       retrieveResponse.result.object.customAttributeValues['vendor_name']
         .stringValue
-    if (itemVendor != req.user.squareName) {
+    if (itemVendor != req.user.name) {
       throw new UnauthorizedError('not authorized to access this route')
     }
     const parsedResponse = JSONBig.parse(

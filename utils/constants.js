@@ -10,9 +10,9 @@ export const JOB_TYPE = {
   INTERNSHIP: 'internship',
 }
 
-export const JOB_SORT_BY = {
-  NEWEST_FIRST: 'newest',
-  OLDEST_FIRST: 'oldest',
+export const INVENTORY_SORT_BY = {
+  QTY_ASCENDING: 'quantityAsc',
+  QTY_DESCENDING: 'quantityDesc',
   ASCENDING: 'a-z',
   DESCENDING: 'z-a',
 }

@@ -12,27 +12,35 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
 import { CSVLink } from 'react-csv'
-import PageBtnContainer from './PageBtnContainer'
+import PageBtnContainer from './CursorPageBtnContainer'
 
 const ProductsContainer = () => {
   const {
-    data: { organizedItems: products, cursor },
+    data: { organizedItems: products },
   } = useAllInventoryContext()
+
   const today = new Date()
   const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
     today.getDate() + 1
   }`
-  const locationHeaders = ALL_LOCATIONS.map((el) => {
-    return { label: el.name, key: el.id }
-  })
-  const dataHeaders = [
-    { label: 'Product Name', key: 'productName' },
-    { label: 'Product ID', key: 'productId' },
-    { label: 'Variation Name', key: 'variationName' },
-    { label: 'Variation SKU', key: 'variationSku' },
-    { label: 'Variation ID', key: 'variationId' },
-    ...locationHeaders,
-  ]
+
+  let locationHeaders = null
+  let dataHeaders = null
+  if (products.length > 0) {
+    locationHeaders = products[0][0].locationQuantities.map((location) => {
+      const loc = ALL_LOCATIONS.find((el) => el.id == location.locationId)
+      return { label: loc.name, key: loc.id }
+    })
+
+    dataHeaders = [
+      { label: 'Product Name', key: 'productName' },
+      { label: 'Product ID', key: 'productId' },
+      { label: 'Variation Name', key: 'variationName' },
+      { label: 'Variation SKU', key: 'variationSku' },
+      { label: 'Variation ID', key: 'variationId' },
+      ...locationHeaders,
+    ]
+  }
 
   const { user } = useDashboardContext()
   const navigate = useNavigate()
@@ -41,6 +49,9 @@ const ProductsContainer = () => {
   const [inventoryChanges, setInventoryChanges] = useState([])
   //import helpers:
   const [importInventoryModalShow, setImportInventoryModalShow] =
+    useState(false)
+  //export helpers:
+  const [exportInventoryModalShow, setExportInventoryModalShow] =
     useState(false)
   const [fileUploaded, setFileUploaded] = useState(false)
   const [importFile, setImportFile] = useState(null)
@@ -95,12 +106,12 @@ const ProductsContainer = () => {
 
   const submitInventoryChanges = async (event) => {
     event.preventDefault()
-    console.log(inventoryChanges)
+    const params = new URLSearchParams(window.location.search)
 
     try {
       await customFetch.post('/inventory/update', inventoryChanges)
 
-      navigate('/dashboard/inventory', { replace: true })
+      navigate(`/dashboard/inventory?${params.toString()}`, { replace: true })
       toast.success('Inventory edited successfully')
       discardChanges()
     } catch (error) {
@@ -145,14 +156,14 @@ const ProductsContainer = () => {
         <div className='products'>
           <div className='inventory-actions'>
             <div className='import-export-actions'>
-              <CSVLink
-                data={products.flat()}
-                headers={dataHeaders}
-                filename={`inventory-export-${dateString}.csv`}
-                className='btn'
-              >
-                Export Inventory
-              </CSVLink>
+              {products.length > 0 && (
+                <button
+                  className='btn'
+                  onClick={() => setExportInventoryModalShow(true)}
+                >
+                  Export Inventory
+                </button>
+              )}
               <button
                 className='btn'
                 onClick={() => setImportInventoryModalShow(true)}
@@ -160,19 +171,21 @@ const ProductsContainer = () => {
                 Import Inventory
               </button>
             </div>
-            <div className='batch-actions'>
-              <Button
-                onClick={() => {
-                  if (!editMode) {
-                    setEditMode(true)
-                  } else {
-                    discardChanges()
-                  }
-                }}
-              >
-                {!editMode ? 'Quick Edit' : 'Cancel'}
-              </Button>
-            </div>
+            {products.length > 0 && (
+              <div className='batch-actions'>
+                <Button
+                  onClick={() => {
+                    if (!editMode) {
+                      setEditMode(true)
+                    } else {
+                      discardChanges()
+                    }
+                  }}
+                >
+                  {!editMode ? 'Quick Edit' : 'Cancel'}
+                </Button>
+              </div>
+            )}
           </div>
           {products.length === 0 ? (
             <h2>No products to display...</h2>
@@ -182,9 +195,11 @@ const ProductsContainer = () => {
                 <tr>
                   <th>Product Name</th>
                   <th>SKU</th>
-                  {userLocations.map((location) => {
-                    const loc = ALL_LOCATIONS.find((el) => el.id == location)
-                    return <th key={location}>{loc.name}</th>
+                  {products[0][0].locationQuantities.map((location) => {
+                    const loc = ALL_LOCATIONS.find(
+                      (el) => el.id == location.locationId
+                    )
+                    return <th key={location.locationId}>{loc.name}</th>
                   })}
                 </tr>
               </thead>
@@ -203,7 +218,7 @@ const ProductsContainer = () => {
             </Table>
           )}
         </div>
-        <PageBtnContainer cursor={cursor} />
+        {/* <PageBtnContainer cursor={cursor} /> */}
       </Wrapper>
       <ImportInventoryModal
         handleFileImport={handleFileImport}
@@ -211,6 +226,13 @@ const ProductsContainer = () => {
         importFile={importFile}
         show={importInventoryModalShow}
         onHide={() => setImportInventoryModalShow(false)}
+      />
+      <ExportInventoryModal
+        show={exportInventoryModalShow}
+        products={products}
+        dataHeaders={dataHeaders}
+        dateString={dateString}
+        onHide={() => setExportInventoryModalShow(false)}
       />
     </>
   )
@@ -248,6 +270,101 @@ function ImportInventoryModal({
         <Button onClick={handleImportSubmit} disabled={importFile == null}>
           Import CSV
         </Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
+function ExportInventoryModal({ products, dataHeaders, dateString, ...props }) {
+  const [exportPage, setExportPage] = useState(true)
+  const [actionSubmitted, setActionSubmitted] = useState(false)
+  const handleExportTypeChange = (e) => {
+    const value = e.target.value
+    if (value === 'page') {
+      setExportPage(true)
+    } else {
+      setExportPage(false)
+    }
+  }
+  const handleExportSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await customFetch.get('/exports/export-all-inventory')
+      toast.success('Full inventory export will be sent to your email')
+      setActionSubmitted(true)
+    } catch (error) {
+      toast.error(error?.response?.data?.msg)
+      return error
+    }
+  }
+
+  return (
+    <Modal
+      {...props}
+      size='lg'
+      aria-labelledby='contained-modal-title-vcenter'
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id='contained-modal-title-vcenter'>
+          Export Products Inventory by CSV
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {actionSubmitted ? (
+          <p>Your export has started</p>
+        ) : (
+          <>
+            <p>Choose your export option:</p>
+            <input
+              type='radio'
+              id='page'
+              name='export-option'
+              value='page'
+              checked={exportPage}
+              onChange={(e) => handleExportTypeChange(e)}
+            />
+            <label htmlFor='page'>
+              Export the products in the current view
+            </label>
+            <input
+              type='radio'
+              id='full'
+              name='export-option'
+              value='full'
+              checked={!exportPage}
+              onChange={(e) => handleExportTypeChange(e)}
+            />
+            <label htmlFor='full'>Full export (to email)</label>
+          </>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>Cancel</Button>
+        {exportPage ? (
+          <CSVLink
+            data={products.flat().map((el) => {
+              let newEl = { ...el }
+              for (let i = 0; i < el.locationQuantities.length; i++) {
+                newEl[el.locationQuantities[i].locationId] =
+                  el.locationQuantities[i].quantity
+              }
+              return newEl
+            })}
+            headers={dataHeaders}
+            filename={`inventory-export-${dateString}.csv`}
+            onClick={() => {
+              setActionSubmitted(true)
+            }}
+            className='btn'
+          >
+            Export CSV
+          </CSVLink>
+        ) : (
+          <button className='btn' onClick={handleExportSubmit}>
+            Export CSV
+          </button>
+        )}
       </Modal.Footer>
     </Modal>
   )

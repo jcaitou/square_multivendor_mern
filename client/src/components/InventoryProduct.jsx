@@ -44,25 +44,25 @@ const InventoryVariation = ({ variation, editMode, handleInventoryChange }) => {
 
   return (
     <>
-      {userLocations.map((location) => {
+      {variation.locationQuantities.map((location) => {
         return (
-          <td key={`${location}_${variation.variationId}`}>
+          <td key={`${location.locationId}_${variation.variationId}`}>
             {editMode ? (
               <input
                 type='number'
-                defaultValue={variation[location]}
+                defaultValue={location.quantity}
                 min='0'
                 onChange={(e) =>
                   handleInventoryChange(
                     variation.variationId,
-                    location,
+                    location.locationId,
                     e.target.value,
-                    variation[location]
+                    location.quantity
                   )
                 }
               ></input>
             ) : (
-              variation[location]
+              location.quantity
             )}
           </td>
         )

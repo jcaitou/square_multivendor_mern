@@ -31,17 +31,34 @@ Report bug feature
 Low in stock warning
 
 Agenda needs to be set up for certain functions:
--full product export (email)
--full inventory export
 -(?) order webhook
 
 unused packages:
 
+Added front end function:
+-sort inventory page by a-z or count
+-Export all inventory
+-Export all products
+-Display all file actions
+-update password
+-create user (admin function)
+
+Front end development (back end already done):
+-Display all orders with amount earned during that time period
+-query orders by product (sales by product to see which performs best)
+
+Things to fix:
+-product prices - should i return the values as price / 100 already?
+
+Front and back end dev:
+-Display details about one order (do I really need this?)
+
+administrative functions
 Adding new user:
 -only doable with 'admin' role
--squareId needs to be created first
 
--Display all orders
--Display details about one order
--Display all file actions
--admin page: change password
+When setting up from scratch:
+
+1. Create custom attribute in Square
+2. Add locations in square and get the location IDs (maybe change this into a function)
+3. Create first account (User with administrator role)
