@@ -9,6 +9,7 @@ const DiscountSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: 'User',
     },
+    storewide: Boolean,
   },
   { timestamps: true }
 )

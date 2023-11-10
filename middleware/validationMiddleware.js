@@ -1,4 +1,4 @@
-import { body, param, validationResult } from 'express-validator'
+import { body, query, param, validationResult } from 'express-validator'
 import { squareClient } from '../utils/squareUtils.js'
 import {
   BadRequestError,
@@ -7,6 +7,7 @@ import {
 } from '../errors/customError.js'
 import mongoose from 'mongoose'
 import User from '../models/UserModel.js'
+import { start } from 'agenda/dist/agenda/start.js'
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -133,4 +134,20 @@ export const validateUpdateUserInput = withValidationErrors([
     }),
   body('lastName').notEmpty().withMessage('last name is required'),
   body('location').notEmpty().withMessage('location is required'),
+])
+
+export const validateOrderQueryInput = withValidationErrors([
+  query('startDate').custom((startDate, { req }) => {
+    const formattedStart = new Date(startDate)
+    const formattedEnd = new Date(req.query.endDate)
+
+    if (
+      isNaN(Date.parse(formattedStart)) === false &&
+      isNaN(Date.parse(formattedEnd)) === false &&
+      startDate > req.query.endDate
+    ) {
+      throw new Error('Start date must be before end date')
+    }
+    return true
+  }),
 ])

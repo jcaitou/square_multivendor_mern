@@ -12,8 +12,9 @@ import PageBtnContainer from '../components/PageBtnContainer'
 const DiscountsContainer = () => {
   const {
     data: { discounts, numOfPages, totalItems, currentPage },
+    storewideDiscounts,
   } = useAllDiscountsContext()
-  console.log(discounts, numOfPages, totalItems, currentPage)
+  const navigate = useNavigate()
 
   const [confirmDeleteDiscountModalShow, setConfirmDeleteDiscountModalShow] =
     useState(false)
@@ -26,7 +27,6 @@ const DiscountsContainer = () => {
 
   const handleDeleteDiscount = async () => {
     if (singleIdToDelete) {
-      console.log('single delete discount')
       setConfirmDeleteDiscountModalShow(false)
       try {
         let response = await customFetch.delete(
@@ -42,7 +42,7 @@ const DiscountsContainer = () => {
     }
   }
 
-  if (discounts.length === 0) {
+  if (discounts.length === 0 && storewideDiscounts.length === 0) {
     return (
       <Wrapper>
         <div className='product-actions'>
@@ -66,17 +66,47 @@ const DiscountsContainer = () => {
             </Link>
           </div>
         </div>
-        <div className='discounts'>
-          {discounts.map((discount) => {
-            return (
-              <Discount
-                key={discount.id}
-                discount={discount}
-                confirmDeleteDiscount={() => confirmDeleteDiscount(discount.id)}
-              />
-            )
-          })}
-        </div>
+        <h2>Storewide Discounts</h2>
+        {storewideDiscounts.length > 0 && (
+          <div className='discounts'>
+            {storewideDiscounts.map((storewideDiscount) => {
+              const discount = storewideDiscount.find((el) => {
+                return el.type === 'PRICING_RULE'
+              })
+              const productSet = storewideDiscount.find((el) => {
+                return el.type === 'PRODUCT_SET'
+              })
+              return (
+                <Discount
+                  key={discount.id}
+                  discount={discount}
+                  storewide={true}
+                  productSet={productSet}
+                  confirmDeleteDiscount={() =>
+                    confirmDeleteDiscount(discount.id)
+                  }
+                />
+              )
+            })}
+          </div>
+        )}
+        <h2>Vendor Discounts</h2>
+        {discounts.length > 0 && (
+          <div className='discounts'>
+            {discounts.map((discount) => {
+              return (
+                <Discount
+                  key={discount.id}
+                  discount={discount}
+                  storewide={false}
+                  confirmDeleteDiscount={() =>
+                    confirmDeleteDiscount(discount.id)
+                  }
+                />
+              )
+            })}
+          </div>
+        )}
         {discounts.length > 0 && (
           <PageBtnContainer numOfPages={numOfPages} currentPage={currentPage} />
         )}

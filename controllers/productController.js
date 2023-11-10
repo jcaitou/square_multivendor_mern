@@ -52,6 +52,7 @@ export const getAllProducts = async (req, res) => {
 }
 
 export const upsertProduct = async (req, res) => {
+  console.log(req.body)
   const key = nanoid()
   const productData = req.body
   const today = new Date(Date.now())
@@ -109,7 +110,7 @@ export const upsertProduct = async (req, res) => {
   }
   productData.itemData.categoryId = req.user.squareId
 
-  // console.log(productData.itemData.variations)
+  // console.log(productData)
   // return res.status(StatusCodes.CREATED).json({ productData })
 
   const response = await squareClient.catalogApi.upsertCatalogObject({

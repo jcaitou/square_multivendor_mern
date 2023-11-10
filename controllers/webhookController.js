@@ -4,10 +4,17 @@ import JSONBig from 'json-bigint'
 import { NotFoundError, SquareApiError } from '../errors/customError.js'
 import Order from '../models/OrderModel.js'
 import User from '../models/UserModel.js'
+import day from 'dayjs'
 
 export const createOrder = async (req, res) => {
-  console.log(req.body.data)
   const orderId = req.body.data.id
+
+  const existingOrder = await Order.findOne({ orderId: orderId })
+  if (existingOrder) {
+    return res
+      .status(StatusCodes.OK)
+      .json({ msg: 'Order already exists, will not create a new one' })
+  }
 
   const responseTemp = await squareClient.ordersApi.retrieveOrder(orderId)
 
@@ -17,17 +24,19 @@ export const createOrder = async (req, res) => {
 
   const response = JSONBig.parse(JSONBig.stringify(responseTemp))
 
-  console.log(response.result.order)
   if (!response?.result?.order?.lineItems) {
     throw new SquareApiError('no variation ID defined')
   }
 
   //return res.status(StatusCodes.CREATED).json({ msg })
 
+  let hasError = false
+
   const orderItemsPromise = response.result.order.lineItems.map(
     async (item) => {
       if (!item?.catalogObjectId) {
         // throw new SquareApiError('no variation ID defined')
+        hasError = true
         return res.status(StatusCodes.CREATED).json({ msg: 'ok' })
       }
       const itemResponse = await squareClient.catalogApi.retrieveCatalogObject(
@@ -36,6 +45,7 @@ export const createOrder = async (req, res) => {
       )
 
       if (responseTemp?.statusCode < 200 || responseTemp?.statusCode > 299) {
+        hasError = true
         throw new SquareApiError('error while calling the Square API')
       }
       let vendorName =
@@ -43,11 +53,22 @@ export const createOrder = async (req, res) => {
       const user = await User.findOne({ name: vendorName })
 
       if (!user) {
+        hasError = true
         throw new NotFoundError('user not found')
       }
+      let variationName
+
+      if (item.variationName !== '' && item.name === item.variationName) {
+        variationName = ''
+      } else {
+        variationName = item.variationName
+      }
+
       return {
         itemName: item.name,
+        itemVariationName: variationName,
         itemVariationId: item.catalogObjectId,
+        itemId: itemResponse.result.object.itemVariationData.itemId,
         quantity: item.quantity,
         basePrice: item.basePriceMoney.amount,
         totalDiscount: item.totalDiscountMoney.amount,
@@ -58,13 +79,16 @@ export const createOrder = async (req, res) => {
   )
   const orderItems = await Promise.all(orderItemsPromise)
 
+  // const customDate = day().month(9).date(1)
+
   const orderInfo = {
     orderId: req.body.data.id,
     location: response.result.order.locationId,
     orderDate: response.result.order.updatedAt,
+    // orderDate: customDate.toDate(),
     orderItems: orderItems,
   }
-  console.log(orderInfo)
+
   const newOrder = await Order.create(orderInfo)
 
   return res.status(StatusCodes.CREATED).json({ newOrder })
@@ -129,9 +153,6 @@ export const updateOrder = async (req, res) => {
   const orderItems = await Promise.all(orderItemsPromise)
 
   const orderInfo = {
-    orderId: req.body.data.id,
-    location: response.result.order.locationId,
-    orderDate: response.result.order.updatedAt,
     orderItems: orderItems,
   }
 

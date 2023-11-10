@@ -18,11 +18,46 @@ const Wrapper = styled.article`
     column-gap: 10px;
     justify-content: space-between;
   }
-  .import-export-actions {
+  .inventory-action-group {
     display: flex;
     -webkit-box-pack: end;
     justify-content: center;
     column-gap: 10px;
+  }
+
+  thead th {
+    vertical-align: middle;
+  }
+  .stock-qty-header,
+  .stock-qty {
+    width: 1px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .stock-qty span {
+    padding: 1px 12px;
+  }
+
+  .stock-qty--warning span {
+    color: var(--bs-gray-dark);
+    background-color: #ffe6cc;
+    padding: 1px 12px;
+    border-radius: 20px;
+    width: 40px;
+    display: inline-block;
+  }
+
+  .stock-qty--out-of-stock span {
+    color: #cc0023;
+    background-color: #ffccd5;
+    padding: 1px 12px;
+    border-radius: 20px;
+    width: 40px;
+    display: inline-block;
+  }
+
+  .stock-qty input[type='number'] {
+    max-width: 65px;
   }
 
   /*

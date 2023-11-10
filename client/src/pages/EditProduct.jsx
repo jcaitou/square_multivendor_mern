@@ -9,6 +9,7 @@ import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import customFetch from '../utils/customFetch'
 import _ from 'lodash'
+import Barcode from 'react-barcode'
 
 export const loader = async ({ params }) => {
   try {
@@ -183,47 +184,50 @@ const EditProduct = () => {
               }}
             />
             {productVariations.map((variation, index) => (
-              <div className='form-variation' key={variation.id}>
-                <FormRow
-                  type='text'
-                  name='name'
-                  labelText='variation name'
-                  value={variation.itemVariationData.name}
-                  onChange={(e) =>
-                    handleEditProduct(e, index, 'itemVariationData.name')
-                  }
-                />
-                <FormRow
-                  type='text'
-                  name='sku'
-                  labelText='SKU'
-                  value={variation.itemVariationData.sku}
-                  onChange={(e) =>
-                    handleEditProduct(e, index, 'itemVariationData.sku')
-                  }
-                />
-                <FormRow
-                  type='number'
-                  name='price'
-                  labelText='price'
-                  value={variation.itemVariationData.priceMoney.amount}
-                  onChange={(e) =>
-                    handleEditProduct(
-                      e,
-                      index,
-                      'itemVariationData.priceMoney.amount'
-                    )
-                  }
-                />
-                {index > 0 && (
-                  <div
-                    className='btn remove-var-btn'
-                    onClick={() => handleDeleteVariation(index)}
-                  >
-                    X
-                  </div>
-                )}
-              </div>
+              <>
+                <div className='form-variation' key={variation.id}>
+                  <FormRow
+                    type='text'
+                    name='name'
+                    labelText='variation name'
+                    value={variation.itemVariationData.name}
+                    onChange={(e) =>
+                      handleEditProduct(e, index, 'itemVariationData.name')
+                    }
+                  />
+                  <FormRow
+                    type='text'
+                    name='sku'
+                    labelText='SKU'
+                    value={variation.itemVariationData.sku}
+                    onChange={(e) =>
+                      handleEditProduct(e, index, 'itemVariationData.sku')
+                    }
+                  />
+                  <FormRow
+                    type='number'
+                    name='price'
+                    labelText='price'
+                    value={variation.itemVariationData.priceMoney.amount}
+                    onChange={(e) =>
+                      handleEditProduct(
+                        e,
+                        index,
+                        'itemVariationData.priceMoney.amount'
+                      )
+                    }
+                  />
+                  {index > 0 && (
+                    <div
+                      className='btn remove-var-btn'
+                      onClick={() => handleDeleteVariation(index)}
+                    >
+                      X
+                    </div>
+                  )}
+                </div>
+                <Barcode value={variation.itemVariationData.sku} />
+              </>
             ))}
 
             <div className='btn add-var-btn' onClick={handleAddVariation}>

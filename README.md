@@ -20,15 +20,7 @@ Store model (?):
 -active locations
 -payments to vendors
 
-Export: option to export page only, or all items (by email)
-
-Discount function: opt-in for vendors
-
-Barcode generation
-
 Report bug feature
-
-Low in stock warning
 
 Agenda needs to be set up for certain functions:
 -(?) order webhook
@@ -42,20 +34,24 @@ Added front end function:
 -Display all file actions
 -update password
 -create user (admin function)
-
-Front end development (back end already done):
 -Display all orders with amount earned during that time period
--query orders by product (sales by product to see which performs best)
+-Discount function: opt-in for vendors
+-Low in stock warning
+-both frontend and backend for stats page
 
-Things to fix:
--product prices - should i return the values as price / 100 already?
+Loading spinner
+React Query\*\*\*\*
 
-Front and back end dev:
--Display details about one order (do I really need this?)
+Email hooks:
+-when storewide discount is created
+-when item hits low stock warning/out of stock
+-monthly reports: sales summary, expected revnue
 
 administrative functions
 Adding new user:
 -only doable with 'admin' role
+Adding first admin user: the first user also need a Square category (for discounts), can leave the product list empty
+-Creating storewide discounts via admin user: add auto email?
 
 When setting up from scratch:
 

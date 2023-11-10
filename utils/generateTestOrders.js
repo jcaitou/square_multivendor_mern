@@ -90,7 +90,7 @@ export const generateTestOrders = async (req, res) => {
   //   }
   // })
 
-  console.log(lineItems)
+  // console.log(lineItems)
 
   // return res.status(StatusCodes.OK).json({ msg: 'ok' })
 
@@ -130,13 +130,13 @@ export const generateTestOrders = async (req, res) => {
         },
       })
 
-      console.log(response.result)
+      // console.log(response.result)
       res.status(StatusCodes.OK).json({ parsedResponse })
     } catch (error) {
       console.log(error)
     }
 
-    res.status(StatusCodes.OK).json({ parsedResponse })
+    // res.status(StatusCodes.OK).json({ parsedResponse })
   } catch (error) {
     console.log(error)
   }

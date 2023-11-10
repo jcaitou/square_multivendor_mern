@@ -1,4 +1,5 @@
 import Discount from '../models/DiscountModel.js'
+import User from '../models/UserModel.js'
 import { StatusCodes } from 'http-status-codes'
 import {
   FILE_TYPE,
@@ -14,7 +15,85 @@ import {
   UnauthorizedError,
   SquareApiError,
 } from '../errors/customError.js'
-import User from '../models/UserModel.js'
+
+export const getStorewideDiscounts = async (req, res) => {
+  const discounts = await Discount.find({ storewide: true })
+
+  if (discounts.length == 0) {
+    return res.status(StatusCodes.OK).json({
+      storewideDiscounts: discounts,
+    })
+  }
+  const productSetIds = discounts.map((el) => [
+    el.pricingRuleId,
+    el.productSetId,
+  ])
+
+  let parsedResponse = []
+  for (let i = 0; i < productSetIds.length; i++) {
+    const response = await squareClient.catalogApi.batchRetrieveCatalogObjects({
+      objectIds: productSetIds[i],
+      includeRelatedObjects: false,
+    })
+
+    if (!response) {
+      throw new SquareApiError('error while calling the Square API')
+    }
+    if (response.result) {
+      parsedResponse.push(
+        JSONBig.parse(JSONBig.stringify(response.result.objects))
+      )
+    }
+  }
+
+  // if (response.result) {
+  //   parsedResponse = JSONBig.parse(JSONBig.stringify(response.result.objects))
+  // } else {
+  //   parsedResponse = []
+  // }
+
+  res.status(StatusCodes.OK).json({
+    storewideDiscounts: parsedResponse,
+  })
+}
+
+export const storewideOptInOut = async (req, res) => {
+  const { productSetId, optIn } = req.body
+
+  const response = await squareClient.catalogApi.retrieveCatalogObject(
+    productSetId,
+    false
+  )
+
+  if (!response) {
+    throw new SquareApiError('error while calling the Square API')
+  }
+
+  const newProductSetIds =
+    response.result.object.productSetData.productIdsAny.filter((el) => {
+      return el !== req.user.squareId
+    })
+
+  if (optIn) {
+    newProductSetIds.push(req.user.squareId)
+  }
+
+  const newProductSet = response.result.object
+  newProductSet.productSetData.productIdsAny = newProductSetIds
+
+  const upsertResponse = await squareClient.catalogApi.upsertCatalogObject({
+    idempotencyKey: nanoid(),
+    object: newProductSet,
+  })
+
+  if (!upsertResponse) {
+    throw new SquareApiError('error while calling the Square API')
+  }
+
+  res.status(StatusCodes.OK).json({
+    msg: 'ok',
+  })
+}
 
 export const getAllDiscounts = async (req, res) => {
   const queryObj = { createdBy: req.user.userId }
@@ -26,8 +105,6 @@ export const getAllDiscounts = async (req, res) => {
   const discounts = await Discount.find(queryObj).skip(skip).limit(limit)
   const totalItems = await Discount.countDocuments(queryObj)
   const numOfPages = Math.ceil(totalItems / limit)
-
-  console.log(discounts)
 
   if (discounts.length == 0) {
     return res.status(StatusCodes.OK).json({
@@ -110,6 +187,7 @@ export const upsertDiscount = async (req, res) => {
         discountId: newDiscountId,
         productSetId: newProductSetId,
         createdBy: req.user.userId,
+        storewide: req.user.role === 'admin',
       })
       return res.status(StatusCodes.CREATED).json({ discount })
     }
@@ -186,4 +264,13 @@ export const deleteDiscount = async (req, res, next) => {
     squareResponse: parsedResponse,
     mongoResponse: mongoRemovedDiscount,
   })
+}
+
+export const getDiscountCategories = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(StatusCodes.OK).json({ categories: [] })
+  }
+  const categories = await User.find({ role: 'user' }, { name: 1, squareId: 1 })
+  // const userWithoutPassword = user.toJSON()
+  res.status(StatusCodes.OK).json({ categories })
 }

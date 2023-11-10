@@ -34,3 +34,17 @@ export const ALL_LOCATIONS = [
   { name: 'Metrotown', id: 'LVBCM6VKTYDHH' },
   { name: 'Richmond Center', id: 'L1NN4715DCC58' },
 ]
+
+export const ORDERS_SORT_BY = {
+  DATE_DESCENDING: 'dateDesc',
+  DATE_ASCENDING: 'dateAsc',
+  PRICE_DESCENDING: 'priceDesc',
+  PRICE_ASCENDING: 'priceAsc',
+}
+
+export const SALES_SORT_BY = {
+  QTY_DESCENDING: 'qtyDesc',
+  QTY_ASCENDING: 'qtyAsc',
+  ASCENDING: 'a-z',
+  DESCENDING: 'z-a',
+}

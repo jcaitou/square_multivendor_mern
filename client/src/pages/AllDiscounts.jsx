@@ -7,8 +7,12 @@ import { useContext, createContext } from 'react'
 export const loader = async ({ request }) => {
   try {
     const { data } = await customFetch.get('/discounts')
+    const {
+      data: { storewideDiscounts },
+    } = await customFetch.get('/discounts/storewide')
     return {
       data,
+      storewideDiscounts,
     }
   } catch (error) {
     toast.error(error?.response?.data?.msg)
@@ -19,10 +23,9 @@ export const loader = async ({ request }) => {
 const AllDiscountsContext = createContext()
 
 const AllDiscounts = () => {
-  const { data } = useLoaderData()
-  console.log(data)
+  const { data, storewideDiscounts } = useLoaderData()
   return (
-    <AllDiscountsContext.Provider value={{ data }}>
+    <AllDiscountsContext.Provider value={{ data, storewideDiscounts }}>
       <DiscountsContainer />
     </AllDiscountsContext.Provider>
   )

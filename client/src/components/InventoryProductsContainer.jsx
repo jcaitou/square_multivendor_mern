@@ -17,8 +17,24 @@ import PageBtnContainer from './CursorPageBtnContainer'
 const ProductsContainer = () => {
   const {
     data: { organizedItems: products },
+    searchValues,
   } = useAllInventoryContext()
+  const sort = searchValues.sort
 
+  let locations
+  if (searchValues.locations.length > 0) {
+    locations = searchValues.locations
+  } else if (products[0]?.locationQuantities) {
+    locations = products[0]?.locationQuantities.map((el) => {
+      return el.locationId
+    })
+  } else if (products[0][0]?.locationQuantities) {
+    locations = products[0][0]?.locationQuantities.map((el) => {
+      return el.locationId
+    })
+  }
+
+  const showHeaderRow = sort !== 'quantityAsc' && sort !== 'quantityDesc'
   const today = new Date()
   const dateString = `${today.getFullYear()}${today.getMonth() + 1}${
     today.getDate() + 1
@@ -27,8 +43,8 @@ const ProductsContainer = () => {
   let locationHeaders = null
   let dataHeaders = null
   if (products.length > 0) {
-    locationHeaders = products[0][0].locationQuantities.map((location) => {
-      const loc = ALL_LOCATIONS.find((el) => el.id == location.locationId)
+    locationHeaders = locations.map((location) => {
+      const loc = ALL_LOCATIONS.find((el) => el.id == location)
       return { label: loc.name, key: loc.id }
     })
 
@@ -42,22 +58,25 @@ const ProductsContainer = () => {
     ]
   }
 
-  const { user } = useDashboardContext()
   const navigate = useNavigate()
+
+  //edit inventory helpers:
   const [editMode, setEditMode] = useState(false)
   const [showStateBar, setShowStateBar] = useState(false)
   const [inventoryChanges, setInventoryChanges] = useState([])
+  //edit warning helpers:
+  const [editWarningMode, setEditWarningMode] = useState(false)
+  const [showWarningStateBar, setShowWarningStateBar] = useState(false)
+  const [warningChanges, setWarningChanges] = useState([])
   //import helpers:
   const [importInventoryModalShow, setImportInventoryModalShow] =
     useState(false)
   //export helpers:
   const [exportInventoryModalShow, setExportInventoryModalShow] =
     useState(false)
-  const [fileUploaded, setFileUploaded] = useState(false)
   const [importFile, setImportFile] = useState(null)
 
-  const userLocations = user.locations
-
+  //handle inventory change:
   const handleInventoryChange = (
     variationId,
     locationId,
@@ -72,7 +91,6 @@ const ProductsContainer = () => {
     })
 
     if (quantity == originalQty) {
-      console.log('no change')
     } else {
       let today = new Date(Date.now())
       const inventoryChangeObj = {
@@ -120,6 +138,57 @@ const ProductsContainer = () => {
     }
   }
 
+  //handle warning change:
+  const handleWarningChange = (
+    variationId,
+    locationId,
+    warning,
+    originalWarning
+  ) => {
+    const newWarningChanges = warningChanges.filter((el) => {
+      return !(el.variationId == variationId && el.locationId == locationId)
+    })
+
+    if (warning == originalWarning) {
+      console.log('no change')
+    } else {
+      newWarningChanges.push({
+        variationId,
+        locationId,
+        warning,
+      })
+    }
+
+    setWarningChanges(newWarningChanges)
+
+    if (newWarningChanges.length == 0) {
+      setShowWarningStateBar(false)
+    } else {
+      setShowWarningStateBar(true)
+    }
+  }
+
+  const discardWarningChanges = () => {
+    setEditWarningMode(false)
+    setWarningChanges([])
+    setShowWarningStateBar(false)
+  }
+
+  const submitWarningChanges = async (event) => {
+    event.preventDefault()
+    const params = new URLSearchParams(window.location.search)
+
+    try {
+      await customFetch.post('/inventory/update-warning', warningChanges)
+      navigate(`/dashboard/inventory?${params.toString()}`, { replace: true })
+      toast.success('Warning levels edited successfully')
+      discardWarningChanges()
+    } catch (error) {
+      toast.error(error?.response?.data?.msg)
+      return error
+    }
+  }
+
   //import inventory functions:
   const handleFileImport = (e) => {
     setImportFile(e.target.files[0])
@@ -134,7 +203,6 @@ const ProductsContainer = () => {
 
     try {
       let response = await customFetch.post('/uploads', data)
-      console.log(response.data)
       toast.success('Batch update has started')
       setImportInventoryModalShow(false)
       setImportFile(null)
@@ -148,6 +216,11 @@ const ProductsContainer = () => {
   return (
     <>
       <StateBar
+        showStateBar={showWarningStateBar}
+        discardAction={discardWarningChanges}
+        submitAction={submitWarningChanges}
+      ></StateBar>
+      <StateBar
         showStateBar={showStateBar}
         discardAction={discardChanges}
         submitAction={submitInventoryChanges}
@@ -155,7 +228,7 @@ const ProductsContainer = () => {
       <Wrapper>
         <div className='products'>
           <div className='inventory-actions'>
-            <div className='import-export-actions'>
+            <div className='inventory-action-group'>
               {products.length > 0 && (
                 <button
                   className='btn'
@@ -172,8 +245,22 @@ const ProductsContainer = () => {
               </button>
             </div>
             {products.length > 0 && (
-              <div className='batch-actions'>
+              <div className='inventory-action-group'>
+                <button
+                  className='btn'
+                  disabled={editMode}
+                  onClick={() => {
+                    if (!editWarningMode) {
+                      setEditWarningMode(true)
+                    } else {
+                      discardWarningChanges()
+                    }
+                  }}
+                >
+                  {!editWarningMode ? 'Change Warning Levels' : 'Cancel'}
+                </button>
                 <Button
+                  disabled={editWarningMode}
                   onClick={() => {
                     if (!editMode) {
                       setEditMode(true)
@@ -195,11 +282,16 @@ const ProductsContainer = () => {
                 <tr>
                   <th>Product Name</th>
                   <th>SKU</th>
-                  {products[0][0].locationQuantities.map((location) => {
-                    const loc = ALL_LOCATIONS.find(
-                      (el) => el.id == location.locationId
+                  {locations.map((location) => {
+                    const loc = ALL_LOCATIONS.find((el) => el.id == location)
+                    return (
+                      <th
+                        className='stock-qty-header'
+                        key={`header-${location}`}
+                      >
+                        {loc.name}
+                      </th>
                     )
-                    return <th key={location.locationId}>{loc.name}</th>
                   })}
                 </tr>
               </thead>
@@ -207,10 +299,17 @@ const ProductsContainer = () => {
                 {products.map((product) => {
                   return (
                     <InventoryProduct
-                      key={product[0].productId}
+                      key={
+                        showHeaderRow
+                          ? product[0].productId
+                          : `row-${product.productId}-${product.variationId}`
+                      }
                       product={product}
+                      showHeaderRow={showHeaderRow}
                       handleInventoryChange={handleInventoryChange}
                       editMode={editMode}
+                      editWarningMode={editWarningMode}
+                      handleWarningChange={handleWarningChange}
                     />
                   )
                 })}

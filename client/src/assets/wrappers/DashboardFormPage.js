@@ -5,6 +5,7 @@ const Wrapper = styled.section`
   width: 100%;
   background: var(--background-secondary-color);
   padding: 3rem 2rem 4rem;
+  margin-bottom: 4rem;
   header {
     display: flex;
     flex-direction: row;
@@ -63,6 +64,11 @@ const Wrapper = styled.section`
     color: var(--disabled-text-color);
   }
 
+  .date-search {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
   .date-group {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -79,6 +85,13 @@ const Wrapper = styled.section`
 
   .date-group label {
     justify-self: flex-start;
+  }
+
+  .locations-search {
+    display: flex;
+    flex-direction: row;
+    column-gap: 20px;
+    row-gap: 20px;
   }
 
   input[type='checkbox'],

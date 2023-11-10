@@ -2,26 +2,14 @@ import { FormRow, FormRowSelect, FormRowCheckbox } from '.'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { Form, useSubmit, Link } from 'react-router-dom'
 import { Fragment } from 'react'
-import { ALL_LOCATIONS, INVENTORY_SORT_BY } from '../../../utils/constants'
-import { useAllInventoryContext } from '../pages/Inventory'
+import { ALL_LOCATIONS, ORDERS_SORT_BY } from '../../../utils/constants'
+import { useAllOrdersContext } from '../pages/AllOrders'
 import { useDashboardContext } from '../pages/DashboardLayout'
 
-const InventorySearchContainer = () => {
-  const { searchValues } = useAllInventoryContext()
-  const { search, sort, locations } = searchValues
+const OrderSearchContainer = () => {
+  const { searchValues } = useAllOrdersContext()
+  const { startDate, endDate, sort, locations } = searchValues
   const { user } = useDashboardContext()
-  const submit = useSubmit()
-
-  const debounce = (onChange) => {
-    let timeout
-    return (e) => {
-      const form = e.currentTarget.form
-      clearTimeout(timeout)
-      timeout = setTimeout(() => {
-        onChange(form)
-      }, 2000)
-    }
-  }
 
   const locationChangeAll = (e) => {
     const locationInputs = document.querySelectorAll('input[name=locations]')
@@ -43,39 +31,66 @@ const InventorySearchContainer = () => {
       }
     }
     allLocationInput.checked = prop
-    debounce((form) => {
-      submit(form)
-    })
   }
 
   const sortLabels = {
-    'a-z': 'Alphabetical (a-z)',
-    'z-a': 'Alphabetical (z-a)',
-    quantityDesc: 'Quantity in stock, most to least',
-    quantityAsc: 'Quantity in stock, least to most',
+    dateDesc: 'Date, most recent first',
+    dateAsc: 'Date, oldest first',
+    priceDesc: 'Order total, highest to lowest',
+    priceAsc: 'Order total, lowest to highest',
   }
 
   return (
     <Wrapper>
       <Form className='form'>
         <div className='form-center'>
-          <FormRow
-            type='search'
-            name='search'
-            defaultValue={search}
-            required={false}
-            // onChange={debounce((form) => {
-            //   submit(form)
-            // })}
-          />
+          <div className='date-search'>
+            <div className='date-group'>
+              <label htmlFor='startDate'>Start date:</label>
+              <input
+                type='date'
+                id='startDate'
+                name='startDate'
+                defaultValue={startDate}
+                onChange={(e) => {
+                  const selectedDate = e.target.value
+                  const dateInput = document.querySelector(
+                    'input[name=endDate]'
+                  )
+                  if (!selectedDate) {
+                    dateInput.removeAttribute('min')
+                  } else {
+                    dateInput.setAttribute('min', selectedDate)
+                  }
+                }}
+              />
+            </div>
+            <div className='date-group'>
+              <label htmlFor='endDate'>End date:</label>
+              <input
+                type='date'
+                id='endDate'
+                name='endDate'
+                defaultValue={endDate}
+                onChange={(e) => {
+                  const selectedDate = e.target.value
+                  const dateInput = document.querySelector(
+                    'input[name=startDate]'
+                  )
+                  if (!selectedDate) {
+                    dateInput.removeAttribute('max')
+                  } else {
+                    dateInput.setAttribute('max', selectedDate)
+                  }
+                }}
+              />
+            </div>
+          </div>
           <FormRowSelect
             name='sort'
             defaultValue={sort || 'a-z'}
             listLabels={sortLabels}
-            list={[...Object.values(INVENTORY_SORT_BY)]}
-            // onChange={(e) => {
-            //   submit(e.currentTarget.form)
-            // }}
+            list={[...Object.values(ORDERS_SORT_BY)]}
           />
           <div className='form-row'>
             <label htmlFor='locations' className='form-label'>
@@ -133,4 +148,4 @@ const InventorySearchContainer = () => {
   )
 }
 
-export default InventorySearchContainer
+export default OrderSearchContainer

@@ -20,7 +20,9 @@ import {
   FileActions,
   ChangePassword,
   AllOrders,
+  ItemSales,
 } from './pages'
+import { ErrorElement } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
 import { action as registerAction } from './pages/Register'
@@ -39,6 +41,8 @@ import { loader as addDiscountLoader } from './pages/AddDiscount'
 import { loader as editDiscountLoader } from './pages/EditDiscount'
 import { loader as fileActionLoader } from './pages/FileActions'
 import { loader as allOrdersLoader } from './pages/AllOrders'
+import { loader as itemSalesLoader } from './pages/ItemSales'
+import { loader as statsLoader } from './pages/Stats'
 
 checkDefaultTheme()
 
@@ -65,8 +69,9 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <Stats />,
+            loader: statsLoader,
           },
-          { path: 'stats', element: <Stats /> },
+          { path: 'stats', element: <Stats />, loader: statsLoader },
           {
             path: 'add-product',
             element: <AddProduct />,
@@ -109,6 +114,13 @@ const router = createBrowserRouter([
             path: 'all-orders',
             element: <AllOrders />,
             loader: allOrdersLoader,
+            errorElement: <ErrorElement />,
+          },
+          {
+            path: 'item-sales',
+            element: <ItemSales />,
+            loader: itemSalesLoader,
+            errorElement: <ErrorElement />,
           },
           {
             path: 'file-actions',

@@ -3,7 +3,6 @@ import Wrapper from '../assets/wrappers/PageBtnContainer'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 
 const PageBtnContainer = ({ numOfPages, currentPage }) => {
-  console.log(numOfPages, currentPage)
   const { search, pathname } = useLocation()
   const navigate = useNavigate()
   const pages = Array.from({ length: numOfPages }, (_, index) => index + 1)

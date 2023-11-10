@@ -4,6 +4,7 @@ const Wrapper = styled.section`
   margin-top: 4rem;
   h2 {
     text-transform: none;
+    margin-bottom: 1rem;
   }
   & > h5 {
     font-weight: 700;
@@ -15,6 +16,7 @@ const Wrapper = styled.section`
     display: grid;
     grid-template-columns: 1fr;
     row-gap: 2rem;
+    margin-bottom: 4rem;
   }
   .product-actions {
     margin-bottom: 20px;

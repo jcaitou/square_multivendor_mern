@@ -8,12 +8,17 @@ import {
 
 import {
   getAllDiscounts,
+  getStorewideDiscounts,
+  storewideOptInOut,
   upsertDiscount,
   getDiscount,
   deleteDiscount,
+  getDiscountCategories,
 } from '../controllers/discountController.js'
 
 router.route('/').get(getAllDiscounts).post(upsertDiscount)
+router.route('/storewide').get(getStorewideDiscounts).post(storewideOptInOut)
+router.route('/discount-categories').get(getDiscountCategories)
 
 router
   .route('/:id')

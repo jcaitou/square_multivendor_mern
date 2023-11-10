@@ -1,5 +1,6 @@
 import React from 'react'
 import Wrapper from '../assets/wrappers/FileActions'
+import day from 'dayjs'
 
 const FileAction = ({ fileAction }) => {
   return (
@@ -8,7 +9,7 @@ const FileAction = ({ fileAction }) => {
         <span className='import-type'>
           {fileAction.fileType.replace(/-/g, ' ')}
         </span>
-        <span>{fileAction.createdAt}</span>
+        <span>{day(fileAction.createdAt).format('YYYY MMM DD h:mm A')}</span>
       </div>
 
       <div className='file-action-status'>

@@ -16,7 +16,7 @@ import {
 
 const links = [
   { text: 'orders', path: 'all-orders', icon: <GiReceiveMoney /> },
-  { text: 'sales by product', path: 'all-orders', icon: <MdOutlineBarChart /> },
+  { text: 'sales by product', path: 'item-sales', icon: <MdOutlineBarChart /> },
   { text: 'products', path: 'all-products', icon: <MdOutlineInventory2 /> },
   { text: 'inventory', path: 'inventory', icon: <MdOutlineInventory /> },
   { text: 'discounts', path: 'discounts', icon: <MdOutlineDiscount /> },

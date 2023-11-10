@@ -5,9 +5,7 @@ import { useAllProductsContext } from '../pages/AllProducts'
 
 const SearchContainer = () => {
   const { data, searchValues } = useAllProductsContext()
-  console.log(data, searchValues)
   const { search } = searchValues
-  console.log(search)
   const submit = useSubmit()
 
   const debounce = (onChange) => {
@@ -29,18 +27,18 @@ const SearchContainer = () => {
             type='search'
             name='search'
             defaultValue=''
-            onChange={debounce((form) => {
-              submit(form)
-            })}
+            // onChange={debounce((form) => {
+            //   submit(form)
+            // })}
           />
 
-          <Link
+          {/* <Link
             to='/dashboard/all-products'
             className='btn form-btn delete-btn'
           >
             Reset Search Values
-          </Link>
-          {/* TEMP!!!! */}
+          </Link> */}
+          <button className='btn btn-block form-btn'>submit</button>
         </div>
       </Form>
     </Wrapper>

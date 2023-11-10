@@ -4,7 +4,7 @@ const StateBarWrapper = styled.nav`
   background: var(--background-secondary-color);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-2);
-  z-index: 10;
+  z-index: 11;
   position: fixed;
   top: 0;
   left: 0%;

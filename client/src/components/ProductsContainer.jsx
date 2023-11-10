@@ -42,7 +42,7 @@ const ProductsContainer = () => {
           productName: product.itemData.name,
           variationName: variation.itemVariationData.name,
           variationSku: variation.itemVariationData.sku,
-          variationPrice: variation.itemVariationData.priceMoney.amount,
+          variationPrice: variation.itemVariationData.priceMoney.amount / 100.0,
           productId: variation.itemVariationData.itemId.toString(),
           variationId: variation.id.toString(),
         }
@@ -75,7 +75,6 @@ const ProductsContainer = () => {
 
     try {
       let response = await customFetch.post('/uploads', data)
-      console.log(response.data)
       toast.success('Batch update has started')
       setImportProductsModalShow(false)
       setImportFile(null)
@@ -94,7 +93,6 @@ const ProductsContainer = () => {
 
   const handleSingleDeleteProduct = async () => {
     if (singleIdToDelete) {
-      console.log('single delete product')
       setConfirmSingleDeleteModalShow(false)
       try {
         let response = await customFetch.delete(`/products/${singleIdToDelete}`)
@@ -128,7 +126,6 @@ const ProductsContainer = () => {
 
   const handleBatchDeleteProducts = async (e) => {
     e.preventDefault()
-    console.log('start delete process')
 
     if (idsToDelete.length > 0) {
       const productData = {

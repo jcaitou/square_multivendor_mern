@@ -19,3 +19,12 @@ export { default as StateBar } from './StateBar'
 export { default as DiscountsContainer } from './DiscountsContainer'
 
 export { default as FileAction } from './FileAction'
+export { default as Order } from './Order'
+
+export { default as OrderSearchContainer } from './OrderSearchContainer'
+export { default as SalesSearchContainer } from './SalesSearchContainer'
+export { default as ErrorElement } from './ErrorElement'
+
+export { default as AreaChartContainer } from './AreaChartContainer'
+export { default as BarChartContainer } from './BarChartContainer'
+export { default as StatItem } from './StatItem'

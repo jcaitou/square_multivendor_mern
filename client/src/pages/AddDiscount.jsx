@@ -18,9 +18,15 @@ export const loader = async ({ request }) => {
     const {
       data: { items, cursor, matchedVariationIds },
     } = await customFetch.get('/products')
+
+    const {
+      data: { categories },
+    } = await customFetch.get('/discounts/discount-categories')
+    console.log(categories)
     return {
       items,
       cursor,
+      categories,
     }
   } catch (error) {
     toast.error(error?.response?.data?.msg)
@@ -29,10 +35,24 @@ export const loader = async ({ request }) => {
 }
 
 const AddDiscount = () => {
-  const { items: products, cursor: cursorTemp } = useLoaderData()
+  const { items: products, cursor: cursorTemp, categories } = useLoaderData()
   const { user } = useDashboardContext()
-  const [loadedProducts, setLoadedProducts] = useState(products)
+  const [loadedProducts, setLoadedProducts] = useState(
+    user.role === 'admin' ? categories : products
+  )
   const [cursor, setCursor] = useState(cursorTemp)
+
+  // console.log(categories)
+
+  // const getCategories = async () => {
+  //   const response = await customFetch.get('discounts/discount-categories')
+  //   console.log(response.data)
+  //   setLoadedProducts(response.data.users)
+  // }
+
+  // if (user.role === 'admin') {
+  //   getCategories()
+  // }
 
   const navigate = useNavigate()
   const navigation = useNavigation()
@@ -298,15 +318,27 @@ const AddDiscount = () => {
                         ? `Specific Items: ${selectedProducts.length} selected`
                         : 'Specific Items:'}
                     </label>
-                    <button
-                      type='button'
-                      className='btn product-selection-button'
-                      onClick={() => setSelectProductsModalShow(true)}
-                    >
-                      {selectedProducts.length > 0
-                        ? 'Change Products'
-                        : 'Select Products'}
-                    </button>
+                    {user.role === 'admin' ? (
+                      <button
+                        type='button'
+                        className='btn product-selection-button'
+                        onClick={() => setSelectProductsModalShow(true)}
+                      >
+                        {selectedProducts.length > 0
+                          ? 'Change Products'
+                          : 'Select Products'}
+                      </button>
+                    ) : (
+                      <button
+                        type='button'
+                        className='btn product-selection-button'
+                        onClick={() => setSelectProductsModalShow(true)}
+                      >
+                        {selectedProducts.length > 0
+                          ? 'Change Products'
+                          : 'Select Products'}
+                      </button>
+                    )}
                   </span>
                 </div>
               </div>

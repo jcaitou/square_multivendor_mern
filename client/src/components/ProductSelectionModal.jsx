@@ -5,6 +5,7 @@ import Modal from 'react-bootstrap/Modal'
 import Table from 'react-bootstrap/Table'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import customFetch from '../utils/customFetch'
+import { useDashboardContext } from '../pages/DashboardLayout'
 
 function ProductSelectionModal({
   loadedProducts,
@@ -15,13 +16,13 @@ function ProductSelectionModal({
   selectProducts,
   ...props
 }) {
+  const { user } = useDashboardContext()
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
   })
 
   const productSearch = (e) => {
-    console.log(e.target.value)
     const searchQuery = e.target.value.toLowerCase()
     const allRows = document.querySelectorAll(
       '#product-selection-table tbody tr'
@@ -55,23 +56,119 @@ function ProductSelectionModal({
             onChange={(e) => productSearch(e)}
           />
           <div className='product-selection-table' id='product-selection-table'>
-            <InfiniteScroll
-              dataLength={loadedProducts?.length || 0}
-              next={async () => {
-                //console.log(products, cursor)
-                const { data } = await customFetch.get(
-                  `/products?cursor=${cursor}`
-                )
-                setLoadedProducts(loadedProducts.concat(data.items))
-                setCursor(data.cursor)
-                console.log(data)
-                //console.log(products)
-                return
-              }}
-              hasMore={cursor != ''}
-              scrollableTarget='product-selection-table'
-              loader={<h4>Loading...</h4>}
-            >
+            {user.role === 'user' ? (
+              <InfiniteScroll
+                dataLength={loadedProducts?.length || 0}
+                next={async () => {
+                  const { data } = await customFetch.get(
+                    `/products?cursor=${cursor}`
+                  )
+                  setLoadedProducts(loadedProducts.concat(data.items))
+                  setCursor(data.cursor)
+                  return
+                }}
+                hasMore={cursor != ''}
+                scrollableTarget='product-selection-table'
+                loader={<h4>Loading...</h4>}
+              >
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>
+                        <input
+                          type='checkbox'
+                          name='all-products'
+                          id='all-products'
+                          value='all-products'
+                          onChange={(e) => {
+                            let allCheckboxes = document.querySelectorAll(
+                              '#product-selection-table input[type="checkbox"][name="product-selection"]'
+                            )
+                            allCheckboxes.forEach((checkbox) => {
+                              checkbox.checked = e.target.checked
+                            })
+                          }}
+                        />
+                      </th>
+                      <th>Name</th>
+                      <th>SKU</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loadedProducts &&
+                      loadedProducts.map((product) => {
+                        let priceMin, priceMax
+                        if (product.itemData.variations.length != 1) {
+                          priceMin = product.itemData.variations.reduce(
+                            function (prev, curr) {
+                              return prev.itemVariationData.priceMoney.amount <
+                                curr.itemVariationData.priceMoney.amount
+                                ? prev
+                                : curr
+                            }
+                          )
+                          priceMax = product.itemData.variations.reduce(
+                            function (prev, curr) {
+                              return prev.itemVariationData.priceMoney.amount <
+                                curr.itemVariationData.priceMoney.amount
+                                ? curr
+                                : prev
+                            }
+                          )
+                        }
+                        return (
+                          <Fragment key={product.id}>
+                            <tr data-product={product.itemData.name}>
+                              <td>
+                                <input
+                                  type='checkbox'
+                                  name='product-selection'
+                                  id={product.id}
+                                  value={product.id}
+                                  defaultChecked={selectedProducts.includes(
+                                    product.id
+                                  )}
+                                />
+                              </td>
+                              <td className='has-label'>
+                                <label htmlFor={product.id}>
+                                  {product.itemData.name}
+                                </label>
+                              </td>
+                              <td className='has-label'>
+                                <label htmlFor={product.id}>
+                                  {product.itemData.variations.length == 1
+                                    ? product.itemData.variations[0]
+                                        .itemVariationData.sku
+                                    : `${product.itemData.variations.length} variations`}
+                                </label>
+                              </td>
+                              <td className='has-label'>
+                                <label htmlFor={product.id}>
+                                  {product.itemData.variations.length == 1
+                                    ? CADMoney.format(
+                                        product.itemData.variations[0]
+                                          .itemVariationData.priceMoney.amount /
+                                          100
+                                      )
+                                    : `${CADMoney.format(
+                                        priceMin.itemVariationData.priceMoney
+                                          .amount / 100
+                                      )} - ${CADMoney.format(
+                                        priceMax.itemVariationData.priceMoney
+                                          .amount / 100
+                                      )}`}
+                                </label>
+                              </td>
+                            </tr>
+                          </Fragment>
+                        )
+                      })}
+                  </tbody>
+                </Table>
+              </InfiniteScroll>
+            ) : (
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -92,76 +189,28 @@ function ProductSelectionModal({
                       />
                     </th>
                     <th>Name</th>
-                    <th>SKU</th>
-                    <th>Price</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadedProducts &&
-                    loadedProducts.map((product) => {
-                      let priceMin, priceMax
-                      if (product.itemData.variations.length != 1) {
-                        priceMin = product.itemData.variations.reduce(function (
-                          prev,
-                          curr
-                        ) {
-                          return prev.itemVariationData.priceMoney.amount <
-                            curr.itemVariationData.priceMoney.amount
-                            ? prev
-                            : curr
-                        })
-                        priceMax = product.itemData.variations.reduce(function (
-                          prev,
-                          curr
-                        ) {
-                          return prev.itemVariationData.priceMoney.amount <
-                            curr.itemVariationData.priceMoney.amount
-                            ? curr
-                            : prev
-                        })
-                      }
+                    loadedProducts.map((category) => {
                       return (
-                        <Fragment key={product.id}>
-                          <tr data-product={product.itemData.name}>
+                        <Fragment key={category._id}>
+                          <tr data-product={category.name}>
                             <td>
                               <input
                                 type='checkbox'
                                 name='product-selection'
-                                id={product.id}
-                                value={product.id}
+                                id={category.squareId}
+                                value={category.squareId}
                                 defaultChecked={selectedProducts.includes(
-                                  product.id
+                                  category.squareId
                                 )}
                               />
                             </td>
                             <td className='has-label'>
-                              <label htmlFor={product.id}>
-                                {product.itemData.name}
-                              </label>
-                            </td>
-                            <td className='has-label'>
-                              <label htmlFor={product.id}>
-                                {product.itemData.variations.length == 1
-                                  ? product.itemData.variations[0]
-                                      .itemVariationData.sku
-                                  : `${product.itemData.variations.length} variations`}
-                              </label>
-                            </td>
-                            <td className='has-label'>
-                              <label htmlFor={product.id}>
-                                {product.itemData.variations.length == 1
-                                  ? CADMoney.format(
-                                      product.itemData.variations[0]
-                                        .itemVariationData.priceMoney.amount /
-                                        100
-                                    )
-                                  : `${CADMoney.format(
-                                      priceMin.itemVariationData.priceMoney
-                                        .amount / 100
-                                    )} - ${CADMoney.format(
-                                      priceMax.itemVariationData.priceMoney
-                                        .amount / 100
-                                    )}`}
+                              <label htmlFor={category.squareId}>
+                                {category.name}
                               </label>
                             </td>
                           </tr>
@@ -170,7 +219,7 @@ function ProductSelectionModal({
                     })}
                 </tbody>
               </Table>
-            </InfiniteScroll>
+            )}
           </div>
         </Modal.Body>
         <Modal.Footer>
