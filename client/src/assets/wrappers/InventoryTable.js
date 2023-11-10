@@ -44,6 +44,7 @@ const Wrapper = styled.article`
     padding: 1px 12px;
     border-radius: 20px;
     width: 40px;
+    min-width: fit-content;
     display: inline-block;
   }
 
@@ -53,6 +54,7 @@ const Wrapper = styled.article`
     padding: 1px 12px;
     border-radius: 20px;
     width: 40px;
+    min-width: fit-content;
     display: inline-block;
   }
 
