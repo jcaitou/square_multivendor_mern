@@ -117,7 +117,7 @@ const InventoryVariation = ({
               <input
                 type='number'
                 defaultValue={location.inventoryAlert}
-                min='-1'
+                min='0'
                 onChange={(e) =>
                   handleWarningChange(
                     variation.variationId,

@@ -60,6 +60,8 @@ const ProductsContainer = () => {
 
   const navigate = useNavigate()
 
+  //loading helper:
+  const [loading, setLoading] = useState(false)
   //edit inventory helpers:
   const [editMode, setEditMode] = useState(false)
   const [showStateBar, setShowStateBar] = useState(false)
@@ -127,8 +129,9 @@ const ProductsContainer = () => {
     const params = new URLSearchParams(window.location.search)
 
     try {
+      setLoading(true)
       await customFetch.post('/inventory/update', inventoryChanges)
-
+      setLoading(false)
       navigate(`/dashboard/inventory?${params.toString()}`, { replace: true })
       toast.success('Inventory edited successfully')
       discardChanges()
@@ -179,7 +182,9 @@ const ProductsContainer = () => {
     const params = new URLSearchParams(window.location.search)
 
     try {
+      setLoading(true)
       await customFetch.post('/inventory/update-warning', warningChanges)
+      setLoading(false)
       navigate(`/dashboard/inventory?${params.toString()}`, { replace: true })
       toast.success('Warning levels edited successfully')
       discardWarningChanges()
@@ -202,8 +207,10 @@ const ProductsContainer = () => {
     data.append('update-file', importFile)
 
     try {
+      setLoading(true)
       let response = await customFetch.post('/uploads', data)
       toast.success('Batch update has started')
+      setLoading(false)
       setImportInventoryModalShow(false)
       setImportFile(null)
       navigate('/dashboard/inventory', { replace: true })
@@ -219,11 +226,13 @@ const ProductsContainer = () => {
         showStateBar={showWarningStateBar}
         discardAction={discardWarningChanges}
         submitAction={submitWarningChanges}
+        loading={loading}
       ></StateBar>
       <StateBar
         showStateBar={showStateBar}
         discardAction={discardChanges}
         submitAction={submitInventoryChanges}
+        loading={loading}
       ></StateBar>
       <Wrapper>
         <div className='products'>
@@ -322,6 +331,7 @@ const ProductsContainer = () => {
       <ImportInventoryModal
         handleFileImport={handleFileImport}
         handleImportSubmit={handleImportSubmit}
+        loading={loading}
         importFile={importFile}
         show={importInventoryModalShow}
         onHide={() => setImportInventoryModalShow(false)}
@@ -339,6 +349,7 @@ const ProductsContainer = () => {
 
 function ImportInventoryModal({
   handleImportSubmit,
+  loading,
   handleFileImport,
   importFile,
   ...props
@@ -365,8 +376,13 @@ function ImportInventoryModal({
         </form>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>Cancel</Button>
-        <Button onClick={handleImportSubmit} disabled={importFile == null}>
+        <Button onClick={props.onHide} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          onClick={handleImportSubmit}
+          disabled={importFile == null || loading}
+        >
           Import CSV
         </Button>
       </Modal.Footer>
@@ -439,31 +455,34 @@ function ExportInventoryModal({ products, dataHeaders, dateString, ...props }) {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>Cancel</Button>
-        {exportPage ? (
-          <CSVLink
-            data={products.flat().map((el) => {
-              let newEl = { ...el }
-              for (let i = 0; i < el.locationQuantities.length; i++) {
-                newEl[el.locationQuantities[i].locationId] =
-                  el.locationQuantities[i].quantity
-              }
-              return newEl
-            })}
-            headers={dataHeaders}
-            filename={`inventory-export-${dateString}.csv`}
-            onClick={() => {
-              setActionSubmitted(true)
-            }}
-            className='btn'
-          >
-            Export CSV
-          </CSVLink>
-        ) : (
-          <button className='btn' onClick={handleExportSubmit}>
-            Export CSV
-          </button>
-        )}
+        <Button onClick={props.onHide}>
+          {actionSubmitted ? 'Close' : 'Cancel'}
+        </Button>
+        {!actionSubmitted &&
+          (exportPage ? (
+            <CSVLink
+              data={products.flat().map((el) => {
+                let newEl = { ...el }
+                for (let i = 0; i < el.locationQuantities.length; i++) {
+                  newEl[el.locationQuantities[i].locationId] =
+                    el.locationQuantities[i].quantity
+                }
+                return newEl
+              })}
+              headers={dataHeaders}
+              filename={`inventory-export-${dateString}.csv`}
+              onClick={() => {
+                setActionSubmitted(true)
+              }}
+              className='btn'
+            >
+              Export CSV
+            </CSVLink>
+          ) : (
+            <button className='btn' onClick={handleExportSubmit}>
+              Export CSV
+            </button>
+          ))}
       </Modal.Footer>
     </Modal>
   )

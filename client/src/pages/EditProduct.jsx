@@ -51,15 +51,18 @@ const EditProduct = () => {
   )
   const [showStateBar, setShowStateBar] = useState(false)
   const navigate = useNavigate()
-  const navigation = useNavigation()
-  const isSubmitting = navigation.state === 'submitting'
+  // const navigation = useNavigation()
+  // const isSubmitting = navigation.state === 'submitting'
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   //delete helpers:
   const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
   const handleDeleteProduct = async () => {
     setConfirmDeleteModalShow(false)
     try {
+      setIsSubmitting(true)
       let response = await customFetch.delete(`/products/${product.id}`)
+      setIsSubmitting(false)
       toast.success('Product deleted successfully')
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
@@ -144,7 +147,9 @@ const EditProduct = () => {
         )
     }
     try {
+      setIsSubmitting(true)
       await customFetch.patch(`/products/${productData.id}`, productData)
+      setIsSubmitting(false)
       toast.success('Product edited successfully')
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
@@ -157,6 +162,7 @@ const EditProduct = () => {
     <>
       <StateBar
         showStateBar={showStateBar}
+        loading={isSubmitting}
         discardAction={discardChanges}
         submitAction={handleEditProductSubmit}
       ></StateBar>
@@ -230,9 +236,13 @@ const EditProduct = () => {
               </>
             ))}
 
-            <div className='btn add-var-btn' onClick={handleAddVariation}>
+            <button
+              className='btn add-var-btn'
+              onClick={handleAddVariation}
+              disabled={isSubmitting}
+            >
               <span>Add a Variation</span>
-            </div>
+            </button>
             <button
               type='submit'
               className='btn btn-block form-btn '
@@ -245,6 +255,7 @@ const EditProduct = () => {
       </Wrapper>
       <ConfirmDeleteModal
         handleDeleteProduct={handleDeleteProduct}
+        isSubmitting={isSubmitting}
         show={confirmDeleteModalShow}
         onHide={() => setConfirmDeleteModalShow(false)}
       />
@@ -252,7 +263,7 @@ const EditProduct = () => {
   )
 }
 
-function ConfirmDeleteModal({ handleDeleteProduct, ...props }) {
+function ConfirmDeleteModal({ handleDeleteProduct, isSubmitting, ...props }) {
   return (
     <Modal
       {...props}
@@ -269,8 +280,12 @@ function ConfirmDeleteModal({ handleDeleteProduct, ...props }) {
         <p>Are you sure you want to delete the selected product?</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>No</Button>
-        <Button onClick={handleDeleteProduct}>Yes</Button>
+        <Button onClick={props.onHide} disabled={isSubmitting}>
+          No
+        </Button>
+        <Button onClick={handleDeleteProduct} disabled={isSubmitting}>
+          Yes
+        </Button>
       </Modal.Footer>
     </Modal>
   )

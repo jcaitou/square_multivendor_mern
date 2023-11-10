@@ -6,6 +6,7 @@ const StateBar = ({
   showStateBar,
   discardAction,
   submitAction,
+  loading = null,
   warningText = 'Unsaved changes',
   discardText = 'Discard',
   submitText = 'Save',
@@ -19,10 +20,18 @@ const StateBar = ({
             <span>{warningText}</span>
           </div>
           <div className='action-container'>
-            <Button variant='outline-primary' onClick={discardAction}>
+            <Button
+              variant='outline-primary'
+              onClick={discardAction}
+              disabled={loading !== null ? loading : false}
+            >
               {discardText}
             </Button>
-            <Button variant='primary' onClick={submitAction}>
+            <Button
+              variant='primary'
+              onClick={submitAction}
+              disabled={loading !== null ? loading : false}
+            >
               {submitText}
             </Button>
           </div>

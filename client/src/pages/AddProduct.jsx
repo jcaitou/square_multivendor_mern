@@ -8,8 +8,9 @@ import customFetch from '../utils/customFetch'
 
 const AddProduct = () => {
   const navigate = useNavigate()
-  const navigation = useNavigation()
-  const isSubmitting = navigation.state === 'submitting'
+  // const navigation = useNavigation()
+  // const isSubmitting = navigation.state === 'submitting'
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [productTitle, setProductTitle] = useState('')
   const [variationEdited, setVariationEdited] = useState(false)
   const [variations, setVariations] = useState([
@@ -89,8 +90,9 @@ const AddProduct = () => {
     }
 
     try {
+      setIsSubmitting(true)
       let response = await customFetch.post('/products', newProductObject)
-      console.log(response)
+      setIsSubmitting(false)
       toast.success('Product added successfully')
       if (response.status >= 200 && response.status <= 299) {
         setTimeout(() => {
@@ -161,6 +163,7 @@ const AddProduct = () => {
             type='button'
             className='btn add-btn'
             onClick={handleAddVariation}
+            disabled={isSubmitting}
           >
             <span>Add a Variation</span>
           </button>

@@ -22,7 +22,6 @@ export const loader = async ({ request }) => {
     const {
       data: { categories },
     } = await customFetch.get('/discounts/discount-categories')
-    console.log(categories)
     return {
       items,
       cursor,
@@ -42,21 +41,10 @@ const AddDiscount = () => {
   )
   const [cursor, setCursor] = useState(cursorTemp)
 
-  // console.log(categories)
-
-  // const getCategories = async () => {
-  //   const response = await customFetch.get('discounts/discount-categories')
-  //   console.log(response.data)
-  //   setLoadedProducts(response.data.users)
-  // }
-
-  // if (user.role === 'admin') {
-  //   getCategories()
-  // }
-
   const navigate = useNavigate()
-  const navigation = useNavigation()
-  const isSubmitting = navigation.state === 'submitting'
+  // const navigation = useNavigation()
+  // const isSubmitting = navigation.state === 'submitting'
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [alwaysActive, setAlwaysActive] = useState(false)
   const [condition, setCondition] = useState('purchase-items')
@@ -84,9 +72,9 @@ const AddDiscount = () => {
   const handleAddProductSubmit = async (event) => {
     event.preventDefault()
     var formData = new FormData(document.querySelector('#discount-form'))
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}, ${pair[1]}`)
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(`${pair[0]}, ${pair[1]}`)
+    // }
 
     let pricingRuleData = {
       name: `[${user.name}] ${formData.get('title')}`,
@@ -158,23 +146,18 @@ const AddDiscount = () => {
       productSetData: productSetData,
     }
 
-    console.log(
-      pricingRuleData,
-      discountData,
-      productSetData,
-      formData.get('min-spend')
-    )
-
     try {
+      setIsSubmitting(true)
       let response = await customFetch.post('/discounts', {
         pricingRuleObj,
         discountObj,
         productSetObj,
       })
-      console.log(response)
+
       toast.success('Discount added successfully')
       if (response.status >= 200 && response.status <= 299) {
         setTimeout(() => {
+          setIsSubmitting(false)
           navigate('/dashboard/discounts', { replace: true })
         }, '1000')
       }
@@ -323,6 +306,7 @@ const AddDiscount = () => {
                         type='button'
                         className='btn product-selection-button'
                         onClick={() => setSelectProductsModalShow(true)}
+                        disabled={isSubmitting}
                       >
                         {selectedProducts.length > 0
                           ? 'Change Products'
@@ -333,6 +317,7 @@ const AddDiscount = () => {
                         type='button'
                         className='btn product-selection-button'
                         onClick={() => setSelectProductsModalShow(true)}
+                        disabled={isSubmitting}
                       >
                         {selectedProducts.length > 0
                           ? 'Change Products'

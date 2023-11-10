@@ -20,6 +20,8 @@ const ProductsContainer = () => {
     today.getDate() + 1
   }`
   const navigate = useNavigate()
+  //loading helper:
+  const [loading, setLoading] = useState(false)
   //export helpers:
   const [exportProductsModalShow, setExportProductsModalShow] = useState(false)
   //import helpers:
@@ -74,10 +76,12 @@ const ProductsContainer = () => {
     data.append('update-file', importFile)
 
     try {
+      setLoading(true)
       let response = await customFetch.post('/uploads', data)
       toast.success('Batch update has started')
       setImportProductsModalShow(false)
       setImportFile(null)
+      setLoading(false)
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
       console.log(error)
@@ -95,7 +99,9 @@ const ProductsContainer = () => {
     if (singleIdToDelete) {
       setConfirmSingleDeleteModalShow(false)
       try {
+        setLoading(true)
         let response = await customFetch.delete(`/products/${singleIdToDelete}`)
+        setLoading(false)
         toast.success('Product deleted successfully')
         setSingleIdToDelete(null)
         navigate('/dashboard/all-products', { replace: true })
@@ -133,10 +139,12 @@ const ProductsContainer = () => {
       }
 
       try {
+        setLoading(true)
         let response = await customFetch.post(
           '/products/batch-delete',
           productData
         )
+        setLoading(false)
         toast.success('Products deleted successfully')
         setConfirmDeleteModalShow(false)
         setIdsToDelete([])
@@ -153,6 +161,7 @@ const ProductsContainer = () => {
     <>
       <StateBar
         showStateBar={deleteMode}
+        loading={loading}
         discardAction={discardBatchDeleteProdcuts}
         submitAction={confirmDeleteProducts}
         submitText='Delete All'
@@ -219,6 +228,7 @@ const ProductsContainer = () => {
         {products.length > 0 && <PageBtnContainer cursor={cursor} />}
       </Wrapper>
       <ImportProductsModal
+        loading={loading}
         handleFileImport={handleFileImport}
         handleImportSubmit={handleImportSubmit}
         importFile={importFile}
@@ -236,12 +246,14 @@ const ProductsContainer = () => {
       />
       <ConfirmBatchDeleteModal
         handleBatchDeleteProducts={handleBatchDeleteProducts}
+        loading={loading}
         show={confirmDeleteModalShow}
         onHide={() => setConfirmDeleteModalShow(false)}
       />
       <ConfirmSingleDeleteModal
         handleSingleDeleteProduct={handleSingleDeleteProduct}
         show={confirmSingleDeleteModalShow}
+        loading={loading}
         onHide={() => setConfirmSingleDeleteModalShow(false)}
       />
       <SelectMoreItemsError
@@ -275,7 +287,11 @@ function SelectMoreItemsError(props) {
   )
 }
 
-function ConfirmSingleDeleteModal({ handleSingleDeleteProduct, ...props }) {
+function ConfirmSingleDeleteModal({
+  handleSingleDeleteProduct,
+  loading,
+  ...props
+}) {
   return (
     <Modal
       {...props}
@@ -292,14 +308,22 @@ function ConfirmSingleDeleteModal({ handleSingleDeleteProduct, ...props }) {
         <p>Are you sure you want to delete the selected product?</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>No</Button>
-        <Button onClick={handleSingleDeleteProduct}>Yes</Button>
+        <Button onClick={props.onHide} disabled={loading}>
+          No
+        </Button>
+        <Button onClick={handleSingleDeleteProduct} disabled={loading}>
+          Yes
+        </Button>
       </Modal.Footer>
     </Modal>
   )
 }
 
-function ConfirmBatchDeleteModal({ handleBatchDeleteProducts, ...props }) {
+function ConfirmBatchDeleteModal({
+  handleBatchDeleteProducts,
+  loading,
+  ...props
+}) {
   return (
     <Modal
       {...props}
@@ -316,14 +340,19 @@ function ConfirmBatchDeleteModal({ handleBatchDeleteProducts, ...props }) {
         <p>Are you sure you want to delete the selected products?</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>No</Button>
-        <Button onClick={handleBatchDeleteProducts}>Yes</Button>
+        <Button onClick={props.onHide} disabled={loading}>
+          No
+        </Button>
+        <Button onClick={handleBatchDeleteProducts} disabled={loading}>
+          Yes
+        </Button>
       </Modal.Footer>
     </Modal>
   )
 }
 function ImportProductsModal({
   handleImportSubmit,
+  loading,
   handleFileImport,
   importFile,
   ...props
@@ -350,8 +379,13 @@ function ImportProductsModal({
         </form>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>Cancel</Button>
-        <Button onClick={handleImportSubmit} disabled={importFile == null}>
+        <Button onClick={props.onHide} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          onClick={handleImportSubmit}
+          disabled={importFile == null || loading}
+        >
           Import CSV
         </Button>
       </Modal.Footer>
@@ -424,23 +458,26 @@ function ExportProductsModal({ variationsData, dateString, ...props }) {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>Cancel</Button>
-        {exportPage ? (
-          <CSVLink
-            data={variationsData}
-            filename={`products-export-${dateString}.csv`}
-            onClick={() => {
-              setActionSubmitted(true)
-            }}
-            className='btn'
-          >
-            Export CSV
-          </CSVLink>
-        ) : (
-          <button className='btn' onClick={handleExportSubmit}>
-            Export CSV
-          </button>
-        )}
+        <Button onClick={props.onHide}>
+          {actionSubmitted ? 'Close' : 'Cancel'}
+        </Button>
+        {!actionSubmitted &&
+          (exportPage ? (
+            <CSVLink
+              data={variationsData}
+              filename={`products-export-${dateString}.csv`}
+              onClick={() => {
+                setActionSubmitted(true)
+              }}
+              className='btn'
+            >
+              Export CSV
+            </CSVLink>
+          ) : (
+            <button className='btn' onClick={handleExportSubmit}>
+              Export CSV
+            </button>
+          ))}
       </Modal.Footer>
     </Modal>
   )

@@ -16,6 +16,7 @@ const DiscountsContainer = () => {
   } = useAllDiscountsContext()
   const navigate = useNavigate()
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmDeleteDiscountModalShow, setConfirmDeleteDiscountModalShow] =
     useState(false)
   const [singleIdToDelete, setSingleIdToDelete] = useState(null)
@@ -25,19 +26,46 @@ const DiscountsContainer = () => {
     setConfirmDeleteDiscountModalShow(true)
   }
 
+  const storewideDiscountOpt = async (e) => {
+    let opt = 'out of'
+    if (e.target.checked) {
+      opt = 'in to'
+    }
+
+    // e.target.setAttribute('disabled', true)
+
+    try {
+      setIsSubmitting(true)
+      let response = await customFetch.post('/discounts/storewide', {
+        productSetId: e.target.value,
+        optIn: e.target.checked,
+      })
+      toast.success(`You have opted ${opt} the storewide discount`)
+      setIsSubmitting(false)
+      // e.target.removeAttribute('disabled')
+      navigate('/dashboard/discounts', { replace: true })
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.response?.data?.msg)
+    }
+  }
+
   const handleDeleteDiscount = async () => {
     if (singleIdToDelete) {
-      setConfirmDeleteDiscountModalShow(false)
       try {
+        setIsSubmitting(true)
         let response = await customFetch.delete(
           `/discounts/${singleIdToDelete}`
         )
         toast.success('Discount deleted successfully')
+        setConfirmDeleteDiscountModalShow(false)
+        setIsSubmitting(false)
         setSingleIdToDelete(null)
         navigate('/dashboard/discounts', { replace: true })
       } catch (error) {
         console.log(error)
         toast.error(error?.response?.data?.msg)
+        setConfirmDeleteDiscountModalShow(false)
       }
     }
   }
@@ -81,10 +109,9 @@ const DiscountsContainer = () => {
                   key={discount.id}
                   discount={discount}
                   storewide={true}
+                  isSubmitting={isSubmitting}
                   productSet={productSet}
-                  confirmDeleteDiscount={() =>
-                    confirmDeleteDiscount(discount.id)
-                  }
+                  discountAction={storewideDiscountOpt}
                 />
               )
             })}
@@ -99,9 +126,8 @@ const DiscountsContainer = () => {
                   key={discount.id}
                   discount={discount}
                   storewide={false}
-                  confirmDeleteDiscount={() =>
-                    confirmDeleteDiscount(discount.id)
-                  }
+                  isSubmitting={isSubmitting}
+                  discountAction={() => confirmDeleteDiscount(discount.id)}
                 />
               )
             })}

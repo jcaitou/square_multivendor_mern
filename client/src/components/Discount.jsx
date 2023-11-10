@@ -9,7 +9,8 @@ const Discount = ({
   discount,
   storewide,
   productSet,
-  confirmDeleteDiscount,
+  isSubmitting,
+  discountAction,
 }) => {
   const { user } = useDashboardContext()
   const navigate = useNavigate()
@@ -87,30 +88,8 @@ const Discount = ({
               id={productSet.id}
               value={productSet.id}
               // disabled={today >= decisionDate}
-              onChange={async (e) => {
-                let opt = 'out of'
-                if (e.target.checked) {
-                  opt = 'in to'
-                }
-
-                e.target.setAttribute('disabled', true)
-
-                try {
-                  let response = await customFetch.post(
-                    '/discounts/storewide',
-                    {
-                      productSetId: e.target.value,
-                      optIn: e.target.checked,
-                    }
-                  )
-                  toast.success(`You have opted ${opt} the storewide discount`)
-                  e.target.removeAttribute('disabled')
-                  navigate('/dashboard/discounts', { replace: true })
-                } catch (error) {
-                  console.log(error)
-                  toast.error(error?.response?.data?.msg)
-                }
-              }}
+              disabled={isSubmitting}
+              onChange={(e) => discountAction(e)}
             />
           ) : (
             <>
@@ -123,7 +102,8 @@ const Discount = ({
               <button
                 type='submit'
                 className='btn delete-btn'
-                onClick={confirmDeleteDiscount}
+                disabled={isSubmitting}
+                onClick={() => discountAction()}
               >
                 <RiDeleteBinLine />
               </button>

@@ -1,7 +1,6 @@
 import { AreaChartContainer, BarChartContainer, StatItem } from '../components'
 import customFetch from '../utils/customFetch'
 import { useLoaderData } from 'react-router-dom'
-import { FaSuitcaseRolling, FaCalendarCheck, FaBug } from 'react-icons/fa'
 import { MdOutlineLocationOn } from 'react-icons/md'
 import { BsCashCoin, BsBasket } from 'react-icons/bs'
 import { GiCoins } from 'react-icons/gi'
@@ -13,7 +12,6 @@ import day from 'dayjs'
 export const loader = async () => {
   try {
     const response = await customFetch.get('/orders/stats')
-    console.log(response.data)
     return response.data
   } catch (error) {
     return error
@@ -30,7 +28,6 @@ const Stats = () => {
     productCount,
   } = useLoaderData()
   const { user } = useDashboardContext()
-  console.log(user)
 
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',

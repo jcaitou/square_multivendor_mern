@@ -53,8 +53,9 @@ const EditDiscount = () => {
 
   const { user } = useDashboardContext()
   const navigate = useNavigate()
-  const navigation = useNavigation()
-  const isSubmitting = navigation.state === 'submitting'
+  // const navigation = useNavigation()
+  // const isSubmitting = navigation.state === 'submitting'
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [alwaysActive, setAlwaysActive] = useState(
     originalPricingRule?.pricingRuleData?.validFromDate == null
@@ -185,14 +186,15 @@ const EditDiscount = () => {
     console.log([pricingRuleObj, discountObj, productSetObj])
 
     try {
+      setIsSubmitting(true)
       let response = await customFetch.patch(
         `/discounts/${originalProductSet.id}`,
         { pricingRuleObj, discountObj, productSetObj }
       )
-      console.log(response)
       toast.success('Discount edited successfully')
       if (response.status >= 200 && response.status <= 299) {
         setTimeout(() => {
+          setIsSubmitting(false)
           navigate('/dashboard/discounts', { replace: true })
         }, '1000')
       }
@@ -386,6 +388,7 @@ const EditDiscount = () => {
                     <button
                       type='button'
                       className='btn product-selection-button'
+                      disabled={isSubmitting}
                       onClick={() => setSelectProductsModalShow(true)}
                     >
                       {selectedProducts.length > 0
