@@ -4,8 +4,7 @@ import JSONBig from 'json-bigint'
 import { NotFoundError, SquareApiError } from '../errors/customError.js'
 import Order from '../models/OrderModel.js'
 import User from '../models/UserModel.js'
-import { transporter } from '../middleware/nodemailerMiddleware.js'
-import day from 'dayjs'
+import agenda from '../jobs/agenda.js'
 
 export const createOrder = async (req, res) => {
   const orderId = req.body.data.id
@@ -70,6 +69,7 @@ export const createOrder = async (req, res) => {
         itemVariationName: variationName,
         itemVariationId: item.catalogObjectId,
         itemId: itemResponse.result.object.itemVariationData.itemId,
+        itemSku: itemResponse.result.object.itemVariationData.sku,
         quantity: item.quantity,
         basePrice: item.basePriceMoney.amount,
         totalDiscount: item.totalDiscountMoney.amount,
@@ -165,55 +165,10 @@ export const updateOrder = async (req, res) => {
 
 export const inventoryUpdate = async (req, res) => {
   const counts = req.body.data.object['inventory_counts']
-  console.log(counts)
 
-  //copy below into agenda:
-  const messageList = []
-  for (let i = 0; i < counts.length; i++) {
-    if ((counts[i]['catalog_object_type'] = 'ITEM_VARIATION')) {
-      const catalogObjectId = counts[i]['catalog_object_id']
-      console.log(catalogObjectId)
-
-      const retrieveResponse =
-        await squareClient.catalogApi.retrieveCatalogObject(
-          catalogObjectId,
-          false
-        )
-
-      const itemVendor =
-        retrieveResponse.result.object.customAttributeValues['vendor_name']
-          .stringValue
-      const user = await User.findOne({ name: itemVendor })
-      console.log(itemVendor)
-      console.log(user)
-
-      const locationInfo =
-        retrieveResponse.result.object.itemVariationData.locationOverrides
-      const relevantLocation = locationInfo.find((el) => {
-        return el.locationId === counts[i]['location_id']
-      })
-
-      console.log(
-        retrieveResponse.result.object.itemVariationData.locationOverrides
-      )
-
-      if (counts[i]['quantity'] <= 0) {
-        let messageObj = messageList.find((el) => {
-          return (el.name = itemVendor)
-        })
-        //warning email that item is out of stock
-        console.log('quantity below zero')
-      } else if (
-        relevantLocation?.inventoryAlertThreshold &&
-        counts[i]['quantity'] <=
-          Number(relevantLocation?.inventoryAlertThreshold)
-      ) {
-        console.log('quantity below warning')
-      }
-    }
-  }
-
-  //copy above into agenda
+  agenda.now('inventory warning', {
+    counts,
+  })
 
   return res.status(StatusCodes.OK).json({ msg: 'ok' })
 }

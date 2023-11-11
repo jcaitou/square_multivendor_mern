@@ -11,6 +11,7 @@ const OrderSchema = new mongoose.Schema(
         itemVariationName: String,
         itemVariationId: String,
         itemId: String,
+        itemSku: String,
         quantity: Number,
         basePrice: Number,
         totalDiscount: Number,

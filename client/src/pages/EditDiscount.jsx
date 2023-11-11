@@ -21,9 +21,14 @@ export const loader = async ({ request, params }) => {
     const {
       data: { items, cursor, matchedVariationIds },
     } = await customFetch.get('/products')
+    const {
+      data: { categories },
+    } = await customFetch.get('/discounts/discount-categories')
     const { data: discount } = await customFetch.get(`/discounts/${params.id}`)
+
     return {
       items,
+      categories,
       cursor,
       discount,
     }
@@ -34,9 +39,17 @@ export const loader = async ({ request, params }) => {
 }
 
 const EditDiscount = () => {
-  const { items: products, cursor: cursorTemp, discount } = useLoaderData()
+  const {
+    items: products,
+    categories,
+    cursor: cursorTemp,
+    discount,
+  } = useLoaderData()
+  const { user } = useDashboardContext()
 
-  const [loadedProducts, setLoadedProducts] = useState(products)
+  const [loadedProducts, setLoadedProducts] = useState(
+    user.role === 'admin' ? categories : products
+  )
   const [cursor, setCursor] = useState(cursorTemp)
 
   const originalPricingRule = discount.objects.filter(
@@ -49,9 +62,8 @@ const EditDiscount = () => {
     (el) => el.type === 'PRODUCT_SET'
   )[0]
 
-  //console.log(originalPricingRule, originalDiscount, originalProductSet, cursor)
+  console.log(originalProductSet)
 
-  const { user } = useDashboardContext()
   const navigate = useNavigate()
   // const navigation = useNavigation()
   // const isSubmitting = navigation.state === 'submitting'
@@ -75,6 +87,7 @@ const EditDiscount = () => {
     originalPricingRule.pricingRuleData.minimumOrderSubtotalMoney != null
   )
   const defaultAllItems =
+    user.role !== 'admin' &&
     originalProductSet.productSetData.productIdsAny.length == 1 &&
     originalProductSet.productSetData.productIdsAny[0] == user.squareId
   const [selectedProducts, setSelectedProducts] = useState(

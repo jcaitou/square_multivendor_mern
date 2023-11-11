@@ -531,6 +531,6 @@ export const getStats = async (req, res) => {
     sixMonthsSales,
     allTimeBestsellers: allTimeBestsellersQuery,
     lastMonthBestsellers: lastMonthBestsellersQuery,
-    productCount: products.length,
+    productCount: products?.length || 0,
   })
 }

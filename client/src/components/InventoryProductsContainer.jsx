@@ -20,10 +20,14 @@ const ProductsContainer = () => {
     searchValues,
   } = useAllInventoryContext()
   const sort = searchValues.sort
+  const { user } = useDashboardContext()
+  console.log(products)
 
   let locations
   if (searchValues.locations.length > 0) {
     locations = searchValues.locations
+  } else if (products && products.length == 0) {
+    locations = user.locations
   } else if (products[0]?.locationQuantities) {
     locations = products[0]?.locationQuantities.map((el) => {
       return el.locationId

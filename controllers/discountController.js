@@ -274,7 +274,7 @@ export const getDiscountCategories = async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(StatusCodes.OK).json({ categories: [] })
   }
-  const categories = await User.find({ role: 'user' }, { name: 1, squareId: 1 })
+  const categories = await User.find({}, { name: 1, squareId: 1 })
   // const userWithoutPassword = user.toJSON()
   res.status(StatusCodes.OK).json({ categories })
 }

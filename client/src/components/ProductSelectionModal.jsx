@@ -36,6 +36,9 @@ function ProductSelectionModal({
     })
   }
 
+  console.log(loadedProducts)
+  console.log(user)
+
   return (
     <Modal
       {...props}
@@ -203,9 +206,12 @@ function ProductSelectionModal({
                                 name='product-selection'
                                 id={category.squareId}
                                 value={category.squareId}
-                                defaultChecked={selectedProducts.includes(
-                                  category.squareId
-                                )}
+                                defaultChecked={
+                                  selectedProducts.includes(
+                                    category.squareId
+                                  ) || category.squareId === user.squareId
+                                }
+                                disabled={category.squareId === user.squareId}
                               />
                             </td>
                             <td className='has-label'>

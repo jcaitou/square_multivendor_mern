@@ -38,6 +38,8 @@ Added front end function:
 -Discount function: opt-in for vendors
 -Low in stock warning
 -both frontend and backend for stats page
+Added email hook:
+-when item hits low stock warning/out of stock
 
 React Query\*\*\*\*
 
@@ -47,7 +49,6 @@ Functions:
 
 Email hooks:
 -when storewide discount is created
--when item hits low stock warning/out of stock
 -monthly reports: sales summary, expected revnue
 
 administrative functions
@@ -58,6 +59,6 @@ Adding first admin user: the first user also need a Square category (for discoun
 
 When setting up from scratch:
 
-1. Create custom attribute in Square
+1. Create custom attribute in Square for "vendor_name"
 2. Add locations in square and get the location IDs (maybe change this into a function)
-3. Create first account (User with administrator role)
+3. Create first account (User with administrator role, needs to have locations array and square ID)

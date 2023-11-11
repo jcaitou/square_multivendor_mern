@@ -21,11 +21,11 @@ const Landing = () => {
             quinoa lo-fi tote bag adaptogen everyday carry meggings +1 brunch
             narwhal.
           </p>
-          <Link to='/register' className='btn register-link'>
+          {/* <Link to='/register' className='btn register-link'>
             Register
-          </Link>
+          </Link> */}
           <Link to='/login' className='btn'>
-            Login / Demo User
+            Login
           </Link>
         </div>
         <img src={main} alt='job hunt' className='img main-img' />

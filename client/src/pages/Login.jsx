@@ -30,7 +30,7 @@ const Login = () => {
         <button type='submit' className='btn btn-block' disabled={isSubmitting}>
           {isSubmitting ? 'submitting...' : 'submit'}
         </button>
-        <button type='button' className='btn btn-block'>
+        {/* <button type='button' className='btn btn-block'>
           explore the app
         </button>
         <p>
@@ -38,7 +38,7 @@ const Login = () => {
           <Link to='/register' className='member-btn'>
             Register
           </Link>
-        </p>
+        </p> */}
       </Form>
     </Wrapper>
   )

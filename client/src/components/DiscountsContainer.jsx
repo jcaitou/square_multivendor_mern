@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAllDiscountsContext } from '../pages/AllDiscounts'
+import { useDashboardContext } from '../pages/DashboardLayout'
 import { Link, useNavigate } from 'react-router-dom'
 import Wrapper from '../assets/wrappers/ProductsContainer'
 import Discount from './Discount'
@@ -14,6 +15,7 @@ const DiscountsContainer = () => {
     data: { discounts, numOfPages, totalItems, currentPage },
     storewideDiscounts,
   } = useAllDiscountsContext()
+  const { user } = useDashboardContext()
   const navigate = useNavigate()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -94,8 +96,8 @@ const DiscountsContainer = () => {
             </Link>
           </div>
         </div>
-        <h2>Storewide Discounts</h2>
-        {storewideDiscounts.length > 0 && (
+        {user.role === 'user' && <h2>Storewide Discounts</h2>}
+        {user.role === 'user' && storewideDiscounts.length > 0 && (
           <div className='discounts'>
             {storewideDiscounts.map((storewideDiscount) => {
               const discount = storewideDiscount.find((el) => {
@@ -117,7 +119,9 @@ const DiscountsContainer = () => {
             })}
           </div>
         )}
-        <h2>Vendor Discounts</h2>
+        <h2>
+          {user.role === 'user' ? 'Vendor Discounts' : 'Storewide Discounts'}
+        </h2>
         {discounts.length > 0 && (
           <div className='discounts'>
             {discounts.map((discount) => {

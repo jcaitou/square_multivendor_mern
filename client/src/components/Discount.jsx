@@ -19,7 +19,6 @@ const Discount = ({
     decisionDate = new Date(),
     today = new Date()
   let status = 'unset'
-  console.log(productSet)
   if (
     discount?.pricingRuleData?.validFromDate &&
     discount?.pricingRuleData?.validUntilDate
