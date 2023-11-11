@@ -10,6 +10,7 @@ import Button from 'react-bootstrap/Button'
 import customFetch from '../utils/customFetch'
 import _ from 'lodash'
 import Barcode from 'react-barcode'
+import { Fragment } from 'react'
 
 export const loader = async ({ params }) => {
   try {
@@ -190,8 +191,8 @@ const EditProduct = () => {
               }}
             />
             {productVariations.map((variation, index) => (
-              <>
-                <div className='form-variation' key={variation.id}>
+              <Fragment key={index}>
+                <div className='form-variation'>
                   <FormRow
                     type='text'
                     name='name'
@@ -232,11 +233,14 @@ const EditProduct = () => {
                     </div>
                   )}
                 </div>
-                <Barcode value={variation.itemVariationData.sku} />
-              </>
+                {variation.itemVariationData.sku != '' && (
+                  <Barcode value={variation.itemVariationData.sku} />
+                )}
+              </Fragment>
             ))}
 
             <button
+              type='button'
               className='btn add-var-btn'
               onClick={handleAddVariation}
               disabled={isSubmitting}

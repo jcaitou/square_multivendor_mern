@@ -69,10 +69,15 @@ export const storewideOptInOut = async (req, res) => {
     throw new SquareApiError('error while calling the Square API')
   }
 
-  const newProductSetIds =
-    response.result.object.productSetData.productIdsAny.filter((el) => {
-      return el !== req.user.squareId
-    })
+  let newProductSetIds
+  if (response.result.object.productSetData.productIdsAny) {
+    newProductSetIds =
+      response.result.object.productSetData.productIdsAny.filter((el) => {
+        return el !== req.user.squareId
+      })
+  } else {
+    newProductSetIds = []
+  }
 
   if (optIn) {
     newProductSetIds.push(req.user.squareId)
@@ -179,8 +184,6 @@ export const upsertDiscount = async (req, res) => {
         .flat()
       const newProductSetId = newProductSetObj[0].objectId
 
-      console.log(newPricingRuleId)
-
       req.body.createdBy = req.user.userId
       const discount = await Discount.create({
         pricingRuleId: newPricingRuleId,
@@ -189,6 +192,9 @@ export const upsertDiscount = async (req, res) => {
         createdBy: req.user.userId,
         storewide: req.user.role === 'admin',
       })
+      if (req.user.role === 'admin') {
+        //this is a storewide discount, send an email to everyone to let them know they should opt in/out
+      }
       return res.status(StatusCodes.CREATED).json({ discount })
     }
 
@@ -198,7 +204,6 @@ export const upsertDiscount = async (req, res) => {
     } else {
       parsedResponse = []
     }
-    console.log(parsedResponse)
     res.status(StatusCodes.OK).json(parsedResponse)
   } catch (error) {
     console.log(error)
@@ -243,7 +248,6 @@ export const deleteDiscount = async (req, res, next) => {
   if (!discount) {
     throw new NotFoundError(`no discount with id : ${req.params.id}`)
   }
-  console.log(discount.createdBy.toString(), req.user.userId)
   if (req.user.userId != discount.createdBy.toString()) {
     throw new UnauthorizedError('not authorized to access this route')
   }

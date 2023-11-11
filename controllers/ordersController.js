@@ -323,9 +323,6 @@ export const getStats = async (req, res) => {
     products = products.concat(response.result.items)
   }
 
-  console.log(products)
-  console.log(products.length)
-
   //for all-time revenue:
   const allTimeQueryObj = {
     $match: {

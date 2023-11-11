@@ -19,7 +19,7 @@ const Discount = ({
     decisionDate = new Date(),
     today = new Date()
   let status = 'unset'
-
+  console.log(productSet)
   if (
     discount?.pricingRuleData?.validFromDate &&
     discount?.pricingRuleData?.validUntilDate
@@ -81,14 +81,14 @@ const Discount = ({
             <input
               className='switch-checkbox'
               type='checkbox'
-              defaultChecked={productSet.productSetData.productIdsAny.includes(
-                user.squareId
-              )}
-              name={productSet.id}
-              id={productSet.id}
-              value={productSet.id}
-              // disabled={today >= decisionDate}
-              disabled={isSubmitting}
+              defaultChecked={
+                productSet.productSetData.productIdsAny &&
+                productSet.productSetData.productIdsAny.includes(user.squareId)
+              }
+              name={productSet?.id}
+              id={productSet?.id}
+              value={productSet?.id}
+              disabled={isSubmitting || today >= decisionDate}
               onChange={(e) => discountAction(e)}
             />
           ) : (

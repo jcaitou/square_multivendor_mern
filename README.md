@@ -39,8 +39,11 @@ Added front end function:
 -Low in stock warning
 -both frontend and backend for stats page
 
-Loading spinner
 React Query\*\*\*\*
+
+Functions:
+-export orders
+-export all barcodes as zip file (?)
 
 Email hooks:
 -when storewide discount is created
