@@ -9,6 +9,6 @@ const router = Router()
 
 router.route('/export-all-products').get(exportAllProducts)
 router.route('/export-all-inventory').get(exportAllInventory)
-router.route('/export-orders').get(exportOrders)
+router.route('/export-orders').post(exportOrders)
 
 export default router

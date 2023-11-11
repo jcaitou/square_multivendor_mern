@@ -4,8 +4,12 @@ import customFetch from '../utils/customFetch'
 import { Order } from '../components'
 import Wrapper from '../assets/wrappers/OrdersContainer'
 import PageBtnContainer from '../components/PageBtnContainer'
+import { useDashboardContext } from './DashboardLayout'
 import { OrderSearchContainer } from '../components'
-import { useContext, createContext } from 'react'
+import { useContext, createContext, useState } from 'react'
+import { ALL_LOCATIONS } from '../../../utils/constants'
+import Button from 'react-bootstrap/Button'
+import Modal from 'react-bootstrap/Modal'
 import day from 'dayjs'
 
 export const loader = async ({ request }) => {
@@ -62,6 +66,7 @@ const AllOrders = () => {
     style: 'currency',
     currency: 'CAD',
   })
+  const [exportOrdersModalShow, setExportOrdersModalShow] = useState(false)
   return (
     <AllOrdersContext.Provider value={{ searchValues }}>
       <Wrapper>
@@ -84,6 +89,17 @@ const AllOrders = () => {
           </div>
         </div>
         {orders.length === 0 && <h2>No items to display...</h2>}
+        <div className='product-actions'>
+          <div className='grouped-actions'>
+            <button
+              className='btn'
+              onClick={() => setExportOrdersModalShow(true)}
+            >
+              Export Orders
+            </button>
+          </div>
+        </div>
+
         <div className='orders'>
           <div className='orders-heading'>
             <span className='order-item-name'>Item</span>
@@ -100,7 +116,138 @@ const AllOrders = () => {
           <PageBtnContainer numOfPages={numOfPages} currentPage={currentPage} />
         )}
       </Wrapper>
+      <ExportOrdersModal
+        show={exportOrdersModalShow}
+        onHide={() => {
+          setExportOrdersModalShow(false)
+        }}
+      />
     </AllOrdersContext.Provider>
+  )
+}
+
+function ExportOrdersModal({ ...props }) {
+  const { user } = useDashboardContext()
+  const today = day()
+  const [monthRangeStart, setMonthRangeStart] = useState(0)
+  const [monthRangeEnd, setMonthRangeEnd] = useState(today.month())
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ]
+
+  const yearChange = (e) => {
+    if (e.target.value == today.year()) {
+      setMonthRangeEnd(today.month())
+    } else {
+      setMonthRangeEnd(11)
+    }
+  }
+
+  const renderMonthOptions = () => {
+    const monthOptions = []
+    for (let i = monthRangeStart; i <= monthRangeEnd; i++) {
+      monthOptions.push(
+        <option value={i} key={i}>
+          {months[i]}
+        </option>
+      )
+    }
+    return monthOptions
+  }
+
+  const handleExportSubmit = async (e) => {
+    e.preventDefault()
+
+    const month = document.getElementById('export-month').value
+    const year = document.getElementById('export-year').value
+    const checkedLocations = document.querySelectorAll(
+      '#export-locations input:checked'
+    )
+    const locations = []
+
+    checkedLocations.forEach((el) => {
+      locations.push(el.value)
+    })
+    console.log(locations)
+
+    try {
+      await customFetch.post('/exports/export-orders', {
+        month,
+        year,
+        locations,
+      })
+      toast.success('Full order export will be sent to your email')
+      setActionSubmitted(true)
+    } catch (error) {
+      toast.error(error?.response?.data?.msg)
+      return error
+    }
+  }
+
+  return (
+    <Modal
+      {...props}
+      size='lg'
+      aria-labelledby='contained-modal-title-vcenter'
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id='contained-modal-title-vcenter'>
+          Export Products by CSV
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Choose the date and location of the orders you want to export</p>
+        <select name='month' id='export-month'>
+          <option value=''>--All--</option>
+          {renderMonthOptions()}
+        </select>
+        <select name='year' id='export-year' onChange={(e) => yearChange(e)}>
+          <option value='2023'>2023</option>
+          <option value='2022'>2022</option>
+        </select>
+
+        {user.locations.map((itemValue) => {
+          return (
+            <div
+              className='location-search-group'
+              id='export-locations'
+              key={`export-${itemValue}`}
+            >
+              <input
+                type='checkbox'
+                name='locations'
+                id={itemValue}
+                value={itemValue}
+                defaultChecked='true'
+              />
+              <label htmlFor={itemValue}>
+                {
+                  ALL_LOCATIONS.find((el) => {
+                    return el.id === itemValue
+                  }).name
+                }
+              </label>
+            </div>
+          )
+        })}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>Cancel</Button>
+        <Button onClick={handleExportSubmit}>Export CSV</Button>
+      </Modal.Footer>
+    </Modal>
   )
 }
 

@@ -137,8 +137,8 @@ export default (agenda) => {
     let message = {
       from: 'from-example@email.com',
       to: user.email,
-      subject: 'Product Export',
-      text: 'Hello SMTP Email',
+      subject: 'Export of your products',
+      text: 'Your products have finished exporting.',
       attachments: attachments,
     }
     transporter.sendMail(message, (err, info) => {

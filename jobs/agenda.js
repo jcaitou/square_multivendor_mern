@@ -16,11 +16,13 @@ import productImport from './jobs_list/productImport.js'
 import inventoryImport from './jobs_list/inventoryImport.js'
 import productExport from './jobs_list/productExport.js'
 import inventoryExport from './jobs_list/inventoryExport.js'
+import orderExport from './jobs_list/orderExport.js'
 import inventoryWarning from './jobs_list/inventoryWarning.js'
 productImport(agenda)
 inventoryImport(agenda)
 productExport(agenda)
 inventoryExport(agenda)
+orderExport(agenda)
 inventoryWarning(agenda)
 
 agenda.on('ready', async () => await agenda.start())
