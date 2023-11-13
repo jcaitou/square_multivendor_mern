@@ -9,8 +9,6 @@ Currently, two official plugins are available:
 
 # Need to add:
 
-Order history & money earned
-
 User (Vendor) model:
 -multiple locations
 -how to register a new vendor?
@@ -24,8 +22,6 @@ Report bug feature
 
 Agenda needs to be set up for certain functions:
 -(?) order webhook
-
-unused packages:
 
 Added front end function:
 -sort inventory page by a-z or count
@@ -47,12 +43,14 @@ User settings:
 -default discount opt-in? - added setting but not implemented, not sure if it is really needed because maybe we should get the vendor's explicit confirmation every time
 -choose whether or not to receive inventory warnings
 
-React Query\*\*\*\*
+# React Query
 
-Functions:
+# Functions:
+
 -export all barcodes as zip file (?)
 
-Email hooks:
+# Email hooks:
+
 -monthly reports: sales summary, expected revnue
 
 Static page content:
