@@ -1,11 +1,6 @@
 import Discount from '../models/DiscountModel.js'
 import User from '../models/UserModel.js'
 import { StatusCodes } from 'http-status-codes'
-import {
-  FILE_TYPE,
-  FILE_UPLOAD_STATUS,
-  ALL_LOCATIONS,
-} from '../utils/constants.js'
 import { nanoid } from 'nanoid'
 import { squareClient } from '../utils/squareUtils.js'
 import JSONBig from 'json-bigint'
@@ -15,6 +10,8 @@ import {
   UnauthorizedError,
   SquareApiError,
 } from '../errors/customError.js'
+import agenda from '../jobs/agenda.js'
+import day from 'dayjs'
 
 export const getStorewideDiscounts = async (req, res) => {
   const discounts = await Discount.find({ storewide: true })
@@ -149,7 +146,6 @@ export const getAllDiscounts = async (req, res) => {
 
 export const upsertDiscount = async (req, res) => {
   let { pricingRuleObj, discountObj, productSetObj } = req.body
-  console.log(req.body)
   try {
     const response = await squareClient.catalogApi.batchUpsertCatalogObjects({
       idempotencyKey: nanoid(),
@@ -162,7 +158,6 @@ export const upsertDiscount = async (req, res) => {
 
     //this is a new discount, save the object IDs:
     if (response?.result?.idMappings) {
-      console.log(response.result.idMappings)
       const newPricngRuleObj = response.result.idMappings
         .filter((el) => {
           return el.clientObjectId.includes('pricing_rule')
@@ -194,6 +189,32 @@ export const upsertDiscount = async (req, res) => {
       })
       if (req.user.role === 'admin') {
         //this is a storewide discount, send an email to everyone to let them know they should opt in/out
+
+        agenda.now('storewide sale email', {
+          discountName: pricingRuleObj.pricingRuleData.name.replace(
+            '[Administrator] ',
+            ''
+          ),
+          validFromDate: pricingRuleObj.pricingRuleData.validFromDate,
+          validUntilDate: pricingRuleObj.pricingRuleData.validUntilDate,
+          firstLine: 'Our store is hosting a new store-wide sale!',
+        })
+
+        const validFromDate = pricingRuleObj.pricingRuleData.validFromDate
+        const decisionDate = day(validFromDate, 'YYYY-MM-DD')
+          .subtract(8, 'day')
+          .toDate()
+
+        agenda.schedule(decisionDate, 'storewide sale email', {
+          discountName: pricingRuleObj.pricingRuleData.name.replace(
+            '[Administrator] ',
+            ''
+          ),
+          validFromDate: pricingRuleObj.pricingRuleData.validFromDate,
+          validUntilDate: pricingRuleObj.pricingRuleData.validUntilDate,
+          firstLine:
+            'This is a reminder that the decision cut-off date for the store-wide sale is tomorrow.',
+        })
       }
       return res.status(StatusCodes.CREATED).json({ discount })
     }

@@ -144,8 +144,6 @@ export default (agenda) => {
     transporter.sendMail(message, (err, info) => {
       if (err) {
         console.log(err)
-      } else {
-        // console.log(info)
       }
     })
     done()

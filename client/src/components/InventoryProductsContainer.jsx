@@ -21,7 +21,6 @@ const ProductsContainer = () => {
   } = useAllInventoryContext()
   const sort = searchValues.sort
   const { user } = useDashboardContext()
-  console.log(products)
 
   let locations
   if (searchValues.locations.length > 0) {

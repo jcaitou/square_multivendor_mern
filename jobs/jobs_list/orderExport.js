@@ -16,7 +16,7 @@ export default (agenda) => {
     //copy below
 
     const user = await User.findOne({ _id: userTemp.userId })
-    const id = new mongoose.Types.ObjectId(user.userId)
+    const id = new mongoose.Types.ObjectId(user._id)
 
     let locations
     if (!locationsQuery) {

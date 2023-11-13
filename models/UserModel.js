@@ -15,6 +15,11 @@ const UserSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    settings: {
+      receiveInventoryWarningEmails: Boolean,
+      defaultInventoryWarningLevel: Number,
+      defaultDiscountOptIn: Boolean,
+    },
     role: {
       type: String,
       enum: ['user', 'admin'],

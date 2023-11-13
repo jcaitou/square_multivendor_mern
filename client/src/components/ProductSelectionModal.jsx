@@ -36,9 +36,6 @@ function ProductSelectionModal({
     })
   }
 
-  console.log(loadedProducts)
-  console.log(user)
-
   return (
     <Modal
       {...props}

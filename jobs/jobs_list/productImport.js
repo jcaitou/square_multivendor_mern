@@ -22,6 +22,7 @@ export default (agenda) => {
       filename: fileName,
       fileUrl,
       fileActionId,
+      defaultInventoryWarningLevel,
     } = job.attrs.data
 
     let processedIds = [''],
@@ -52,6 +53,15 @@ export default (agenda) => {
       console.log('file exists but error reading data')
       return
     }
+
+    const locationOverrides = vendorLocations.map((location) => {
+      return {
+        locationId: location,
+        trackInventory: true,
+        inventoryAlertType: 'LOW_QUANTITY',
+        inventoryAlertThreshold: defaultInventoryWarningLevel,
+      }
+    })
 
     for (let i = 0; i < productUpdateData.length; i++) {
       if (productUpdateData[i].productId) {
@@ -198,6 +208,11 @@ export default (agenda) => {
               },
             }
 
+            if (defaultInventoryWarningLevel > 0) {
+              newVariation.itemVariationData.locationOverrides =
+                locationOverrides
+            }
+
             organizedProducts[i][j].variationId = `#product${i}_variation${j}`
             currProductVariations.push(newVariation)
           }
@@ -272,6 +287,13 @@ export default (agenda) => {
             },
           })
         )
+
+        if (defaultInventoryWarningLevel > 0) {
+          for (let i = 0; i < newProductVariations.length; i++) {
+            newProductVariations[i].itemVariationData.locationOverrides =
+              locationOverrides
+          }
+        }
 
         let newProductObject = {
           type: 'ITEM',

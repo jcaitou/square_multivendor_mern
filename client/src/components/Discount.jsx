@@ -29,7 +29,7 @@ const Discount = ({
     toDate = new Date(
       discount.pricingRuleData.validUntilDate + 'T23:59:59+08:00'
     )
-    const dateOffset = 24 * 60 * 60 * 1000 * 1
+    const dateOffset = 24 * 60 * 60 * 1000 * 7
     decisionDate.setTime(fromDate.getTime() - dateOffset)
 
     if (today >= fromDate && today <= toDate) {

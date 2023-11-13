@@ -27,10 +27,21 @@ export const createOrder = async (req, res) => {
   if (!response?.result?.order?.lineItems) {
     throw new SquareApiError('no variation ID defined')
   }
-
-  //return res.status(StatusCodes.CREATED).json({ msg })
-
   let hasError = false
+
+  //below is for sending inventory warnings
+  const lineItemIds = response.result.order.lineItems.map(
+    (item) => item.catalogObjectId
+  )
+  const inventoryCountResponse =
+    await squareClient.inventoryApi.batchRetrieveInventoryCounts({
+      catalogObjectIds: lineItemIds,
+      locationIds: [response.result.order.locationId],
+    })
+  agenda.now('inventory warning', {
+    counts: inventoryCountResponse.result.counts,
+  })
+  //above is for sending inventory warnings
 
   const orderItemsPromise = response.result.order.lineItems.map(
     async (item) => {
@@ -166,9 +177,9 @@ export const updateOrder = async (req, res) => {
 export const inventoryUpdate = async (req, res) => {
   const counts = req.body.data.object['inventory_counts']
 
-  agenda.now('inventory warning', {
-    counts,
-  })
+  // agenda.now('inventory warning', {
+  //   counts,
+  // })
 
   return res.status(StatusCodes.OK).json({ msg: 'ok' })
 }

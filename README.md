@@ -60,6 +60,9 @@ Static page content:
 -how to import products
 -how to import inventory
 
+Next clean refresh:
+-orders export: select inputs should start from when the user is created
+
 administrative functions
 Adding new user:
 -only doable with 'admin' role

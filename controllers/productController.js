@@ -8,8 +8,9 @@ import {
   SquareApiError,
 } from '../errors/customError.js'
 import JSONBig from 'json-bigint'
+import User from '../models/UserModel.js'
 
-const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
+// const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
 
 export const getAllProducts = async (req, res) => {
   const { search, cursor } = req.query
@@ -52,10 +53,13 @@ export const getAllProducts = async (req, res) => {
 }
 
 export const upsertProduct = async (req, res) => {
-  console.log(req.body)
   const key = nanoid()
   const productData = req.body
   const today = new Date(Date.now())
+
+  const user = await User.findOne({ _id: req.user.userId })
+
+  const vendorLocations = req.user.locations
 
   // /* refactor this into product input validation */
   // if (productData.variations.length < 1) {
@@ -110,7 +114,25 @@ export const upsertProduct = async (req, res) => {
   }
   productData.itemData.categoryId = req.user.squareId
 
-  // console.log(productData)
+  if (
+    productData.id == '#newitem' &&
+    user.settings.defaultInventoryWarningLevel > 0
+  ) {
+    var locationOverrides = vendorLocations.map((location) => {
+      return {
+        locationId: location,
+        trackInventory: true,
+        inventoryAlertType: 'LOW_QUANTITY',
+        inventoryAlertThreshold: user.settings.defaultInventoryWarningLevel,
+      }
+    })
+
+    for (let i = 0; i < productData.itemData.variations.length; i++) {
+      productData.itemData.variations[i].itemVariationData.locationOverrides =
+        locationOverrides
+    }
+  }
+  // console.log(productData.itemData.variations)
   // return res.status(StatusCodes.CREATED).json({ productData })
 
   const response = await squareClient.catalogApi.upsertCatalogObject({
@@ -153,7 +175,6 @@ export const upsertProduct = async (req, res) => {
           idempotencyKey: inventoryKey,
           changes: inventoryChanges,
         })
-      console.log(inventoryResponse.result)
       res.status(StatusCodes.CREATED).json({ parsedResponse })
     } catch (error) {
       console.log(error)
@@ -186,24 +207,22 @@ export const getProduct = async (req, res, next) => {
   /*refactor above */
 }
 
-export const updateProduct = async (req, res, next) => {
-  const key = nanoid()
-  const productData = req.body
+// export const updateProduct = async (req, res, next) => {
+//   const key = nanoid()
+//   const productData = req.body
 
-  console.log(productData)
-
-  try {
-    const response = await squareClient.catalogApi.upsertCatalogObject({
-      idempotencyKey: key,
-      object: productData,
-    })
-    const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
-    res.status(StatusCodes.OK).json({ parsedResponse })
-  } catch (error) {
-    console.log(error)
-    throw new SquareApiError('Square API error trying to update product')
-  }
-}
+//   try {
+//     const response = await squareClient.catalogApi.upsertCatalogObject({
+//       idempotencyKey: key,
+//       object: productData,
+//     })
+//     const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
+//     res.status(StatusCodes.OK).json({ parsedResponse })
+//   } catch (error) {
+//     console.log(error)
+//     throw new SquareApiError('Square API error trying to update product')
+//   }
+// }
 
 export const deleteProduct = async (req, res, next) => {
   const { id: productID } = req.params

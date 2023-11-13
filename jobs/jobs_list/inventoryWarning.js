@@ -9,7 +9,7 @@ export default (agenda) => {
     const { counts } = job.attrs.data
 
     //copy below into agenda:
-    for (let i = 0; i < counts.length; i++) {
+    jobLoop: for (let i = 0; i < counts.length; i++) {
       if ((counts[i]['catalog_object_type'] = 'ITEM_VARIATION')) {
         const catalogObjectId = counts[i]['catalog_object_id']
 
@@ -23,6 +23,10 @@ export default (agenda) => {
           retrieveResponse.result.object.customAttributeValues['vendor_name']
             .stringValue
         const user = await User.findOne({ name: itemVendor })
+
+        if (user.settings.receiveInventoryWarningEmails === false) {
+          continue
+        }
 
         const itemId = retrieveResponse.result.object.itemVariationData.itemId
 
@@ -83,16 +87,16 @@ export default (agenda) => {
             to: user.email,
             subject: 'Low Stock Warning',
             text: dedent`
-          Dear ${user.name},
+              Dear ${user.name},
 
-          A low-stock warning has just been triggered for the following item:
-          Item: ${productName}
-          Location: ${locationName}
-          SKU: ${itemSku}
-          Quantity: ${counts[i]['quantity']}
+              A low-stock warning has just been triggered for the following item:
+              Item: ${productName}
+              Location: ${locationName}
+              SKU: ${itemSku}
+              Quantity: ${counts[i]['quantity']}
 
-          Makers2
-          `,
+              Makers2
+              `,
           }
 
           transporter.sendMail(message, (err, info) => {
