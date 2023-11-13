@@ -113,6 +113,8 @@ export const upsertProduct = async (req, res) => {
     },
   }
   productData.itemData.categoryId = req.user.squareId
+  productData.presentAtAllLocations = false
+  productData.presentAtLocationIds = vendorLocations
 
   if (
     productData.id == '#newitem' &&
@@ -130,9 +132,11 @@ export const upsertProduct = async (req, res) => {
     for (let i = 0; i < productData.itemData.variations.length; i++) {
       productData.itemData.variations[i].itemVariationData.locationOverrides =
         locationOverrides
+      productData.itemData.variations[i].presentAtAllLocations = false
+      productData.itemData.variations[i].presentAtLocationIds = vendorLocations
     }
   }
-  // console.log(productData.itemData.variations)
+
   // return res.status(StatusCodes.CREATED).json({ productData })
 
   const response = await squareClient.catalogApi.upsertCatalogObject({

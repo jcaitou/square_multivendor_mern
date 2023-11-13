@@ -67,7 +67,8 @@ const Discount = ({
               className={`discount-status status-${status.replace(' ', '-')}`}
             >
               <p>{status}</p>
-              {status != 'always active' && (
+              {((storewide && status !== 'ended') ||
+                (!storewide && status != 'always active')) && (
                 <div className='discount-dates'>
                   <p>Starts: {discount.pricingRuleData.validFromDate}</p>
                   <p>Ends: {discount.pricingRuleData.validUntilDate}</p>

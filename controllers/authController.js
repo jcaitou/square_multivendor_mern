@@ -7,6 +7,7 @@ import { squareClient } from '../utils/squareUtils.js'
 import { SquareApiError } from '../errors/customError.js'
 import { nanoid } from 'nanoid'
 import { transporter } from '../middleware/nodemailerMiddleware.js'
+import dedent from 'dedent-js'
 
 export const register = async (req, res) => {
   let newUserObj = req.body
@@ -40,17 +41,23 @@ export const register = async (req, res) => {
 
   const user = await User.create(newUserObj)
 
+  const emailText = dedent`
+    Dear ${newUserObj.name},
+
+    Your account has been created.
+    Name: ${newUserObj.name}
+    Email: ${newUserObj.email}
+    Password: ${newPassword}
+
+    Please remember to change your password as soon as possible.
+
+    Makers2
+    `
   let message = {
     from: 'from-example@email.com',
     to: newUserObj.email,
     subject: 'Welcome to Makers2!',
-    text: `Your account has been created.\n\n
-    Name: ${newUserObj.name}\n
-    Email: ${newUserObj.email}\n
-    Password: ${newPassword}\n\n
-
-    Please remember to change your password as soon as possible.
-    `,
+    text: emailText,
   }
   transporter.sendMail(message, (err, info) => {
     if (err) {

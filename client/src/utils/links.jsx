@@ -12,6 +12,7 @@ import {
   MdUploadFile,
   MdOutlinePassword,
   MdOutlineBarChart,
+  MdSettings,
 } from 'react-icons/md'
 
 const links = [
@@ -22,9 +23,9 @@ const links = [
   { text: 'discounts', path: 'discounts', icon: <MdOutlineDiscount /> },
   { text: 'imports', path: 'file-actions', icon: <MdUploadFile /> },
   {
-    text: 'change password',
-    path: 'change-password',
-    icon: <MdOutlinePassword />,
+    text: 'settings',
+    path: 'settings',
+    icon: <MdSettings />,
   },
 ]
 

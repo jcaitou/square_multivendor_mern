@@ -12,12 +12,18 @@ import {
   validatePasswordInput,
   validatePasswordUpdateInput,
 } from '../middleware/validationMiddleware.js'
-
-import { authenticateUser } from '../middleware/authMiddleware.js'
+import {
+  authorizePermissions,
+  authenticateUser,
+} from '../middleware/authMiddleware.js'
 
 const router = Router()
 
-router.post('/register', validateRegisterInput, register)
+router.post('/register', authenticateUser, [
+  authorizePermissions('admin'),
+  validateRegisterInput,
+  register,
+])
 router.post('/register-specific', registerSpecific) //only for adding specific user info during testing phase
 router.post(
   '/update-password',

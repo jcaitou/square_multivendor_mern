@@ -9,14 +9,19 @@ import {
   getApplicationStats,
   updateUser,
   updateUserSettings,
+  updateUserLocations,
 } from '../controllers/userController.js'
 
 router.get('/current-user', getCurrentUser)
-router.get('/admin/app-stats', [
-  authorizePermissions('admin'),
-  getApplicationStats,
-])
-router.patch('/update-user', validateUpdateUserInput, updateUser)
+// router.get('/admin/app-stats', [
+//   authorizePermissions('admin'),
+//   getApplicationStats,
+// ])
+// router.patch('/update-user', validateUpdateUserInput, updateUser)
 router.patch('/update-user-settings', updateUserSettings)
+router.patch('/update-user-locations', [
+  authorizePermissions('admin'),
+  updateUserLocations,
+])
 
 export default router

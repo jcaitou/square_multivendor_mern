@@ -19,8 +19,6 @@ import uploadRouter from './routers/uploadRouter.js'
 import exportRouter from './routers/exportRouter.js'
 import webhookRouter from './routers/webhookRouter.js'
 
-import testOrdersRouter from './routers/testOrdersRouter.js'
-
 //public
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -57,7 +55,10 @@ app.use('/api/v1/users', authenticateUser, userRouter)
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/webhooks', webhookRouter)
 
+//only for use while testing:
+import testOrdersRouter from './routers/testOrdersRouter.js'
 app.use('/api/v1/generate-orders', testOrdersRouter)
+//delele above later
 
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, './client/dist', 'index.html'))

@@ -129,7 +129,7 @@ const router = createBrowserRouter([
           },
 
           {
-            path: 'change-password',
+            path: 'settings',
             element: <ChangePassword />,
             action: changePasswordAction,
           },

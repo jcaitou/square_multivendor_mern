@@ -43,6 +43,20 @@ export const getStorewideDiscounts = async (req, res) => {
     }
   }
 
+  parsedResponse.sort((a, b) => {
+    const indexA = a.findIndex((el) => el.type == 'PRICING_RULE')
+    const indexB = b.findIndex((el) => el.type == 'PRICING_RULE')
+    const startDateA = day(
+      a[indexA].pricingRuleData.validFromDate,
+      'YYYY-MM-DD'
+    )
+    const startDateB = day(
+      b[indexB].pricingRuleData.validFromDate,
+      'YYYY-MM-DD'
+    )
+    return startDateA.isBefore(startDateB) ? -1 : 1
+  })
+
   // if (response.result) {
   //   parsedResponse = JSONBig.parse(JSONBig.stringify(response.result.objects))
   // } else {

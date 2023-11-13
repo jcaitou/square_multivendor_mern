@@ -10,6 +10,7 @@ export const loader = async ({ request }) => {
     const {
       data: { storewideDiscounts },
     } = await customFetch.get('/discounts/storewide')
+
     return {
       data,
       storewideDiscounts,

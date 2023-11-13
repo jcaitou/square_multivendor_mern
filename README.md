@@ -53,6 +53,10 @@ User settings:
 
 -monthly reports: sales summary, expected revnue
 
+When a user adds a new location:
+-allow their products to be sold at that location
+-initialize all their products to 0 at that location
+
 Static page content:
 -how to import products
 -how to import inventory

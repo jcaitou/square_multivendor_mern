@@ -197,6 +197,8 @@ export default (agenda) => {
                   amount: organizedProducts[i][j].variationPrice || 0,
                   currency: 'CAD',
                 },
+                presentAtAllLocations: false,
+                presentAtLocationIds: vendorLocations,
                 trackInventory: true,
                 availableForBooking: false,
                 stockable: true,
@@ -280,6 +282,8 @@ export default (agenda) => {
               availableForBooking: false,
               stockable: true,
             },
+            presentAtAllLocations: false,
+            presentAtLocationIds: vendorLocations,
             customAttributeValues: {
               vendor_name: {
                 stringValue: squareName,
@@ -303,6 +307,8 @@ export default (agenda) => {
               stringValue: squareName,
             },
           },
+          presentAtAllLocations: false,
+          presentAtLocationIds: vendorLocations,
           itemData: {
             name: organizedProducts[i][0].productName,
             variations: newProductVariations,

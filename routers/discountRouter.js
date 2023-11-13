@@ -1,12 +1,6 @@
 import { Router } from 'express'
 const router = Router()
 import {
-  validateProductCreateInput,
-  validateProductUpdateInput,
-  validateProductIdParam,
-} from '../middleware/validationMiddleware.js'
-
-import {
   getAllDiscounts,
   getStorewideDiscounts,
   storewideOptInOut,

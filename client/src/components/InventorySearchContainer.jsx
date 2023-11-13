@@ -10,6 +10,7 @@ const InventorySearchContainer = () => {
   const { searchValues } = useAllInventoryContext()
   const { search, sort, locations } = searchValues
   const { user } = useDashboardContext()
+  console.log(user)
   const submit = useSubmit()
 
   const debounce = (onChange) => {
@@ -77,55 +78,61 @@ const InventorySearchContainer = () => {
             //   submit(e.currentTarget.form)
             // }}
           />
-          <div className='form-row'>
-            <label htmlFor='locations' className='form-label'>
-              locations
-            </label>
-            <div className='locations-search'>
-              <div className='location-search-group'>
-                <input
-                  type='checkbox'
-                  value='locations-all'
-                  defaultChecked={
-                    locations.length === 0 ||
-                    locations.length === user.locations.length
-                  }
-                  onChange={(e) => {
-                    locationChangeAll(e)
-                  }}
-                />
-                <label htmlFor='locations-all'>All</label>
-              </div>
-              {user.locations.map((itemValue) => {
-                return (
-                  <div
-                    className='location-search-group'
-                    key={`select-${itemValue}`}
-                  >
+
+          {user.locations.length > 1 && (
+            <>
+              <div className='form-row'>
+                <label htmlFor='locations' className='form-label'>
+                  locations
+                </label>
+                <div className='locations-search'>
+                  <div className='location-search-group'>
                     <input
                       type='checkbox'
-                      name='locations'
-                      id={`locations-${itemValue}`}
-                      value={itemValue}
+                      value='locations-all'
                       defaultChecked={
-                        locations.length === 0 || locations.includes(itemValue)
+                        locations.length === 0 ||
+                        locations.length === user.locations.length
                       }
                       onChange={(e) => {
-                        locationChange(e)
+                        locationChangeAll(e)
                       }}
                     />
-                    <label htmlFor={`locations-${itemValue}`}>
-                      {
-                        ALL_LOCATIONS.find((el) => {
-                          return el.id === itemValue
-                        }).name
-                      }
-                    </label>
+                    <label htmlFor='locations-all'>All</label>
                   </div>
-                )
-              })}
-            </div>
-          </div>
+                  {user.locations.map((itemValue) => {
+                    return (
+                      <div
+                        className='location-search-group'
+                        key={`select-${itemValue}`}
+                      >
+                        <input
+                          type='checkbox'
+                          name='locations'
+                          id={`locations-${itemValue}`}
+                          value={itemValue}
+                          defaultChecked={
+                            locations.length === 0 ||
+                            locations.includes(itemValue)
+                          }
+                          onChange={(e) => {
+                            locationChange(e)
+                          }}
+                        />
+                        <label htmlFor={`locations-${itemValue}`}>
+                          {
+                            ALL_LOCATIONS.find((el) => {
+                              return el.id === itemValue
+                            }).name
+                          }
+                        </label>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
         <button className='btn btn-block form-btn'>submit</button>
       </Form>
