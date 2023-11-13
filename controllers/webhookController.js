@@ -33,13 +33,9 @@ export const createOrder = async (req, res) => {
   const lineItemIds = response.result.order.lineItems.map(
     (item) => item.catalogObjectId
   )
-  const inventoryCountResponse =
-    await squareClient.inventoryApi.batchRetrieveInventoryCounts({
-      catalogObjectIds: lineItemIds,
-      locationIds: [response.result.order.locationId],
-    })
-  agenda.now('inventory warning', {
-    counts: inventoryCountResponse.result.counts,
+  agenda.schedule('2 minutes from now', 'inventory warning', {
+    lineItemIds,
+    locationIds: [response.result.order.locationId],
   })
   //above is for sending inventory warnings
 
@@ -174,12 +170,12 @@ export const updateOrder = async (req, res) => {
   return res.status(StatusCodes.OK).json({ newOrder })
 }
 
-export const inventoryUpdate = async (req, res) => {
-  const counts = req.body.data.object['inventory_counts']
+// export const inventoryUpdate = async (req, res) => {
+//   const counts = req.body.data.object['inventory_counts']
 
-  // agenda.now('inventory warning', {
-  //   counts,
-  // })
+//   agenda.now('inventory warning', {
+//     counts,
+//   })
 
-  return res.status(StatusCodes.OK).json({ msg: 'ok' })
-}
+//   return res.status(StatusCodes.OK).json({ msg: 'ok' })
+// }

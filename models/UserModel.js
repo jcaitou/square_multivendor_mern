@@ -16,9 +16,18 @@ const UserSchema = new mongoose.Schema(
       },
     ],
     settings: {
-      receiveInventoryWarningEmails: Boolean,
-      defaultInventoryWarningLevel: Number,
-      defaultDiscountOptIn: Boolean,
+      receiveInventoryWarningEmails: {
+        type: Boolean,
+        default: true,
+      },
+      defaultInventoryWarningLevel: {
+        type: Number,
+        default: 5,
+      },
+      defaultDiscountOptIn: {
+        type: Boolean,
+        default: false,
+      },
     },
     role: {
       type: String,

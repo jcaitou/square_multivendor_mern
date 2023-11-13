@@ -6,12 +6,23 @@ import dedent from 'dedent-js'
 
 export default (agenda) => {
   agenda.define('inventory warning', async function (job, done) {
-    const { counts } = job.attrs.data
+    const { lineItemIds, locationIds } = job.attrs.data
 
     //copy below into agenda:
+
+    const inventoryCountResponse =
+      await squareClient.inventoryApi.batchRetrieveInventoryCounts({
+        catalogObjectIds: lineItemIds,
+        locationIds: locationIds,
+      })
+
+    const counts = inventoryCountResponse.result.counts
+
     jobLoop: for (let i = 0; i < counts.length; i++) {
       if ((counts[i]['catalog_object_type'] = 'ITEM_VARIATION')) {
-        const catalogObjectId = counts[i]['catalog_object_id']
+        const catalogObjectId = counts[i]['catalogObjectId']
+
+        console.log(catalogObjectId)
 
         const retrieveResponse =
           await squareClient.catalogApi.retrieveCatalogObject(
@@ -25,6 +36,7 @@ export default (agenda) => {
         const user = await User.findOne({ name: itemVendor })
 
         if (user.settings.receiveInventoryWarningEmails === false) {
+          console.log('skipped')
           continue
         }
 
@@ -45,14 +57,17 @@ export default (agenda) => {
         const locationInfo =
           retrieveResponse.result.object.itemVariationData.locationOverrides
         const relevantLocation = locationInfo.find((el) => {
-          return el.locationId === counts[i]['location_id']
+          return el.locationId === counts[i]['locationId']
         })
 
+        console.log(Number(counts[i]['quantity']))
+        console.log(Number(relevantLocation?.inventoryAlertThreshold))
+
         const locationName = ALL_LOCATIONS.find((el) => {
-          return el.id === counts[i]['location_id']
+          return el.id === counts[i]['locationId']
         }).name
 
-        if (counts[i]['quantity'] == 0) {
+        if (Number(counts[i]['quantity']) == 0) {
           //warning email that item is out of stock
           let message = {
             from: 'makers2@email.com',
@@ -78,7 +93,7 @@ export default (agenda) => {
           })
         } else if (
           relevantLocation?.inventoryAlertThreshold &&
-          counts[i]['quantity'] ==
+          Number(counts[i]['quantity']) ==
             Number(relevantLocation?.inventoryAlertThreshold)
         ) {
           //warning email for low stock

@@ -11,6 +11,11 @@ import { transporter } from '../middleware/nodemailerMiddleware.js'
 export const register = async (req, res) => {
   let newUserObj = req.body
   newUserObj.role = 'user'
+  newUserObj.settings = {
+    receiveInventoryWarningEmails: true,
+    defaultInventoryWarningLevel: 5,
+    defaultDiscountOptIn: false,
+  }
 
   const response = await squareClient.catalogApi.upsertCatalogObject({
     idempotencyKey: nanoid(),

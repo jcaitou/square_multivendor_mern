@@ -19,3 +19,14 @@ export const updateUser = async (req, res) => {
   const updatedUser = await User.findByIdAndUpdate(req.user.userId, obj)
   res.status(StatusCodes.OK).json({ msg: 'user updated' })
 }
+
+export const updateUserSettings = async (req, res) => {
+  const { key, value } = req.body
+  const user = await User.findOne({ _id: req.user.userId })
+  const settings = { ...user.settings }
+  settings[key] = value
+  const updatedUser = await User.findByIdAndUpdate(req.user.userId, {
+    settings: settings,
+  })
+  res.status(StatusCodes.OK).json({ msg: 'user updated' })
+}

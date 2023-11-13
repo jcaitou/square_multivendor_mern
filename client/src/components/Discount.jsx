@@ -1,4 +1,5 @@
 import Wrapper from '../assets/wrappers/Discount'
+import SwitchCheckboxWrapper from '../assets/wrappers/SwitchCheckbox'
 import { RiEditLine, RiDeleteBinLine } from 'react-icons/ri'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDashboardContext } from '../pages/DashboardLayout'
@@ -77,19 +78,23 @@ const Discount = ({
         </header>
         <footer className='actions'>
           {storewide ? (
-            <input
-              className='switch-checkbox'
-              type='checkbox'
-              defaultChecked={
-                productSet.productSetData.productIdsAny &&
-                productSet.productSetData.productIdsAny.includes(user.squareId)
-              }
-              name={productSet?.id}
-              id={productSet?.id}
-              value={productSet?.id}
-              disabled={isSubmitting || today >= decisionDate}
-              onChange={(e) => discountAction(e)}
-            />
+            <SwitchCheckboxWrapper>
+              <input
+                className='switch-checkbox'
+                type='checkbox'
+                defaultChecked={
+                  productSet.productSetData.productIdsAny &&
+                  productSet.productSetData.productIdsAny.includes(
+                    user.squareId
+                  )
+                }
+                name={productSet?.id}
+                id={productSet?.id}
+                value={productSet?.id}
+                disabled={isSubmitting || today >= decisionDate}
+                onChange={(e) => discountAction(e)}
+              />
+            </SwitchCheckboxWrapper>
           ) : (
             <>
               <Link

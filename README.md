@@ -41,6 +41,11 @@ Added front end function:
 -export orders
 Added email hook:
 -when item hits low stock warning/out of stock
+-when storewide discount is created
+User settings:
+-default inventory warning level (eg. 3)
+-default discount opt-in? - added setting but not implemented, not sure if it is really needed because maybe we should get the vendor's explicit confirmation every time
+-choose whether or not to receive inventory warnings
 
 React Query\*\*\*\*
 
@@ -48,13 +53,7 @@ Functions:
 -export all barcodes as zip file (?)
 
 Email hooks:
--when storewide discount is created
 -monthly reports: sales summary, expected revnue
-
-User settings:
--default inventory warning level (eg. 3)
--default discount opt-in?
--choose whether or not to receive inventory warnings
 
 Static page content:
 -how to import products
