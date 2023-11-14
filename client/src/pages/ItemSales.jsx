@@ -6,10 +6,38 @@ import Wrapper from '../assets/wrappers/ItemSales'
 import PageBtnContainer from '../components/PageBtnContainer'
 import { SalesSearchContainer } from '../components'
 import { useContext, createContext } from 'react'
-import day from 'dayjs'
+import { useQuery } from '@tanstack/react-query'
 
-export const loader = async ({ request }) => {
-  try {
+const allItemSalesQuery = (params) => {
+  const { startDate, endDate, sort, page } = params
+  return {
+    queryKey: [
+      'itemsales',
+      page ?? 1,
+      startDate ?? '',
+      endDate ?? '',
+      sort ?? 'a-z',
+    ],
+    queryFn: async () => {
+      const { data } = await customFetch.get(
+        '/orders/sales',
+        {
+          params,
+        },
+        {
+          paramsSerializer: {
+            indexes: null,
+          },
+        }
+      )
+      return data
+    },
+  }
+}
+
+export const loader =
+  (queryClient) =>
+  async ({ request }) => {
     const p = new URL(request.url).searchParams
     let locations = []
     p.forEach((value, key) => {
@@ -18,39 +46,61 @@ export const loader = async ({ request }) => {
       }
     })
     const params = Object.fromEntries([...p.entries()])
+    params.locations = locations
 
-    const { data } = await customFetch.get(
-      '/orders/sales',
-      {
-        params: {
-          ...params,
-          locations: locations,
-        },
-      },
-      {
-        paramsSerializer: {
-          indexes: null,
-        },
-      }
-    )
-
+    await queryClient.ensureQueryData(allItemSalesQuery(params))
     return {
-      data,
       searchValues: { ...params, locations: locations },
     }
-  } catch (error) {
-    toast.error(error?.response?.data?.msg)
-    return error
   }
-}
+
+// export const loader = async ({ request }) => {
+//   try {
+//     const p = new URL(request.url).searchParams
+//     let locations = []
+//     p.forEach((value, key) => {
+//       if (key === 'locations') {
+//         locations.push(value)
+//       }
+//     })
+//     const params = Object.fromEntries([...p.entries()])
+
+//     const { data } = await customFetch.get(
+//       '/orders/sales',
+//       {
+//         params: {
+//           ...params,
+//           locations: locations,
+//         },
+//       },
+//       {
+//         paramsSerializer: {
+//           indexes: null,
+//         },
+//       }
+//     )
+
+//     return {
+//       data,
+//       searchValues: { ...params, locations: locations },
+//     }
+//   } catch (error) {
+//     toast.error(error?.response?.data?.msg)
+//     return error
+//   }
+// }
 
 const ItemSalesContext = createContext()
 
 const ItemSales = () => {
+  const { searchValues } = useLoaderData()
   const {
     data: { currentPage, sales, numOfPages, totalItems },
-    searchValues,
-  } = useLoaderData()
+  } = useQuery(allItemSalesQuery(searchValues))
+  // const {
+  //   data: { currentPage, sales, numOfPages, totalItems },
+  //   searchValues,
+  // } = useLoaderData()
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',

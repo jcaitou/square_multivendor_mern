@@ -1,6 +1,7 @@
 export { default as Logo } from './Logo'
 export { default as SubmitBtn } from './SubmitBtn'
 export { default as FormRow } from './FormRow'
+export { default as FormRowSearch } from './FormRowSearch'
 export { default as UncontrolledFormRow } from './UncontrolledFormRow'
 export { default as FormRowSelect } from './FormRowSelect'
 export { default as FormRowCheckbox } from './FormRowCheckbox'

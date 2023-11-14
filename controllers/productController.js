@@ -16,7 +16,7 @@ export const getAllProducts = async (req, res) => {
   const { search, cursor } = req.query
 
   let searchQuery = {
-    limit: 100,
+    limit: 10,
     customAttributeFilters: [
       {
         key: 'vendor_name',
@@ -45,6 +45,7 @@ export const getAllProducts = async (req, res) => {
     } else {
       parsedResponse = []
     }
+
     res.status(StatusCodes.OK).json(parsedResponse)
   } catch (error) {
     console.log(error)

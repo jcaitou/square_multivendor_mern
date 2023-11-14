@@ -10,10 +10,43 @@ import { useContext, createContext, useState } from 'react'
 import { ALL_LOCATIONS } from '../../../utils/constants'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
+import { useQuery } from '@tanstack/react-query'
 import day from 'dayjs'
 
-export const loader = async ({ request }) => {
-  try {
+const allLocationsArray = ALL_LOCATIONS.map((el) => el.id)
+
+const allOrdersQuery = (searchValues) => {
+  const { startDate, endDate, sort, locations } = searchValues
+  const locationsQueryKey =
+    !locations || locations.length == 0 ? allLocationsArray : locations
+  return {
+    queryKey: [
+      'orders',
+      startDate ?? '',
+      endDate ?? '',
+      sort ?? 'dateDesc',
+      locationsQueryKey,
+    ],
+    queryFn: async () => {
+      const { data } = await customFetch.get(
+        '/orders',
+        {
+          params: searchValues,
+        },
+        {
+          paramsSerializer: {
+            indexes: null,
+          },
+        }
+      )
+      return data
+    },
+  }
+}
+
+export const loader =
+  (queryClient) =>
+  async ({ request }) => {
     const p = new URL(request.url).searchParams
     let locations = []
     p.forEach((value, key) => {
@@ -22,35 +55,65 @@ export const loader = async ({ request }) => {
       }
     })
     const params = Object.fromEntries([...p.entries()])
+    params.locations = locations
 
-    const { data } = await customFetch.get(
-      '/orders',
-      {
-        params: {
-          ...params,
-          locations: locations,
-        },
-      },
-      {
-        paramsSerializer: {
-          indexes: null,
-        },
-      }
-    )
-
+    await queryClient.ensureQueryData(allOrdersQuery(params))
     return {
-      data,
       searchValues: { ...params, locations: locations },
     }
-  } catch (error) {
-    toast.error(error?.response?.data?.msg)
-    return error
   }
-}
+
+// export const loader = async ({ request }) => {
+//   try {
+//     const p = new URL(request.url).searchParams
+//     let locations = []
+//     p.forEach((value, key) => {
+//       if (key === 'locations') {
+//         locations.push(value)
+//       }
+//     })
+//     const params = Object.fromEntries([...p.entries()])
+
+//     const { data } = await customFetch.get(
+//       '/orders',
+//       {
+//         params: {
+//           ...params,
+//           locations: locations,
+//         },
+//       },
+//       {
+//         paramsSerializer: {
+//           indexes: null,
+//         },
+//       }
+//     )
+
+//     return {
+//       data,
+//       searchValues: { ...params, locations: locations },
+//     }
+//   } catch (error) {
+//     toast.error(error?.response?.data?.msg)
+//     return error
+//   }
+// }
 
 const AllOrdersContext = createContext()
 
 const AllOrders = () => {
+  // const {
+  // data: {
+  //   currentPage,
+  //   orders,
+  //   numOfPages,
+  //   totalOrders,
+  //   ordersMoneyTotal,
+  //   monthToDateTotal,
+  // },
+  //   searchValues,
+  // } = useLoaderData()
+  const { searchValues } = useLoaderData()
   const {
     data: {
       currentPage,
@@ -60,8 +123,7 @@ const AllOrders = () => {
       ordersMoneyTotal,
       monthToDateTotal,
     },
-    searchValues,
-  } = useLoaderData()
+  } = useQuery(allOrdersQuery(searchValues))
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',

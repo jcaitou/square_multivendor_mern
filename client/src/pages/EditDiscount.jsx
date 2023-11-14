@@ -38,7 +38,7 @@ export const loader = async ({ request, params }) => {
   }
 }
 
-const EditDiscount = () => {
+const EditDiscount = ({ queryClient }) => {
   const {
     items: products,
     categories,
@@ -61,8 +61,6 @@ const EditDiscount = () => {
   const originalProductSet = discount.objects.filter(
     (el) => el.type === 'PRODUCT_SET'
   )[0]
-
-  console.log(originalProductSet)
 
   const navigate = useNavigate()
   // const navigation = useNavigation()
@@ -112,9 +110,9 @@ const EditDiscount = () => {
   const handleAddProductSubmit = async (event) => {
     event.preventDefault()
     var formData = new FormData(document.querySelector('#discount-form'))
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}, ${pair[1]}`)
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(`${pair[0]}, ${pair[1]}`)
+    // }
 
     let pricingRuleData = {
       name: `[${user.name}] ${formData.get('title')}`,
@@ -189,21 +187,13 @@ const EditDiscount = () => {
       productSetData: productSetData,
     }
 
-    console.log(
-      pricingRuleData,
-      discountData,
-      productSetData,
-      formData.get('min-spend')
-    )
-
-    console.log([pricingRuleObj, discountObj, productSetObj])
-
     try {
       setIsSubmitting(true)
       let response = await customFetch.patch(
         `/discounts/${originalProductSet.id}`,
         { pricingRuleObj, discountObj, productSetObj }
       )
+      queryClient.invalidateQueries(['discounts'])
       toast.success('Discount edited successfully')
       if (response.status >= 200 && response.status <= 299) {
         setTimeout(() => {

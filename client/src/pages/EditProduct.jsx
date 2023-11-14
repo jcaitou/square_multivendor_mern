@@ -11,19 +11,47 @@ import customFetch from '../utils/customFetch'
 import _ from 'lodash'
 import Barcode from 'react-barcode'
 import { Fragment } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-export const loader = async ({ params }) => {
-  try {
-    const { data } = await customFetch.get(`/products/${params.id}`)
-    return data
-  } catch (error) {
-    toast.error(error.response.data.msg)
-    return redirect('/dashboard/all-products')
+const singleProductQuery = (id) => {
+  return {
+    queryKey: ['product', id],
+    queryFn: async () => {
+      const { data } = await customFetch.get(`/products/${id}`)
+      return data
+    },
   }
 }
 
-const EditProduct = () => {
-  const { object: product } = useLoaderData()
+export const loader =
+  (queryClient) =>
+  async ({ params }) => {
+    try {
+      await queryClient.ensureQueryData(singleProductQuery(params.id))
+      return params.id
+    } catch (error) {
+      toast.error(error?.response?.data?.msg)
+      return redirect('/dashboard/all-products')
+    }
+  }
+
+// export const loader = async ({ params }) => {
+//   try {
+//     const { data } = await customFetch.get(`/products/${params.id}`)
+//     return data
+//   } catch (error) {
+//     toast.error(error.response.data.msg)
+//     return redirect('/dashboard/all-products')
+//   }
+// }
+
+const EditProduct = ({ queryClient }) => {
+  // const { object: product } = useLoaderData()
+  const id = useLoaderData()
+
+  const {
+    data: { object: product },
+  } = useQuery(singleProductQuery(id))
   const [productTitle, setProductTitle] = useState(product.itemData.name)
   function generateInitialProductVariations(product) {
     return product.itemData.variations.map((variation) => {
@@ -63,6 +91,8 @@ const EditProduct = () => {
     try {
       setIsSubmitting(true)
       let response = await customFetch.delete(`/products/${product.id}`)
+      queryClient.invalidateQueries(['products'])
+      queryClient.invalidateQueries(['inventory'])
       setIsSubmitting(false)
       toast.success('Product deleted successfully')
       navigate('/dashboard/all-products', { replace: true })
@@ -150,6 +180,9 @@ const EditProduct = () => {
     try {
       setIsSubmitting(true)
       await customFetch.patch(`/products/${productData.id}`, productData)
+      queryClient.invalidateQueries(['products'])
+      queryClient.invalidateQueries(['product', id])
+      queryClient.invalidateQueries(['inventory'])
       setIsSubmitting(false)
       toast.success('Product edited successfully')
       navigate('/dashboard/all-products', { replace: true })

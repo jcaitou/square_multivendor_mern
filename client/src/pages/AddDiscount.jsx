@@ -33,7 +33,7 @@ export const loader = async ({ request }) => {
   }
 }
 
-const AddDiscount = () => {
+const AddDiscount = ({ queryClient }) => {
   const { items: products, cursor: cursorTemp, categories } = useLoaderData()
   const { user } = useDashboardContext()
   const [loadedProducts, setLoadedProducts] = useState(
@@ -153,7 +153,7 @@ const AddDiscount = () => {
         discountObj,
         productSetObj,
       })
-
+      queryClient.invalidateQueries(['discounts'])
       toast.success('Discount added successfully')
       if (response.status >= 200 && response.status <= 299) {
         setTimeout(() => {

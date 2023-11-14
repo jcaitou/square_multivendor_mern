@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
 
-const AddProduct = () => {
+const AddProduct = ({ queryClient }) => {
   const navigate = useNavigate()
   // const navigation = useNavigation()
   // const isSubmitting = navigation.state === 'submitting'
@@ -92,9 +92,12 @@ const AddProduct = () => {
     try {
       setIsSubmitting(true)
       let response = await customFetch.post('/products', newProductObject)
+      queryClient.invalidateQueries(['products'])
+      queryClient.invalidateQueries(['inventory'])
+      queryClient.invalidateQueries(['stats'])
       setIsSubmitting(false)
       toast.success('Product added successfully')
-      if (response.status >= 200 && response.status <= 299) {
+      if (response?.status >= 200 && response?.status <= 299) {
         setTimeout(() => {
           navigate('/dashboard/all-products', { replace: true })
         }, '1000')

@@ -4,29 +4,58 @@ import customFetch from '../utils/customFetch'
 import { FileAction } from '../components'
 import Wrapper from '../assets/wrappers/ProductsContainer'
 import PageBtnContainer from '../components/PageBtnContainer'
+import { useQuery } from '@tanstack/react-query'
 
-export const loader = async ({ request }) => {
-  try {
+const allFileActionsQuery = (params) => {
+  const { page } = params
+  return {
+    queryKey: ['fileactions', page ?? 1],
+    queryFn: async () => {
+      const { data } = await customFetch.get('/uploads', {
+        params,
+      })
+      return data
+    },
+  }
+}
+
+export const loader =
+  (queryClient) =>
+  async ({ request }) => {
     const params = Object.fromEntries([
       ...new URL(request.url).searchParams.entries(),
     ])
 
-    const { data } = await customFetch.get('/uploads')
-
+    await queryClient.ensureQueryData(allFileActionsQuery(params))
     return {
-      data,
       searchValues: { ...params },
     }
-  } catch (error) {
-    toast.error(error?.response?.data?.msg)
-    return error
   }
-}
+
+// export const loader = async ({ request }) => {
+//   try {
+//     const params = Object.fromEntries([
+//       ...new URL(request.url).searchParams.entries(),
+//     ])
+
+//     const { data } = await customFetch.get('/uploads')
+
+//     return {
+//       data,
+//       searchValues: { ...params },
+//     }
+//   } catch (error) {
+//     toast.error(error?.response?.data?.msg)
+//     return error
+//   }
+// }
 
 const FileActions = () => {
+  const { searchValues } = useLoaderData()
   const {
-    data: { currentPage, fileActions, numOfPages, totalItems },
-  } = useLoaderData()
+    data: { totalItems, numOfPages, currentPage, fileActions },
+  } = useQuery(allFileActionsQuery(searchValues))
+
   return (
     <Wrapper>
       {fileActions.length === 0 && <h2>No items to display...</h2>}

@@ -3,30 +3,56 @@ import { DiscountsContainer } from '../components'
 import customFetch from '../utils/customFetch'
 import { useLoaderData } from 'react-router-dom'
 import { useContext, createContext } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-export const loader = async ({ request }) => {
+const allDiscountsQuery = {
+  queryKey: ['discounts'],
+  queryFn: async () => {
+    const { data: vendorDiscounts } = await customFetch.get('/discounts')
+    const { data: storewideDiscounts } = await customFetch.get(
+      '/discounts/storewide'
+    )
+    return { vendorDiscounts, storewideDiscounts }
+  },
+}
+
+export const loader = (queryClient) => async () => {
   try {
-    const { data } = await customFetch.get('/discounts')
-    const {
-      data: { storewideDiscounts },
-    } = await customFetch.get('/discounts/storewide')
-
-    return {
-      data,
-      storewideDiscounts,
-    }
+    return await queryClient.ensureQueryData(allDiscountsQuery)
   } catch (error) {
     toast.error(error?.response?.data?.msg)
     return error
   }
 }
 
+// export const loader = async ({ request }) => {
+//   try {
+//     const { data } = await customFetch.get('/discounts')
+//     const {
+//       data: { storewideDiscounts },
+//     } = await customFetch.get('/discounts/storewide')
+
+//     return {
+//       data,
+//       storewideDiscounts,
+//     }
+//   } catch (error) {
+//     toast.error(error?.response?.data?.msg)
+//     return error
+//   }
+// }
+
 const AllDiscountsContext = createContext()
 
 const AllDiscounts = () => {
-  const { data, storewideDiscounts } = useLoaderData()
+  const { vendorDiscounts, storewideDiscounts } =
+    useQuery(allDiscountsQuery)?.data
+  // console.log(data)
+  // const { data, storewideDiscounts } = useLoaderData()
   return (
-    <AllDiscountsContext.Provider value={{ data, storewideDiscounts }}>
+    <AllDiscountsContext.Provider
+      value={{ vendorDiscounts, storewideDiscounts }}
+    >
       <DiscountsContainer />
     </AllDiscountsContext.Provider>
   )

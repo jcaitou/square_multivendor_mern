@@ -1,4 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
   HomeLayout,
   Landing,
@@ -46,6 +48,14 @@ import { loader as statsLoader } from './pages/Stats'
 
 checkDefaultTheme()
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+})
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -59,32 +69,35 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <Login />,
-        action: loginAction,
+        action: loginAction(queryClient),
       },
       {
         path: 'dashboard',
-        element: <DashboardLayout />,
-        loader: dashboardLoader,
+        element: <DashboardLayout queryClient={queryClient} />,
+        loader: dashboardLoader(queryClient),
         children: [
           {
             index: true,
             element: <Stats />,
-            loader: statsLoader,
+            loader: statsLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
-          { path: 'stats', element: <Stats />, loader: statsLoader },
+          // { path: 'stats', element: <Stats />, loader: statsLoader },
           {
             path: 'add-product',
-            element: <AddProduct />,
+            element: <AddProduct queryClient={queryClient} />,
           },
           {
             path: 'all-products',
-            element: <AllProducts />,
-            loader: allProductsLoader,
+            element: <AllProducts queryClient={queryClient} />,
+            loader: allProductsLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: 'edit-product/:id',
-            element: <EditProduct />,
-            loader: editProductLoader,
+            element: <EditProduct queryClient={queryClient} />,
+            loader: editProductLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: 'delete-product/:id',
@@ -92,45 +105,50 @@ const router = createBrowserRouter([
           },
           {
             path: 'inventory',
-            element: <Inventory />,
-            loader: allInventoryLoader,
+            element: <Inventory queryClient={queryClient} />,
+            loader: allInventoryLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: 'discounts',
             element: <AllDiscounts />,
-            loader: allDiscountsLoader,
+            loader: allDiscountsLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: 'add-discount',
-            element: <AddDiscount />,
+            element: <AddDiscount queryClient={queryClient} />,
             loader: addDiscountLoader,
+            errorElement: <ErrorElement />,
           },
           {
             path: 'edit-discount/:id',
-            element: <EditDiscount />,
+            element: <EditDiscount queryClient={queryClient} />,
             loader: editDiscountLoader,
+            errorElement: <ErrorElement />,
           },
           {
             path: 'all-orders',
             element: <AllOrders />,
-            loader: allOrdersLoader,
+            loader: allOrdersLoader(queryClient),
             errorElement: <ErrorElement />,
           },
           {
             path: 'item-sales',
             element: <ItemSales />,
-            loader: itemSalesLoader,
+            loader: itemSalesLoader(queryClient),
             errorElement: <ErrorElement />,
           },
           {
             path: 'file-actions',
             element: <FileActions />,
-            loader: fileActionLoader,
+            loader: fileActionLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
 
           {
             path: 'settings',
-            element: <ChangePassword />,
+            element: <ChangePassword queryClient={queryClient} />,
             action: changePasswordAction,
           },
           {
@@ -160,6 +178,11 @@ const router = createBrowserRouter([
 ])
 
 const App = () => {
-  return <RouterProvider router={router} />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
 }
 export default App

@@ -192,7 +192,7 @@ export const getProductsInventory = async (req, res) => {
 
   const organizedResponse = {
     organizedItems: responseObj,
-    organizedItemsOriginal: responseObj,
+    // organizedItemsOriginal: responseObj,
   }
 
   const parsedResponse = JSONBig.parse(JSONBig.stringify(organizedResponse))

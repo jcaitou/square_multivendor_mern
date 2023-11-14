@@ -21,12 +21,11 @@ export const action = async ({ request, params }) => {
   }
 }
 
-const ChangePassword = () => {
+const ChangePassword = ({ queryClient }) => {
   const { user } = useDashboardContext()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigation = useNavigation()
   const isNavSubmitting = navigation.state === 'submitting'
-  console.log(user)
 
   const debounce = (onChange) => {
     let timeout
@@ -50,9 +49,6 @@ const ChangePassword = () => {
   // }
 
   const changeSettingsAction = async (e) => {
-    console.log(e.target.name)
-    console.log(e.target.type === 'checkbox')
-
     let setting = { key: e.target.name }
     if (e.target.type === 'checkbox') {
       setting.value = e.target.checked
@@ -60,14 +56,13 @@ const ChangePassword = () => {
       setting.value = e.target.value
     }
 
-    console.log(setting)
-
     try {
       setIsSubmitting(true)
       let response = await customFetch.patch(
         '/users/update-user-settings',
         setting
       )
+      queryClient.invalidateQueries(['user'])
       toast.success('User setting updated')
       setIsSubmitting(false)
     } catch (error) {

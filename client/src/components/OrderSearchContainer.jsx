@@ -10,15 +10,21 @@ const OrderSearchContainer = () => {
   const { searchValues } = useAllOrdersContext()
   const { startDate, endDate, sort, locations } = searchValues
   const { user } = useDashboardContext()
+  const submit = useSubmit()
 
   const locationChangeAll = (e) => {
+    const form = e.currentTarget.form
     const locationInputs = document.querySelectorAll('input[name=locations]')
     locationInputs.forEach((input) => {
       input.checked = e.currentTarget.checked
     })
+    if (e.currentTarget.checked) {
+      submit(form)
+    }
   }
 
   const locationChange = (e) => {
+    const form = e.currentTarget.form
     const locationInputs = document.querySelectorAll('input[name=locations]')
     const allLocationInput = document.querySelector(
       'input[value=locations-all]'
@@ -31,6 +37,8 @@ const OrderSearchContainer = () => {
       }
     }
     allLocationInput.checked = prop
+
+    submit(form)
   }
 
   const sortLabels = {
@@ -53,6 +61,7 @@ const OrderSearchContainer = () => {
                 name='startDate'
                 defaultValue={startDate}
                 onChange={(e) => {
+                  const form = e.currentTarget.form
                   const selectedDate = e.target.value
                   const dateInput = document.querySelector(
                     'input[name=endDate]'
@@ -62,6 +71,7 @@ const OrderSearchContainer = () => {
                   } else {
                     dateInput.setAttribute('min', selectedDate)
                   }
+                  submit(form)
                 }}
               />
             </div>
@@ -73,6 +83,7 @@ const OrderSearchContainer = () => {
                 name='endDate'
                 defaultValue={endDate}
                 onChange={(e) => {
+                  const form = e.currentTarget.form
                   const selectedDate = e.target.value
                   const dateInput = document.querySelector(
                     'input[name=startDate]'
@@ -82,6 +93,7 @@ const OrderSearchContainer = () => {
                   } else {
                     dateInput.setAttribute('max', selectedDate)
                   }
+                  submit(form)
                 }}
               />
             </div>
@@ -92,6 +104,9 @@ const OrderSearchContainer = () => {
             defaultValue={sort || 'a-z'}
             listLabels={sortLabels}
             list={[...Object.values(ORDERS_SORT_BY)]}
+            onChange={(e) => {
+              submit(e.currentTarget.form)
+            }}
           />
 
           {user.locations.length > 1 && (
@@ -148,8 +163,11 @@ const OrderSearchContainer = () => {
               </div>
             </>
           )}
+          <Link to='/dashboard/all-orders' className='btn form-btn delete-btn'>
+            Reset Search Values
+          </Link>
         </div>
-        <button className='btn btn-block form-btn'>submit</button>
+        {/* <button className='btn btn-block form-btn'>submit</button> */}
       </Form>
     </Wrapper>
   )

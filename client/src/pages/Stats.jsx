@@ -1,5 +1,6 @@
 import { AreaChartContainer, BarChartContainer, StatItem } from '../components'
 import customFetch from '../utils/customFetch'
+import { useQuery } from '@tanstack/react-query'
 import { useLoaderData } from 'react-router-dom'
 import { MdOutlineLocationOn } from 'react-icons/md'
 import { BsCashCoin, BsBasket } from 'react-icons/bs'
@@ -9,16 +10,38 @@ import StatRowWrapper from '../assets/wrappers/StatsContainer'
 import { useDashboardContext } from './DashboardLayout'
 import day from 'dayjs'
 
-export const loader = async () => {
-  try {
+const statsQuery = {
+  queryKey: ['stats'],
+  queryFn: async () => {
     const response = await customFetch.get('/orders/stats')
     return response.data
-  } catch (error) {
-    return error
-  }
+  },
 }
 
+export const loader = (queryClient) => async () => {
+  const data = await queryClient.ensureQueryData(statsQuery)
+  return null
+}
+
+// export const loader = async () => {
+//   try {
+//     const response = await customFetch.get('/orders/stats')
+//     return response.data
+//   } catch (error) {
+//     return error
+//   }
+// }
+
 const Stats = () => {
+  // const {
+  //   allTimeBestsellers,
+  //   allTimeTotal,
+  //   lastMonthBestsellers,
+  //   monthToDateTotal,
+  //   sixMonthsSales,
+  //   productCount,
+  // } = useLoaderData()
+  const { data } = useQuery(statsQuery)
   const {
     allTimeBestsellers,
     allTimeTotal,
@@ -26,7 +49,7 @@ const Stats = () => {
     monthToDateTotal,
     sixMonthsSales,
     productCount,
-  } = useLoaderData()
+  } = data
   const { user } = useDashboardContext()
 
   const CADMoney = new Intl.NumberFormat('en-CA', {

@@ -68,6 +68,7 @@ const SalesSearchContainer = () => {
                 name='startDate'
                 defaultValue={startDate}
                 onChange={(e) => {
+                  const form = e.currentTarget.form
                   const selectedDate = e.target.value
                   const dateInput = document.querySelector(
                     'input[name=endDate]'
@@ -77,6 +78,7 @@ const SalesSearchContainer = () => {
                   } else {
                     dateInput.setAttribute('min', selectedDate)
                   }
+                  submit(form)
                 }}
               />
             </div>
@@ -88,6 +90,7 @@ const SalesSearchContainer = () => {
                 name='endDate'
                 defaultValue={endDate}
                 onChange={(e) => {
+                  const form = e.currentTarget.form
                   const selectedDate = e.target.value
                   const dateInput = document.querySelector(
                     'input[name=startDate]'
@@ -97,6 +100,7 @@ const SalesSearchContainer = () => {
                   } else {
                     dateInput.setAttribute('max', selectedDate)
                   }
+                  submit(form)
                 }}
               />
             </div>
@@ -125,9 +129,15 @@ const SalesSearchContainer = () => {
             defaultValue={sort || 'a-z'}
             list={[...Object.values(SALES_SORT_BY)]}
             listLabels={sortLabels}
+            onChange={(e) => {
+              submit(e.currentTarget.form)
+            }}
           />
+          <Link to='/dashboard/item-sales' className='btn form-btn delete-btn'>
+            Reset Search Values
+          </Link>
         </div>
-        <button className='btn btn-block form-btn'>submit</button>
+        {/* <button className='btn btn-block form-btn'>submit</button> */}
       </Form>
     </Wrapper>
   )

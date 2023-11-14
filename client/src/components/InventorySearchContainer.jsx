@@ -1,4 +1,4 @@
-import { FormRow, FormRowSelect, FormRowCheckbox } from '.'
+import { FormRowSearch, FormRow, FormRowSelect, FormRowCheckbox } from '.'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { Form, useSubmit, Link } from 'react-router-dom'
 import { Fragment } from 'react'
@@ -10,28 +10,35 @@ const InventorySearchContainer = () => {
   const { searchValues } = useAllInventoryContext()
   const { search, sort, locations } = searchValues
   const { user } = useDashboardContext()
-  console.log(user)
   const submit = useSubmit()
 
-  const debounce = (onChange) => {
+  const debounce = (onChange, preFunction = null) => {
     let timeout
     return (e) => {
       const form = e.currentTarget.form
+      if (preFunction) {
+        preFunction(e)
+      }
       clearTimeout(timeout)
       timeout = setTimeout(() => {
         onChange(form)
-      }, 2000)
+      }, 1000)
     }
   }
 
   const locationChangeAll = (e) => {
+    const form = e.currentTarget.form
     const locationInputs = document.querySelectorAll('input[name=locations]')
     locationInputs.forEach((input) => {
       input.checked = e.currentTarget.checked
     })
+    if (e.currentTarget.checked) {
+      submit(form)
+    }
   }
 
   const locationChange = (e) => {
+    const form = e.currentTarget.form
     const locationInputs = document.querySelectorAll('input[name=locations]')
     const allLocationInput = document.querySelector(
       'input[value=locations-all]'
@@ -44,9 +51,8 @@ const InventorySearchContainer = () => {
       }
     }
     allLocationInput.checked = prop
-    debounce((form) => {
-      submit(form)
-    })
+
+    submit(form)
   }
 
   const sortLabels = {
@@ -60,23 +66,22 @@ const InventorySearchContainer = () => {
     <Wrapper>
       <Form className='form'>
         <div className='form-center'>
-          <FormRow
+          <FormRowSearch
             type='search'
             name='search'
             defaultValue={search}
-            required={false}
-            // onChange={debounce((form) => {
-            //   submit(form)
-            // })}
+            onChange={debounce((form) => {
+              submit(form)
+            })}
           />
           <FormRowSelect
             name='sort'
             defaultValue={sort || 'a-z'}
             listLabels={sortLabels}
             list={[...Object.values(INVENTORY_SORT_BY)]}
-            // onChange={(e) => {
-            //   submit(e.currentTarget.form)
-            // }}
+            onChange={(e) => {
+              submit(e.currentTarget.form)
+            }}
           />
 
           {user.locations.length > 1 && (
@@ -94,9 +99,7 @@ const InventorySearchContainer = () => {
                         locations.length === 0 ||
                         locations.length === user.locations.length
                       }
-                      onChange={(e) => {
-                        locationChangeAll(e)
-                      }}
+                      onChange={(e) => locationChangeAll(e)}
                     />
                     <label htmlFor='locations-all'>All</label>
                   </div>
@@ -115,9 +118,10 @@ const InventorySearchContainer = () => {
                             locations.length === 0 ||
                             locations.includes(itemValue)
                           }
-                          onChange={(e) => {
-                            locationChange(e)
-                          }}
+                          // onChange={debounce((form) => {
+                          //   submit(form)
+                          // }, locationChange)}
+                          onChange={(e) => locationChange(e)}
                         />
                         <label htmlFor={`locations-${itemValue}`}>
                           {
@@ -133,8 +137,12 @@ const InventorySearchContainer = () => {
               </div>
             </>
           )}
+          <Link to='/dashboard/inventory' className='btn form-btn delete-btn'>
+            Reset Search Values
+          </Link>
         </div>
-        <button className='btn btn-block form-btn'>submit</button>
+
+        {/* <button className='btn btn-block form-btn'>submit</button> */}
       </Form>
     </Wrapper>
   )

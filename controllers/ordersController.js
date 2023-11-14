@@ -216,8 +216,14 @@ export const getSalesbyItem = async (req, res) => {
     dateQuery.$gte = new Date(startDate)
   }
   if (endDate) {
-    dateQuery.$lte = new Date(endDate)
+    const formattedEndDate = day(endDate)
+      .hour(23)
+      .minute(59)
+      .second(59)
+      .millisecond(990)
+    dateQuery.$lte = formattedEndDate.toDate()
   }
+
   if (startDate || endDate) {
     matchObj.orderDate = dateQuery
   }

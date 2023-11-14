@@ -7,6 +7,8 @@ import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
 import mongoose from 'mongoose'
 import cloudinary from 'cloudinary'
+import helmet from 'helmet'
+import mongoSanitize from 'express-mongo-sanitize'
 
 //routers
 import productRouter from './routers/productRouter.js'
@@ -41,9 +43,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.static(path.resolve(__dirname, './client/dist')))
-
 app.use(cookieParser())
 app.use(express.json())
+app.use(helmet())
+app.use(mongoSanitize())
 
 app.use('/api/v1/products', authenticateUser, productRouter)
 app.use('/api/v1/inventory', authenticateUser, inventoryRouter)

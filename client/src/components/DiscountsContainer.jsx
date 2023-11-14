@@ -12,8 +12,8 @@ import PageBtnContainer from '../components/PageBtnContainer'
 
 const DiscountsContainer = () => {
   const {
-    data: { discounts, numOfPages, totalItems, currentPage },
-    storewideDiscounts,
+    vendorDiscounts: { discounts, numOfPages, totalItems, currentPage },
+    storewideDiscounts: { storewideDiscounts },
   } = useAllDiscountsContext()
   const { user } = useDashboardContext()
   const navigate = useNavigate()

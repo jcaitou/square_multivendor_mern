@@ -1,4 +1,4 @@
-import { FormRow, FormRowSelect } from '.'
+import { FormRowSearch, FormRow, FormRowSelect } from '.'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { Form, useSubmit, Link } from 'react-router-dom'
 import { useAllProductsContext } from '../pages/AllProducts'
@@ -15,7 +15,7 @@ const SearchContainer = () => {
       clearTimeout(timeout)
       timeout = setTimeout(() => {
         onChange(form)
-      }, 2000)
+      }, 1000)
     }
   }
 
@@ -23,22 +23,22 @@ const SearchContainer = () => {
     <Wrapper>
       <Form className='form'>
         <div className='form-center'>
-          <FormRow
+          <FormRowSearch
             type='search'
             name='search'
-            defaultValue=''
-            // onChange={debounce((form) => {
-            //   submit(form)
-            // })}
+            defaultValue={search}
+            onChange={debounce((form) => {
+              submit(form)
+            })}
           />
 
-          {/* <Link
+          <Link
             to='/dashboard/all-products'
             className='btn form-btn delete-btn'
           >
             Reset Search Values
-          </Link> */}
-          <button className='btn btn-block form-btn'>submit</button>
+          </Link>
+          {/* <button className='btn btn-block form-btn'>submit</button> */}
         </div>
       </Form>
     </Wrapper>

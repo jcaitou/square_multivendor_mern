@@ -14,7 +14,7 @@ import customFetch from '../utils/customFetch'
 import { CSVLink } from 'react-csv'
 import PageBtnContainer from './CursorPageBtnContainer'
 
-const ProductsContainer = () => {
+const ProductsContainer = ({ queryClient }) => {
   const {
     data: { organizedItems: products },
     searchValues,
@@ -134,6 +134,7 @@ const ProductsContainer = () => {
     try {
       setLoading(true)
       await customFetch.post('/inventory/update', inventoryChanges)
+      queryClient.invalidateQueries(['inventory'])
       setLoading(false)
       navigate(`/dashboard/inventory?${params.toString()}`, { replace: true })
       toast.success('Inventory edited successfully')
@@ -187,6 +188,7 @@ const ProductsContainer = () => {
     try {
       setLoading(true)
       await customFetch.post('/inventory/update-warning', warningChanges)
+      queryClient.invalidateQueries(['inventory'])
       setLoading(false)
       navigate(`/dashboard/inventory?${params.toString()}`, { replace: true })
       toast.success('Warning levels edited successfully')
@@ -212,6 +214,7 @@ const ProductsContainer = () => {
     try {
       setLoading(true)
       let response = await customFetch.post('/uploads', data)
+      queryClient.invalidateQueries(['fileactions'])
       toast.success('Batch update has started')
       setLoading(false)
       setImportInventoryModalShow(false)

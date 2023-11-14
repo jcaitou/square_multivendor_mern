@@ -11,7 +11,7 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import PageBtnContainer from './CursorPageBtnContainer'
 
-const ProductsContainer = () => {
+const ProductsContainer = ({ queryClient }) => {
   const { data } = useAllProductsContext()
   const products = data?.items || []
   const cursor = data?.cursor
@@ -78,6 +78,7 @@ const ProductsContainer = () => {
     try {
       setLoading(true)
       let response = await customFetch.post('/uploads', data)
+      queryClient.invalidateQueries(['fileactions'])
       toast.success('Batch update has started')
       setImportProductsModalShow(false)
       setImportFile(null)
@@ -101,6 +102,8 @@ const ProductsContainer = () => {
       try {
         setLoading(true)
         let response = await customFetch.delete(`/products/${singleIdToDelete}`)
+        queryClient.invalidateQueries(['products'])
+        queryClient.invalidateQueries(['inventory'])
         setLoading(false)
         toast.success('Product deleted successfully')
         setSingleIdToDelete(null)
@@ -144,6 +147,8 @@ const ProductsContainer = () => {
           '/products/batch-delete',
           productData
         )
+        queryClient.invalidateQueries(['products'])
+        queryClient.invalidateQueries(['inventory'])
         setLoading(false)
         toast.success('Products deleted successfully')
         setConfirmDeleteModalShow(false)
