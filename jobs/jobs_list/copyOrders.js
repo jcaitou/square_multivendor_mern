@@ -54,7 +54,6 @@ export default (agenda) => {
       console.log(cursor)
 
       for (let i = 0; i < allOrders.length; i++) {
-        console.log(allOrders[i])
         const existingOrder = await Order.findOne({ orderId: allOrders[i].id })
         const currOrderVersion = allOrders[i]?.version || 0
         if (existingOrder && currOrderVersion == existingOrder.version) {
