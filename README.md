@@ -9,11 +9,6 @@ Currently, two official plugins are available:
 
 # Need to add:
 
-User (Vendor) model:
--multiple locations
--how to register a new vendor?
--disabled mode (can only view products/orders, cannot edit)
-
 Store model (?):
 -active locations
 -payments to vendors
@@ -96,4 +91,7 @@ Create first account (User with administrator role, needs to have locations arra
 
 .env access keys for MONGO_URL and SQUARE_ACCESS_TOKEN
 squareUtils.js changed environment to Environment.Production
-disable mailtrap
+change location name constants in constants.js
+
+disable mailtrap and enable sending from domain (need to edit all email addresses)
+changed endpoint of all webhooks in square

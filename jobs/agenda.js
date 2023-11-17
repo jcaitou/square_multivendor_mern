@@ -19,6 +19,7 @@ import inventoryExport from './jobs_list/inventoryExport.js'
 import orderExport from './jobs_list/orderExport.js'
 import inventoryWarning from './jobs_list/inventoryWarning.js'
 import newDiscountEmail from './jobs_list/newDiscountEmail.js'
+import copyOrders from './jobs_list/copyOrders.js'
 productImport(agenda)
 inventoryImport(agenda)
 productExport(agenda)
@@ -26,8 +27,13 @@ inventoryExport(agenda)
 orderExport(agenda)
 inventoryWarning(agenda)
 newDiscountEmail(agenda)
+copyOrders(agenda)
 
-agenda.on('ready', async () => await agenda.start())
+agenda.on('ready', async () => {
+  const copyOrdersTask = agenda.create('copy orders')
+  await agenda.start()
+  await copyOrdersTask.repeatEvery('5 minutes').save()
+})
 
 let graceful = () => {
   agenda.stop(() => process.exit(0))

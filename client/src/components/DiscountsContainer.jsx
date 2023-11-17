@@ -97,6 +97,9 @@ const DiscountsContainer = () => {
           </div>
         </div>
         {user.role === 'user' && <h2>Storewide Discounts</h2>}
+        {user.role === 'user' && storewideDiscounts.length <= 0 && (
+          <p>No storewide discounts available</p>
+        )}
         {user.role === 'user' && storewideDiscounts.length > 0 && (
           <div className='discounts'>
             {storewideDiscounts.map((storewideDiscount) => {

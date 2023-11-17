@@ -146,25 +146,38 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max)
 }
 
+// needed later:
+import Order from '../models/OrderModel.js'
+import User from '../models/UserModel.js'
+import day from 'dayjs'
+
 export const copyOrders = async (req, res) => {
+  const startDate = day().subtract(2, 'day')
+  // const oldOrders = await Order.find({
+  //   updatedAt: { $gte: startDate.toDate() },
+  // }).sort('-updatedAt')
+  // return res.status(StatusCodes.OK).json({ oldOrders })
+
   const locationIds = ALL_LOCATIONS.map((el) => {
-    return el.name
+    return el.id
   })
-  console.log(locationIds)
 
   const searchOrders = await squareClient.ordersApi.searchOrders({
     locationIds: locationIds,
     query: {
       filter: {
+        stateFilter: {
+          states: ['COMPLETED'],
+        },
         dateTimeFilter: {
           updatedAt: {
-            startAt: '2023-11-01',
+            startAt: startDate.format('YYYY-MM-DD'),
           },
         },
       },
       sort: {
         sortField: 'UPDATED_AT',
-        sortOrder: 'DESC',
+        sortOrder: 'ASC',
       },
     },
   })
@@ -172,7 +185,82 @@ export const copyOrders = async (req, res) => {
   if (!searchOrders) {
     throw new SquareApiError('error while calling the Square API')
   }
+
+  const allOrders = searchOrders.result.orders
+
+  for (let i = 0; i < allOrders.length; i++) {
+    const existingOrder = await Order.findOne({ orderId: allOrders[i].id })
+    const currOrderVersion = allOrders[i]?.version || 0
+    if (existingOrder && currOrderVersion == existingOrder.version) {
+      //if existing order is there and version is the same then just skip it
+      continue
+    }
+
+    const orderItemsPromise = allOrders[i].lineItems.map(async (item) => {
+      if (!item?.catalogObjectId) {
+        // throw new SquareApiError('no variation ID defined')
+        hasError = true
+        return res.status(StatusCodes.CREATED).json({ msg: 'ok' })
+      }
+      const itemResponse = await squareClient.catalogApi.retrieveCatalogObject(
+        item.catalogObjectId,
+        false
+      )
+
+      let vendorName =
+        itemResponse.result.object.customAttributeValues.vendor_name.stringValue
+      const user = await User.findOne({ name: vendorName })
+
+      if (!user) {
+        hasError = true
+        throw new NotFoundError('user not found')
+      }
+
+      let variationName
+
+      if (item.variationName !== '' && item.name === item.variationName) {
+        variationName = ''
+      } else {
+        variationName = item.variationName
+      }
+
+      return {
+        itemName: item.name,
+        itemVariationName: variationName,
+        itemVariationId: item.catalogObjectId,
+        itemId: itemResponse.result.object.itemVariationData.itemId,
+        itemSku: itemResponse.result.object.itemVariationData.sku,
+        quantity: item.quantity,
+        basePrice: Number(item.basePriceMoney.amount),
+        totalDiscount: Number(item.totalDiscountMoney.amount),
+        totalMoney: Number(
+          item.totalMoney.amount - item.totalServiceChargeMoney.amount
+        ),
+        itemVendor: user._id,
+      }
+    })
+    const orderItems = await Promise.all(orderItemsPromise)
+    const orderInfo = {
+      orderId: allOrders[i].id,
+      location: allOrders[i].locationId,
+      orderDate: allOrders[i].createdAt,
+      version: allOrders[i]?.version || 0,
+      orderItems: orderItems,
+    }
+
+    let newOrder
+    if (existingOrder) {
+      //find by ID and update
+      newOrder = await Order.findByIdAndUpdate(allOrders[i].id, orderInfo, {
+        new: true,
+      })
+    } else {
+      //create new order
+      newOrder = await Order.create(orderInfo)
+    }
+  }
+
   const parsedResponse = JSONBig.parse(JSONBig.stringify(searchOrders.result))
-  console.log(searchOrders.result)
-  res.status(StatusCodes.OK).json({ parsedResponse })
+  // console.log(searchOrders.result)
+  res.status(StatusCodes.OK).json({ msg: 'ok' })
 }
