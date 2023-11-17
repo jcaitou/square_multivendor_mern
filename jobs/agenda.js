@@ -30,9 +30,9 @@ newDiscountEmail(agenda)
 copyOrders(agenda)
 
 agenda.on('ready', async () => {
-  const copyOrdersTask = agenda.create('copy orders')
+  // const copyOrdersTask = agenda.create('copy orders')
   await agenda.start()
-  await copyOrdersTask.repeatEvery('5 minutes').save()
+  // await copyOrdersTask.repeatEvery('5 minutes').save()
 })
 
 let graceful = () => {
