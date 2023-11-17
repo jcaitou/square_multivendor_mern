@@ -123,7 +123,7 @@ export const getProductsInventory = async (req, res) => {
         productName: catalogItem.itemData.name,
         productId: catalogItem.id,
         variationName: variation.itemVariationData.name,
-        variationSku: variation.itemVariationData.sku,
+        variationSku: variation.itemVariationData.sku.slice(5),
         variationId: variation.id,
         locationQuantities: inventoryAlertCounts,
       }

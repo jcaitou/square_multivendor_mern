@@ -55,6 +55,7 @@ const EditProduct = ({ queryClient }) => {
   const {
     data: { object: product },
   } = useQuery(singleProductQuery(id))
+  console.log(product)
   const [productTitle, setProductTitle] = useState(product.itemData.name)
   function generateInitialProductVariations(product) {
     return product.itemData.variations.map((variation) => {
