@@ -48,6 +48,12 @@ app.use(express.json())
 app.use(helmet())
 app.use(mongoSanitize())
 
+app.set('trust proxy', 1)
+app.get('/ip', (request, response) => response.send(request.ip))
+app.get('/x-forwarded-for', (request, response) =>
+  response.send(request.headers['x-forwarded-for'])
+)
+
 app.use('/api/v1/products', authenticateUser, productRouter)
 app.use('/api/v1/inventory', authenticateUser, inventoryRouter)
 app.use('/api/v1/discounts', authenticateUser, discountRouter)
