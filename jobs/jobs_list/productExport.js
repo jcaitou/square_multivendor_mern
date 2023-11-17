@@ -75,7 +75,7 @@ export default (agenda) => {
         {
           productName: variationsData[i].productName,
           variationName: variationsData[i].variationName,
-          variationSku: variationsData[i].variationSku,
+          variationSku: variationsData[i].variationSku.slice(5),
           variationPrice: Number(variationsData[i].variationPrice) / 100.0,
           productId: variationsData[i].productId,
           variationId: variationsData[i].variationId,
@@ -117,7 +117,7 @@ export default (agenda) => {
           {
             productName: variationsData[i].productName,
             variationName: variationsData[i].variationName,
-            variationSku: variationsData[i].variationSku,
+            variationSku: variationsData[i].variationSku.slice(5),
             variationPrice: Number(variationsData[i].variationPrice) / 100.0,
             productId: variationsData[i].productId,
             variationId: variationsData[i].variationId,
@@ -135,7 +135,7 @@ export default (agenda) => {
     ]
 
     let message = {
-      from: 'from-example@email.com',
+      from: 'mailtrap@jcdevs.site',
       to: user.email,
       subject: 'Export of your products',
       text: 'Your products have finished exporting.',

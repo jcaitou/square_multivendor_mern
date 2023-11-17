@@ -10,13 +10,11 @@ import {
 import JSONBig from 'json-bigint'
 import User from '../models/UserModel.js'
 
-// const vendorLocations = ['LVBCM6VKTYDHH', 'L1NN4715DCC58']
-
 export const getAllProducts = async (req, res) => {
   const { search, cursor } = req.query
 
   let searchQuery = {
-    limit: 10,
+    limit: 100,
     customAttributeFilters: [
       {
         key: 'vendor_name',
@@ -54,95 +52,151 @@ export const getAllProducts = async (req, res) => {
 }
 
 export const upsertProduct = async (req, res) => {
+  const { id: productID } = req.params
   const key = nanoid()
   const productData = req.body
   const today = new Date(Date.now())
 
   const user = await User.findOne({ _id: req.user.userId })
+  const userSku = user.skuId.toString(16).padStart(4, '0')
 
   const vendorLocations = req.user.locations
 
-  // /* refactor this into product input validation */
-  // if (productData.variations.length < 1) {
-  //   console.log('at least one variation is required')
-  // }
-  // /* refactor above */
+  const locationOverrides = vendorLocations.map((location) => {
+    return {
+      locationId: location,
+      trackInventory: true,
+      inventoryAlertType: 'LOW_QUANTITY',
+      inventoryAlertThreshold:
+        user.settings.defaultInventoryWarningLevel > 0
+          ? user.settings.defaultInventoryWarningLevel
+          : 0,
+    }
+  })
 
-  // var newProductVariations = productData.variations.map((variation, index) => ({
-  //   type: 'ITEM_VARIATION',
-  //   id: `#variation${index}`,
-  //   itemVariationData: {
-  //     name: variation.name || productData.name,
-  //     sku: variation.sku || '',
-  //     pricingType: 'FIXED_PRICING',
-  //     priceMoney: {
-  //       amount: variation.price || 0,
-  //       currency: 'CAD',
-  //     },
-  //     trackInventory: true,
-  //     availableForBooking: false,
-  //     stockable: true,
-  //   },
-  // }))
+  let updateObj = productData
+  if (productID) {
+    //there was already an existing product, copy values from productData to existing product
+    const productResponse = await squareClient.catalogApi.retrieveCatalogObject(
+      productID,
+      false
+    )
+    const itemVendor =
+      productResponse.result.object.customAttributeValues['vendor_name']
+        .stringValue
+    if (itemVendor != req.user.name) {
+      throw new UnauthorizedError('not authorized to access this route')
+    }
+    updateObj = productResponse.result.object
+    updateObj.itemData.name = productData.itemData.name
+    for (let i = 0; i < productData.itemData.variations.length; i++) {
+      let isNewVariation = false
+      if (productData.itemData.variations[i].id.includes('#variation')) {
+        isNewVariation = true
+      }
+      if (!isNewVariation) {
+        const currIndex = updateObj.itemData.variations.findIndex((el) => {
+          return el.id === productData.itemData.variations[i].id
+        })
 
-  // var newObject = {
-  //   type: 'ITEM',
-  //   id: '#newitem',
-  //   customAttributeValues: {
-  //     vendor_name: {
-  //       stringValue: req.user.name,
-  //     },
-  //   },
-  //   itemData: {
-  //     name: productData.name,
-  //     variations: newProductVariations,
-  //     categoryId: req.user.squareId,
-  //   },
-  // }
+        //if the variation is not new, then update the name, SKU, and price of new obj
+        updateObj.itemData.variations[
+          currIndex
+        ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
+        updateObj.itemData.variations[currIndex].itemVariationData.name =
+          productData.itemData.variations[i].itemVariationData.name
+        updateObj.itemData.variations[
+          currIndex
+        ].itemVariationData.priceMoney.amount =
+          productData.itemData.variations[i].itemVariationData.priceMoney.amount
+      } else {
+        //update the old obj, then copy over to new obj
+        productData.itemData.variations[i].customAttributeValues = {
+          vendor_name: {
+            stringValue: req.user.name,
+          },
+        }
+        productData.itemData.variations[
+          i
+        ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
+        productData.itemData.variations[i].itemVariationData.locationOverrides =
+          locationOverrides
+        productData.itemData.variations[i].presentAtAllLocations = false
+        productData.itemData.variations[i].presentAtLocationIds =
+          vendorLocations
 
-  for (let i = 0; i < productData.itemData.variations.length; i++) {
-    productData.itemData.variations[i].customAttributeValues = {
+        updateObj.itemData.variations = [
+          ...updateObj.itemData.variations,
+          productData.itemData.variations[i],
+        ]
+      }
+
+      // if (productData.itemData.variations[i].id.includes('#variation')) {
+      //   productData.itemData.variations[i].customAttributeValues = {
+      //     vendor_name: {
+      //       stringValue: req.user.name,
+      //     },
+      //   }
+      // }
+      // productData.itemData.variations[
+      //   i
+      // ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
+    }
+  } else {
+    //this is a new product
+    updateObj.customAttributeValues = {
       vendor_name: {
         stringValue: req.user.name,
       },
     }
-  }
+    updateObj.itemData.categoryId = req.user.squareId
+    updateObj.presentAtAllLocations = false
+    updateObj.presentAtLocationIds = vendorLocations
 
-  productData.customAttributeValues = {
-    vendor_name: {
-      stringValue: req.user.name,
-    },
-  }
-  productData.itemData.categoryId = req.user.squareId
-  productData.presentAtAllLocations = false
-  productData.presentAtLocationIds = vendorLocations
-
-  if (
-    productData.id == '#newitem' &&
-    user.settings.defaultInventoryWarningLevel > 0
-  ) {
-    var locationOverrides = vendorLocations.map((location) => {
-      return {
-        locationId: location,
-        trackInventory: true,
-        inventoryAlertType: 'LOW_QUANTITY',
-        inventoryAlertThreshold: user.settings.defaultInventoryWarningLevel,
+    for (let i = 0; i < updateObj.itemData.variations.length; i++) {
+      updateObj.itemData.variations[i].customAttributeValues = {
+        vendor_name: {
+          stringValue: req.user.name,
+        },
       }
-    })
-
-    for (let i = 0; i < productData.itemData.variations.length; i++) {
-      productData.itemData.variations[i].itemVariationData.locationOverrides =
+      updateObj.itemData.variations[
+        i
+      ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
+      updateObj.itemData.variations[i].itemVariationData.locationOverrides =
         locationOverrides
-      productData.itemData.variations[i].presentAtAllLocations = false
-      productData.itemData.variations[i].presentAtLocationIds = vendorLocations
+      updateObj.itemData.variations[i].presentAtAllLocations = false
+      updateObj.itemData.variations[i].presentAtLocationIds = vendorLocations
     }
   }
 
-  // return res.status(StatusCodes.CREATED).json({ productData })
+  // if (
+  //   productData.id == '#newitem' &&
+  //   user.settings.defaultInventoryWarningLevel > 0
+  // ) {
+  //   for (let i = 0; i < productData.itemData.variations.length; i++) {
+  //     updateObj.itemData.variations[i].customAttributeValues = {
+  //       vendor_name: {
+  //         stringValue: req.user.name,
+  //       },
+  //     }
+  //     updateObj.itemData.variations[
+  //       i
+  //     ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
+  //     productData.itemData.variations[i].itemVariationData.locationOverrides =
+  //       locationOverrides
+  //     productData.itemData.variations[i].presentAtAllLocations = false
+  //     productData.itemData.variations[i].presentAtLocationIds = vendorLocations
+  //   }
+  // }
+
+  console.log(updateObj)
+
+  // const parsedProduct = JSONBig.parse(JSONBig.stringify(updateObj))
+  // return res.status(StatusCodes.CREATED).json({ parsedProduct, productData })
 
   const response = await squareClient.catalogApi.upsertCatalogObject({
     idempotencyKey: key,
-    object: productData,
+    object: updateObj,
   })
 
   const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))

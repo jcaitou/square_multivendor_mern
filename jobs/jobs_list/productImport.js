@@ -18,6 +18,7 @@ export default (agenda) => {
     const {
       squareName,
       squareId,
+      skuId,
       locations: vendorLocations,
       filename: fileName,
       fileUrl,
@@ -54,6 +55,7 @@ export default (agenda) => {
       return
     }
 
+    const userSku = skuId.toString(16).padStart(4, '0')
     const locationOverrides = vendorLocations.map((location) => {
       return {
         locationId: location,
@@ -185,13 +187,24 @@ export default (agenda) => {
             ].itemVariationData.priceMoney.amount = price
           } else {
             //create a new variation
+            let variationSku
+            if (organizedProducts[i][j].variationSku) {
+              variationSku = organizedProducts[i][j].variationSku.substring(
+                0,
+                25
+              )
+            } else {
+              variationSku = organizedProducts[i][j].variationName
+                .substring(0, 25)
+                .replace(/\s/g, '')
+            }
             let newVariation = {
               type: 'ITEM_VARIATION',
               id: `#product${i}_variation${j}`,
               itemVariationData: {
                 itemId: organizedProducts[i][j].productId,
                 name: organizedProducts[i][j].variationName,
-                sku: organizedProducts[i][j].variationSku || '',
+                sku: `${userSku}-${variationSku}`,
                 pricingType: 'FIXED_PRICING',
                 priceMoney: {
                   amount: organizedProducts[i][j].variationPrice || 0,
@@ -266,30 +279,44 @@ export default (agenda) => {
         }
 
         let newProductVariations = organizedProducts[i].map(
-          (variation, index) => ({
-            type: 'ITEM_VARIATION',
-            id: `#product${i}_variation${index}`,
-            itemVariationData: {
-              itemId: `#new_product${i}`,
-              name: variation.variationName || variation.productName,
-              sku: variation.variationSku || '',
-              pricingType: 'FIXED_PRICING',
-              priceMoney: {
-                amount: variation.variationPrice || 0,
-                currency: 'CAD',
+          (variation, index) => {
+            let variationSku
+            if (variation.variationSku) {
+              variationSku = variation.variationSku.substring(0, 25)
+            } else if (variation.variationName) {
+              variationSku = variation.variationName
+                .substring(0, 25)
+                .replace(/\s/g, '')
+            } else {
+              variationSku = variation.productName
+                .substring(0, 25)
+                .replace(/\s/g, '')
+            }
+            return {
+              type: 'ITEM_VARIATION',
+              id: `#product${i}_variation${index}`,
+              itemVariationData: {
+                itemId: `#new_product${i}`,
+                name: variation.variationName || variation.productName,
+                sku: `${userSku}-${variationSku}`,
+                pricingType: 'FIXED_PRICING',
+                priceMoney: {
+                  amount: variation.variationPrice || 0,
+                  currency: 'CAD',
+                },
+                trackInventory: true,
+                availableForBooking: false,
+                stockable: true,
               },
-              trackInventory: true,
-              availableForBooking: false,
-              stockable: true,
-            },
-            presentAtAllLocations: false,
-            presentAtLocationIds: vendorLocations,
-            customAttributeValues: {
-              vendor_name: {
-                stringValue: squareName,
+              presentAtAllLocations: false,
+              presentAtLocationIds: vendorLocations,
+              customAttributeValues: {
+                vendor_name: {
+                  stringValue: squareName,
+                },
               },
-            },
-          })
+            }
+          }
         )
 
         if (defaultInventoryWarningLevel > 0) {

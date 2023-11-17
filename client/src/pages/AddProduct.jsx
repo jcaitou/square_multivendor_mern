@@ -134,6 +134,7 @@ const AddProduct = ({ queryClient }) => {
                 type='text'
                 name='sku'
                 labelText='SKU'
+                maxLength={25}
                 value={variation.sku}
                 onChange={(e) => handleVariationChange(e, index)}
               />

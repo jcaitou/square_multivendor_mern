@@ -43,8 +43,6 @@ User settings:
 -default discount opt-in? - added setting but not implemented, not sure if it is really needed because maybe we should get the vendor's explicit confirmation every time
 -choose whether or not to receive inventory warnings
 
-# React Query
-
 # Functions:
 
 -export all barcodes as zip file (?)
@@ -52,11 +50,6 @@ User settings:
 # Email hooks:
 
 -monthly reports: sales summary, expected revnue
-
-# When a user adds a new location:
-
--allow their products to be sold at that location
--initialize all their products to 0 at that location
 
 Static page content:
 -how to import products
@@ -69,10 +62,38 @@ administrative functions
 Adding new user:
 -only doable with 'admin' role
 Adding first admin user: the first user also need a Square category (for discounts), can leave the product list empty
+Adding a new location to a vendor that already sells at one location (ie. change from 1 to 2 locations)
 -Creating storewide discounts via admin user: add auto email?
 
 When setting up from scratch:
 
 1. Create custom attribute in Square for "vendor_name"
-2. Add locations in square and get the location IDs (maybe change this into a function)
-3. Create first account (User with administrator role, needs to have locations array and square ID)
+   try {
+   const response = await client.catalogApi.upsertCatalogObject({
+   idempotencyKey: 'eedf7c30-5764-44a5-8b55-9d7617347bef',
+   object: {
+   type: 'CUSTOM_ATTRIBUTE_DEFINITION',
+   id: '#new',
+   customAttributeDefinitionData: {
+   type: 'STRING',
+   name: 'Vendor',
+   allowedObjectTypes: [
+   'ITEM',
+   'ITEM_VARIATION'
+   ],
+   key: 'vendor_name'
+   }
+   }
+   });
+
+console.log(response.result);
+} catch(error) {
+console.log(error);
+} 2. Add locations in square and get the location IDs (maybe change this into a function) 3. Manually add first category named '[Administrator]
+Create first account (User with administrator role, needs to have locations array and square ID)
+
+# Changed from sandbox to production:
+
+.env access keys for MONGO_URL and SQUARE_ACCESS_TOKEN
+squareUtils.js changed environment to Environment.Production
+disable mailtrap

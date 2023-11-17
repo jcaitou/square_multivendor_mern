@@ -80,7 +80,8 @@ export const createOrder = async (req, res) => {
         quantity: item.quantity,
         basePrice: item.basePriceMoney.amount,
         totalDiscount: item.totalDiscountMoney.amount,
-        totalMoney: item.totalMoney.amount,
+        totalMoney:
+          item.totalMoney.amount - item.totalServiceChargeMoney.amount,
         itemVendor: user._id,
       }
     }
@@ -179,3 +180,9 @@ export const updateOrder = async (req, res) => {
 
 //   return res.status(StatusCodes.OK).json({ msg: 'ok' })
 // }
+
+export const terminal = async (req, res) => {
+  console.log(req.body.data)
+
+  return res.status(StatusCodes.OK).json({ msg: 'ok' })
+}

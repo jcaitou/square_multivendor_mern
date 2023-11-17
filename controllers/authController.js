@@ -33,13 +33,16 @@ export const register = async (req, res) => {
     throw new SquareApiError('error while creating new category')
   }
 
+  const totalUsers = await User.countDocuments()
+  newUserObj.skuId = totalUsers + 1
   newUserObj.squareId = response.result.catalogObject.id
-
   const newPassword = nanoid()
   const hashedPassword = await hashPassword(newPassword)
   newUserObj.password = hashedPassword
 
   const user = await User.create(newUserObj)
+
+  console.log(user)
 
   const emailText = dedent`
     Dear ${newUserObj.name},

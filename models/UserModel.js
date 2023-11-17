@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+// import Inc from 'mongoose-sequence'
+// const AutoIncrement = Inc(mongoose)
 
 const UserSchema = new mongoose.Schema(
   {
@@ -10,6 +12,10 @@ const UserSchema = new mongoose.Schema(
     },
     password: String,
     squareId: String,
+    skuId: {
+      type: Number,
+      unique: true,
+    },
     locations: [
       {
         type: String,
@@ -28,6 +34,10 @@ const UserSchema = new mongoose.Schema(
         type: Boolean,
         default: false,
       },
+    },
+    active: {
+      type: Boolean,
+      default: true,
     },
     role: {
       type: String,

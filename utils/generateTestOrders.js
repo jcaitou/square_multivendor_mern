@@ -145,3 +145,34 @@ export const generateTestOrders = async (req, res) => {
 function getRandomInt(max) {
   return Math.floor(Math.random() * max)
 }
+
+export const copyOrders = async (req, res) => {
+  const locationIds = ALL_LOCATIONS.map((el) => {
+    return el.name
+  })
+  console.log(locationIds)
+
+  const searchOrders = await squareClient.ordersApi.searchOrders({
+    locationIds: locationIds,
+    query: {
+      filter: {
+        dateTimeFilter: {
+          updatedAt: {
+            startAt: '2023-11-01',
+          },
+        },
+      },
+      sort: {
+        sortField: 'UPDATED_AT',
+        sortOrder: 'DESC',
+      },
+    },
+  })
+
+  if (!searchOrders) {
+    throw new SquareApiError('error while calling the Square API')
+  }
+  const parsedResponse = JSONBig.parse(JSONBig.stringify(searchOrders.result))
+  console.log(searchOrders.result)
+  res.status(StatusCodes.OK).json({ parsedResponse })
+}

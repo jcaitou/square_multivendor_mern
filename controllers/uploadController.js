@@ -54,7 +54,8 @@ export const batchUpdateUploadFile = async (req, res, next) => {
     agenda.now('product import', {
       squareName: req.user.name,
       squareId: req.user.squareId,
-      locations: req.user.locations,
+      skuId: user.skuId,
+      locations: user.locations,
       filename: req.file.filename,
       fileUrl: cloudinaryResponse.secure_url,
       fileActionId: fileAction._id,
@@ -64,7 +65,7 @@ export const batchUpdateUploadFile = async (req, res, next) => {
     agenda.now('inventory recount', {
       squareName: req.user.name,
       squareId: req.user.squareId,
-      locations: req.user.locations,
+      locations: user.locations,
       filename: req.file.filename,
       fileUrl: cloudinaryResponse.secure_url,
       fileActionId: fileAction._id,

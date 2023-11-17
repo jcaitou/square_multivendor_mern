@@ -4,6 +4,7 @@ const FormRow = ({
   labelText,
   value,
   onChange,
+  maxLength = false,
   required = true,
 }) => {
   if (type === 'number') {
@@ -35,6 +36,7 @@ const FormRow = ({
           type={type}
           id={name}
           name={name}
+          maxLength={maxLength ? maxLength : undefined}
           className='form-input'
           value={value}
           onChange={onChange}

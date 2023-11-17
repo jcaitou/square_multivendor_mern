@@ -122,7 +122,7 @@ export default (agenda) => {
         productName: organizedItems[i].productName,
         productId: organizedItems[i].productId,
         variationName: organizedItems[i].variationName,
-        variationSku: organizedItems[i].variationSku,
+        variationSku: organizedItems[i].variationSku.slice(5),
         variationId: organizedItems[i].variationId,
       }
       for (let j = 0; j < locations.length; j++) {
@@ -200,7 +200,7 @@ export default (agenda) => {
           productName: organizedItems[i].productName,
           productId: organizedItems[i].productId,
           variationName: organizedItems[i].variationName,
-          variationSku: organizedItems[i].variationSku,
+          variationSku: organizedItems[i].variationSku.slice(5),
           variationId: organizedItems[i].variationId,
         }
         for (let j = 0; j < locations.length; j++) {

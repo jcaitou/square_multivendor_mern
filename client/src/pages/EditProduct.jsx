@@ -12,6 +12,7 @@ import _ from 'lodash'
 import Barcode from 'react-barcode'
 import { Fragment } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useDashboardContext } from './DashboardLayout'
 
 const singleProductQuery = (id) => {
   return {
@@ -48,6 +49,8 @@ export const loader =
 const EditProduct = ({ queryClient }) => {
   // const { object: product } = useLoaderData()
   const id = useLoaderData()
+  const { user } = useDashboardContext()
+  const userSku = user.skuId.toString(16).padStart(4, '0')
 
   const {
     data: { object: product },
@@ -64,6 +67,7 @@ const EditProduct = ({ queryClient }) => {
         version: variation.version,
         itemVariationData: {
           ...variation.itemVariationData,
+          sku: variation.itemVariationData.sku.slice(5),
           priceMoney: {
             amount: (
               variation.itemVariationData.priceMoney.amount / 100
@@ -179,6 +183,7 @@ const EditProduct = ({ queryClient }) => {
     }
     try {
       setIsSubmitting(true)
+      console.log(productData)
       await customFetch.patch(`/products/${productData.id}`, productData)
       queryClient.invalidateQueries(['products'])
       queryClient.invalidateQueries(['product', id])
@@ -239,6 +244,7 @@ const EditProduct = ({ queryClient }) => {
                     type='text'
                     name='sku'
                     labelText='SKU'
+                    maxLength={25}
                     value={variation.itemVariationData.sku}
                     onChange={(e) =>
                       handleEditProduct(e, index, 'itemVariationData.sku')
@@ -267,7 +273,9 @@ const EditProduct = ({ queryClient }) => {
                   )}
                 </div>
                 {variation.itemVariationData.sku != '' && (
-                  <Barcode value={variation.itemVariationData.sku} />
+                  <Barcode
+                    value={`${userSku}-${variation.itemVariationData.sku}`}
+                  />
                 )}
               </Fragment>
             ))}

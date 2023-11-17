@@ -1,6 +1,7 @@
 import { squareClient } from '../utils/squareUtils.js'
 import { StatusCodes } from 'http-status-codes'
 import { SquareApiError } from '../errors/customError.js'
+import User from '../models/UserModel.js'
 import { nanoid } from 'nanoid'
 import JSONBig from 'json-bigint'
 
@@ -10,12 +11,14 @@ export const getProductsInventory = async (req, res) => {
 
   let locations
   if (!locationsQuery) {
-    locations = req.user.locations
+    const user = await User.findOne({ _id: req.user.userId })
+    locations = user.locations
   } else if (Array.isArray(locationsQuery)) {
     locations = locationsQuery
   } else {
     locations = [locationsQuery]
   }
+  console.log(locations)
 
   let searchQuery = {
     limit: 100,

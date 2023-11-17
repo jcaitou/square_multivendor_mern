@@ -21,6 +21,9 @@ const ProductsContainer = ({ queryClient }) => {
   } = useAllInventoryContext()
   const sort = searchValues.sort
   const { user } = useDashboardContext()
+  console.log(user)
+
+  console.log(products[0])
 
   let locations
   if (searchValues.locations.length > 0) {
@@ -36,6 +39,7 @@ const ProductsContainer = ({ queryClient }) => {
       return el.locationId
     })
   }
+  console.log(locations)
 
   const showHeaderRow = sort !== 'quantityAsc' && sort !== 'quantityDesc'
   const today = new Date()
@@ -468,7 +472,7 @@ function ExportInventoryModal({ products, dataHeaders, dateString, ...props }) {
           (exportPage ? (
             <CSVLink
               data={products.flat().map((el) => {
-                let newEl = { ...el }
+                let newEl = { ...el, variationSku: el.variationSku.slice(5) }
                 for (let i = 0; i < el.locationQuantities.length; i++) {
                   newEl[el.locationQuantities[i].locationId] =
                     el.locationQuantities[i].quantity

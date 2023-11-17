@@ -43,7 +43,7 @@ const ProductsContainer = ({ queryClient }) => {
         return {
           productName: product.itemData.name,
           variationName: variation.itemVariationData.name,
-          variationSku: variation.itemVariationData.sku,
+          variationSku: variation.itemVariationData.sku.slice(5),
           variationPrice: variation.itemVariationData.priceMoney.amount / 100.0,
           productId: variation.itemVariationData.itemId.toString(),
           variationId: variation.id.toString(),
