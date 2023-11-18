@@ -8,9 +8,9 @@ import {
 
 const router = Router()
 
-router.post('/create-order', createOrder)
-router.post('/update-order', updateOrder)
-router.post('/terminal', terminal)
+// router.post('/create-order', createOrder)
+// router.post('/update-order', updateOrder)
+// router.post('/terminal', terminal)
 // router.post('/inventory-update', inventoryUpdate)
 
 export default router

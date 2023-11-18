@@ -21,9 +21,6 @@ const ProductsContainer = ({ queryClient }) => {
   } = useAllInventoryContext()
   const sort = searchValues.sort
   const { user } = useDashboardContext()
-  console.log(user)
-
-  console.log(products[0])
 
   let locations
   if (searchValues.locations.length > 0) {
@@ -39,7 +36,6 @@ const ProductsContainer = ({ queryClient }) => {
       return el.locationId
     })
   }
-  console.log(locations)
 
   const showHeaderRow = sort !== 'quantityAsc' && sort !== 'quantityDesc'
   const today = new Date()
