@@ -7,6 +7,7 @@ import { squareClient } from '../utils/squareUtils.js'
 import { SquareApiError } from '../errors/customError.js'
 import { nanoid } from 'nanoid'
 import { transporter } from '../middleware/nodemailerMiddleware.js'
+import { STORE_EMAIL } from '../utils/constants.js'
 import dedent from 'dedent-js'
 
 export const register = async (req, res) => {
@@ -57,7 +58,7 @@ export const register = async (req, res) => {
     Makers2
     `
   let message = {
-    from: 'from-example@email.com',
+    from: STORE_EMAIL,
     to: newUserObj.email,
     subject: 'Welcome to Makers2!',
     text: emailText,

@@ -1,4 +1,5 @@
 import { transporter } from '../../middleware/nodemailerMiddleware.js'
+import { STORE_EMAIL } from '../../utils/constants.js'
 import User from '../../models/UserModel.js'
 import dedent from 'dedent-js'
 import day from 'dayjs'
@@ -28,7 +29,7 @@ export default (agenda) => {
 
     //send the email
     let message = {
-      from: 'makers2@email.com',
+      from: STORE_EMAIL,
       bcc: emailList,
       // to: user.email,
       subject: `Upcoming Storewide Sale: ${day(

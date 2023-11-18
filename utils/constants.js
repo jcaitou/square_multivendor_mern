@@ -50,3 +50,5 @@ export const SALES_SORT_BY = {
   ASCENDING: 'a-z',
   DESCENDING: 'z-a',
 }
+
+export const STORE_EMAIL = 'mailtrap@jcdevs.site'

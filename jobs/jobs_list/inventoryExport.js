@@ -7,7 +7,7 @@ import createCsvWriter from 'csv-writer'
 import path from 'path'
 import day from 'dayjs'
 import { SquareApiError } from '../../errors/customError.js'
-import { ALL_LOCATIONS } from '../../utils/constants.js'
+import { ALL_LOCATIONS, STORE_EMAIL } from '../../utils/constants.js'
 
 export default (agenda) => {
   agenda.define('export all inventory', async function (job, done) {
@@ -219,10 +219,10 @@ export default (agenda) => {
     ]
 
     let message = {
-      from: 'from-example@email.com',
+      from: STORE_EMAIL,
       to: user.email,
       subject: 'Inventory Export',
-      text: 'Hello SMTP Email',
+      text: 'Your requested inventory have finished exporting.',
       attachments: attachments,
     }
     transporter.sendMail(message, (err, info) => {

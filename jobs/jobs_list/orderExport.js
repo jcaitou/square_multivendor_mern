@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import day from 'dayjs'
 import createCsvWriter from 'csv-writer'
-import { ALL_LOCATIONS } from '../../utils/constants.js'
+import { ALL_LOCATIONS, STORE_EMAIL } from '../../utils/constants.js'
 import { transporter } from '../../middleware/nodemailerMiddleware.js'
 import User from '../../models/UserModel.js'
 
@@ -120,7 +120,7 @@ export default (agenda) => {
             itemName: orders[i].filteredOrderItems[j].itemName,
             itemVariationName:
               orders[i].filteredOrderItems[j].itemVariationName,
-            itemSku: orders[i].filteredOrderItems[j]?.itemSku || '',
+            itemSku: orders[i].filteredOrderItems[j]?.itemSku.slice(5) || '',
             // itemSku: '',
             quantity: orders[i].filteredOrderItems[j].quantity,
             basePrice: orders[i].filteredOrderItems[j].basePrice / 100.0,
@@ -144,7 +144,7 @@ export default (agenda) => {
     ]
 
     let message = {
-      from: 'makers2@email.com',
+      from: STORE_EMAIL,
       to: user.email,
       subject: 'Export of your orders',
       text: 'Your requested orders have finished exporting.',

@@ -1,7 +1,7 @@
 import { transporter } from '../../middleware/nodemailerMiddleware.js'
 import User from '../../models/UserModel.js'
 import { squareClient } from '../../utils/squareUtils.js'
-import { ALL_LOCATIONS } from '../../utils/constants.js'
+import { ALL_LOCATIONS, STORE_EMAIL } from '../../utils/constants.js'
 import dedent from 'dedent-js'
 
 export default (agenda) => {
@@ -98,7 +98,7 @@ export default (agenda) => {
         ) {
           //warning email for low stock
           let message = {
-            from: 'makers2@email.com',
+            from: STORE_EMAIL,
             to: user.email,
             subject: 'Low Stock Warning',
             text: dedent`

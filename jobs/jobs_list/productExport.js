@@ -7,6 +7,7 @@ import createCsvWriter from 'csv-writer'
 import path from 'path'
 import day from 'dayjs'
 import { SquareApiError } from '../../errors/customError.js'
+import { STORE_EMAIL } from '../../utils/constants.js'
 
 export default (agenda) => {
   agenda.define('export all products', async function (job, done) {
@@ -135,7 +136,7 @@ export default (agenda) => {
     ]
 
     let message = {
-      from: 'mailtrap@jcdevs.site',
+      from: STORE_EMAIL,
       to: user.email,
       subject: 'Export of your products',
       text: 'Your products have finished exporting.',
