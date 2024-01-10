@@ -5,12 +5,30 @@ import { Fragment } from 'react'
 import { ALL_LOCATIONS, ORDERS_SORT_BY } from '../../../utils/constants'
 import { useAllOrdersContext } from '../pages/AllOrders'
 import { useDashboardContext } from '../pages/DashboardLayout'
+import { SearchByDate } from '.'
+import { setReportDefaultPeriod } from '../utils/setReportDefaultPeriod'
 
 const OrderSearchContainer = () => {
   const { searchValues } = useAllOrdersContext()
-  const { startDate, endDate, sort, locations } = searchValues
   const { user } = useDashboardContext()
+  const { startDate, endDate, sort, locations } = searchValues
   const submit = useSubmit()
+
+  const resetLink = setReportDefaultPeriod(
+    '/dashboard/all-orders',
+    user.settings.defaultReportPeriod
+  )
+
+  const debounce = (onChange) => {
+    let timeout
+    return (e) => {
+      const form = e.currentTarget.form
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        onChange(form, e)
+      }, 1000)
+    }
+  }
 
   const locationChangeAll = (e) => {
     const form = e.currentTarget.form
@@ -52,62 +70,7 @@ const OrderSearchContainer = () => {
     <Wrapper>
       <Form className='form'>
         <div className='form-center'>
-          <div className='date-search'>
-            <div className='date-group'>
-              <label htmlFor='startDate'>Start date:</label>
-              <input
-                type='date'
-                id='startDate'
-                name='startDate'
-                defaultValue={startDate}
-                onChange={(e) => {
-                  const form = e.currentTarget.form
-                  const selectedDate = e.target.value
-                  const dateInput = document.querySelector(
-                    'input[name=endDate]'
-                  )
-                  if (!selectedDate) {
-                    dateInput.removeAttribute('min')
-                  } else {
-                    dateInput.setAttribute('min', selectedDate)
-                  }
-                  submit(form)
-                }}
-              />
-            </div>
-            <div className='date-group'>
-              <label htmlFor='endDate'>End date:</label>
-              <input
-                type='date'
-                id='endDate'
-                name='endDate'
-                defaultValue={endDate}
-                onChange={(e) => {
-                  const form = e.currentTarget.form
-                  const selectedDate = e.target.value
-                  const dateInput = document.querySelector(
-                    'input[name=startDate]'
-                  )
-                  if (!selectedDate) {
-                    dateInput.removeAttribute('max')
-                  } else {
-                    dateInput.setAttribute('max', selectedDate)
-                  }
-                  submit(form)
-                }}
-              />
-            </div>
-          </div>
-
-          <FormRowSelect
-            name='sort'
-            defaultValue={sort || 'a-z'}
-            listLabels={sortLabels}
-            list={[...Object.values(ORDERS_SORT_BY)]}
-            onChange={(e) => {
-              submit(e.currentTarget.form)
-            }}
-          />
+          <SearchByDate defaultStartDate={startDate} defaultEndDate={endDate} />
 
           {user.locations.length > 1 && (
             <>
@@ -163,11 +126,23 @@ const OrderSearchContainer = () => {
               </div>
             </>
           )}
-          <Link to='/dashboard/all-orders' className='btn form-btn delete-btn'>
+
+          <FormRowSelect
+            name='sort'
+            defaultValue={sort || 'a-z'}
+            listLabels={sortLabels}
+            list={[...Object.values(ORDERS_SORT_BY)]}
+            onChange={(e) => {
+              submit(e.currentTarget.form)
+            }}
+          />
+
+          <button className='btn btn-block form-btn'>submit</button>
+
+          <Link to={resetLink} className='btn form-btn delete-btn'>
             Reset Search Values
           </Link>
         </div>
-        {/* <button className='btn btn-block form-btn'>submit</button> */}
       </Form>
     </Wrapper>
   )

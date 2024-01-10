@@ -106,6 +106,14 @@ export default (agenda) => {
     })
     //write to csv initialization - end
 
+    if (orders.length === 0) {
+      await csvWriter.writeRecords([
+        {
+          orderId: 'No orders to display within the selected time period.',
+        },
+      ])
+    }
+
     //start of write to csv
     for (let i = 0; i < orders.length; i++) {
       for (let j = 0; j < orders[i].filteredOrderItems.length; j++) {

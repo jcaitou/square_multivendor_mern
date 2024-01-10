@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import { useDashboardContext } from './DashboardLayout'
 import SwitchCheckboxWrapper from '../assets/wrappers/SwitchCheckbox'
 import Wrapper from '../assets/wrappers/UserSettings'
+import { DEFAULT_REPORT_PERIOD } from '../../../utils/constants'
 import { useState } from 'react'
 
 export const action = async ({ request, params }) => {
@@ -21,7 +22,7 @@ export const action = async ({ request, params }) => {
   }
 }
 
-const ChangePassword = ({ queryClient }) => {
+const UserSettings = ({ queryClient }) => {
   const { user } = useDashboardContext()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigation = useNavigation()
@@ -37,16 +38,6 @@ const ChangePassword = ({ queryClient }) => {
       }, 1000)
     }
   }
-
-  // function debounce(func, timeout = 300) {
-  //   let timer
-  //   return (...args) => {
-  //     clearTimeout(timer)
-  //     timer = setTimeout(() => {
-  //       func.apply(this, args)
-  //     }, timeout)
-  //   }
-  // }
 
   const changeSettingsAction = async (e) => {
     let setting = { key: e.target.name }
@@ -74,6 +65,35 @@ const ChangePassword = ({ queryClient }) => {
 
   return (
     <Wrapper>
+      <section>
+        <h2>Default Views</h2>
+        <div className='setting-row'>
+          <div className='setting-detail'>
+            <h3>Sales Period</h3>
+            <p>
+              Set the default reporting period when you open the orders / sales
+              by product page
+            </p>
+          </div>
+          <div className='setting-input'>
+            <select
+              name='defaultReportPeriod'
+              className='form-select'
+              defaultValue={user.settings.defaultReportPeriod}
+              onChange={(e) => changeSettingsAction(e)}
+            >
+              {Object.values(DEFAULT_REPORT_PERIOD).map((itemValue) => {
+                return (
+                  <option key={itemValue} value={itemValue}>
+                    {itemValue}
+                  </option>
+                )
+              })}
+            </select>
+          </div>
+        </div>
+      </section>
+
       <section>
         <h2>Inventory Warnings</h2>
         <div className='setting-row'>
@@ -162,4 +182,4 @@ const ChangePassword = ({ queryClient }) => {
   )
 }
 
-export default ChangePassword
+export default UserSettings

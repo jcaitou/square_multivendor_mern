@@ -5,6 +5,8 @@ import { Fragment } from 'react'
 import { SALES_SORT_BY } from '../../../utils/constants'
 import { useItemSalesContext } from '../pages/ItemSales'
 import { useDashboardContext } from '../pages/DashboardLayout'
+import { SearchByDate } from '.'
+import { setReportDefaultPeriod } from '../utils/setReportDefaultPeriod'
 
 const SalesSearchContainer = () => {
   const { searchValues } = useItemSalesContext()
@@ -12,14 +14,19 @@ const SalesSearchContainer = () => {
   const { user } = useDashboardContext()
   const submit = useSubmit()
 
+  const resetLink = setReportDefaultPeriod(
+    '/dashboard/item-sales',
+    user.settings.defaultReportPeriod
+  )
+
   const debounce = (onChange) => {
     let timeout
     return (e) => {
       const form = e.currentTarget.form
       clearTimeout(timeout)
       timeout = setTimeout(() => {
-        onChange(form)
-      }, 2000)
+        onChange(form, e)
+      }, 1000)
     }
   }
 
@@ -59,52 +66,8 @@ const SalesSearchContainer = () => {
     <Wrapper>
       <Form className='form'>
         <div className='form-center'>
-          <div className='date-search'>
-            <div className='date-group'>
-              <label htmlFor='startDate'>Start date:</label>
-              <input
-                type='date'
-                id='startDate'
-                name='startDate'
-                defaultValue={startDate}
-                onChange={(e) => {
-                  const form = e.currentTarget.form
-                  const selectedDate = e.target.value
-                  const dateInput = document.querySelector(
-                    'input[name=endDate]'
-                  )
-                  if (!selectedDate) {
-                    dateInput.removeAttribute('min')
-                  } else {
-                    dateInput.setAttribute('min', selectedDate)
-                  }
-                  submit(form)
-                }}
-              />
-            </div>
-            <div className='date-group'>
-              <label htmlFor='endDate'>End date:</label>
-              <input
-                type='date'
-                id='endDate'
-                name='endDate'
-                defaultValue={endDate}
-                onChange={(e) => {
-                  const form = e.currentTarget.form
-                  const selectedDate = e.target.value
-                  const dateInput = document.querySelector(
-                    'input[name=startDate]'
-                  )
-                  if (!selectedDate) {
-                    dateInput.removeAttribute('max')
-                  } else {
-                    dateInput.setAttribute('max', selectedDate)
-                  }
-                  submit(form)
-                }}
-              />
-            </div>
-          </div>
+          <SearchByDate defaultStartDate={startDate} defaultEndDate={endDate} />
+
           {/* <div className='form-row'>
             <label htmlFor={sort} className='form-label'>
               Sort
@@ -124,6 +87,7 @@ const SalesSearchContainer = () => {
               })}
             </select>
           </div> */}
+          <button className='btn btn-block form-btn'>submit</button>
           <FormRowSelect
             name='sort'
             defaultValue={sort || 'a-z'}
@@ -133,11 +97,10 @@ const SalesSearchContainer = () => {
               submit(e.currentTarget.form)
             }}
           />
-          <Link to='/dashboard/item-sales' className='btn form-btn delete-btn'>
+          <Link to={resetLink} className='btn form-btn delete-btn'>
             Reset Search Values
           </Link>
         </div>
-        {/* <button className='btn btn-block form-btn'>submit</button> */}
       </Form>
     </Wrapper>
   )

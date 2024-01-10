@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { DEFAULT_REPORT_PERIOD } from '../utils/constants.js'
 // import Inc from 'mongoose-sequence'
 // const AutoIncrement = Inc(mongoose)
 
@@ -33,6 +34,11 @@ const UserSchema = new mongoose.Schema(
       defaultDiscountOptIn: {
         type: Boolean,
         default: false,
+      },
+      defaultReportPeriod: {
+        type: String,
+        enum: Object.values(DEFAULT_REPORT_PERIOD),
+        default: DEFAULT_REPORT_PERIOD.ALL_TIME,
       },
     },
     active: {

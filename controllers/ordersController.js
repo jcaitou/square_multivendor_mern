@@ -14,8 +14,6 @@ import day from 'dayjs'
 
 export const getAllOrders = async (req, res) => {
   const { startDate, endDate, sort, locations: locationsQuery } = req.query
-  //allow sort by: date asc/dsc, price asc/dsc
-  //allow search by: dates, locations
 
   const id = new mongoose.Types.ObjectId(req.user.userId)
 

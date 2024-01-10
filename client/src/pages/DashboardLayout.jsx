@@ -14,7 +14,7 @@ import customFetch from '../utils/customFetch'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-const userQuery = {
+export const userQuery = {
   queryKey: ['user'],
   queryFn: async () => {
     const { data } = await customFetch.get('/users/current-user')

@@ -51,4 +51,11 @@ export const SALES_SORT_BY = {
   DESCENDING: 'z-a',
 }
 
+export const DEFAULT_REPORT_PERIOD = {
+  ALL_TIME: 'all time',
+  ONE_MONTH: 'one month',
+  ONE_WEEK: 'one week',
+  TODAY: 'today',
+}
+
 export const STORE_EMAIL = 'mailtrap@jcdevs.site'

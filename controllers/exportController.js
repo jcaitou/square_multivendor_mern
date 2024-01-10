@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import agenda from '../jobs/agenda.js'
+import { BadRequestError } from '../errors/customError.js'
 
 export const exportAllProducts = async (req, res, next) => {
   agenda.now('export all products', {
@@ -25,6 +26,12 @@ export const exportAllInventory = async (req, res, next) => {
 export const exportOrders = async (req, res, next) => {
   const { month, year, locations: locationsQuery } = req.body
   const user = req.user
+
+  console.log(locationsQuery)
+
+  if (locationsQuery.length < 1) {
+    throw new BadRequestError('at least one location must be selected')
+  }
 
   agenda.now('export orders', {
     user,

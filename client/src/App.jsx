@@ -20,7 +20,7 @@ import {
   AddDiscount,
   EditDiscount,
   FileActions,
-  ChangePassword,
+  UserSettings,
   AllOrders,
   ItemSales,
 } from './pages'
@@ -30,7 +30,7 @@ import { checkDefaultTheme } from './utils/checkDefaultTheme'
 import { action as registerAction } from './pages/Register'
 import { action as loginAction } from './pages/Login'
 import { action as deleteProductAction } from './pages/DeleteProduct'
-import { action as changePasswordAction } from './pages/ChangePassword'
+import { action as userSettingsAction } from './pages/UserSettings'
 
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as adminLayoutLoader } from './pages/AdminLayout'
@@ -148,8 +148,8 @@ const router = createBrowserRouter([
 
           {
             path: 'settings',
-            element: <ChangePassword queryClient={queryClient} />,
-            action: changePasswordAction,
+            element: <UserSettings queryClient={queryClient} />,
+            action: userSettingsAction,
           },
           {
             path: 'profile',

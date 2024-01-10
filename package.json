@@ -46,5 +46,8 @@
     "nodemailer": "^6.9.7",
     "nodemon": "^2.0.22",
     "square": "^31.0.0"
+  },
+  "devDependencies": {
+    "@types/json-bigint": "^1.0.4"
   }
 }

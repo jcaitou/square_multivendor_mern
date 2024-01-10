@@ -17,6 +17,7 @@ const allLocationsArray = ALL_LOCATIONS.map((el) => el.id)
 
 const allOrdersQuery = (searchValues) => {
   const { startDate, endDate, sort, locations } = searchValues
+
   const locationsQueryKey =
     !locations || locations.length == 0 ? allLocationsArray : locations
   return {
@@ -31,7 +32,12 @@ const allOrdersQuery = (searchValues) => {
       const { data } = await customFetch.get(
         '/orders',
         {
-          params: searchValues,
+          params: {
+            startDate,
+            endDate,
+            sort,
+            locations,
+          },
         },
         {
           paramsSerializer: {
@@ -63,56 +69,9 @@ export const loader =
     }
   }
 
-// export const loader = async ({ request }) => {
-//   try {
-//     const p = new URL(request.url).searchParams
-//     let locations = []
-//     p.forEach((value, key) => {
-//       if (key === 'locations') {
-//         locations.push(value)
-//       }
-//     })
-//     const params = Object.fromEntries([...p.entries()])
-
-//     const { data } = await customFetch.get(
-//       '/orders',
-//       {
-//         params: {
-//           ...params,
-//           locations: locations,
-//         },
-//       },
-//       {
-//         paramsSerializer: {
-//           indexes: null,
-//         },
-//       }
-//     )
-
-//     return {
-//       data,
-//       searchValues: { ...params, locations: locations },
-//     }
-//   } catch (error) {
-//     toast.error(error?.response?.data?.msg)
-//     return error
-//   }
-// }
-
 const AllOrdersContext = createContext()
 
 const AllOrders = () => {
-  // const {
-  // data: {
-  //   currentPage,
-  //   orders,
-  //   numOfPages,
-  //   totalOrders,
-  //   ordersMoneyTotal,
-  //   monthToDateTotal,
-  // },
-  //   searchValues,
-  // } = useLoaderData()
   const { searchValues } = useLoaderData()
   const {
     data: {
@@ -191,7 +150,14 @@ const AllOrders = () => {
 function ExportOrdersModal({ ...props }) {
   const { user } = useDashboardContext()
   const today = day()
-  const [monthRangeStart, setMonthRangeStart] = useState(0)
+  const userStartMonth = day(user.createdAt).month()
+  const userStartYear = day(user.createdAt).year()
+
+  const [actionSubmitted, setActionSubmitted] = useState(false)
+
+  const [monthRangeStart, setMonthRangeStart] = useState(
+    userStartYear == today.year() ? userStartMonth : 0
+  )
   const [monthRangeEnd, setMonthRangeEnd] = useState(today.month())
   const months = [
     'January',
@@ -208,11 +174,23 @@ function ExportOrdersModal({ ...props }) {
     'December',
   ]
 
+  const generateYearRange = (start, stop, step) =>
+    Array.from(
+      { length: (stop - start) / step + 1 },
+      (_, i) => start + i * step
+    )
+  const yearRange = generateYearRange(today.year(), userStartYear, -1)
+
   const yearChange = (e) => {
     if (e.target.value == today.year()) {
       setMonthRangeEnd(today.month())
     } else {
       setMonthRangeEnd(11)
+    }
+    if (e.target.value == userStartYear) {
+      setMonthRangeStart(userStartMonth)
+    } else {
+      setMonthRangeStart(0)
     }
   }
 
@@ -241,7 +219,6 @@ function ExportOrdersModal({ ...props }) {
     checkedLocations.forEach((el) => {
       locations.push(el.value)
     })
-    console.log(locations)
 
     try {
       await customFetch.post('/exports/export-orders', {
@@ -270,44 +247,64 @@ function ExportOrdersModal({ ...props }) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>Choose the date and location of the orders you want to export</p>
-        <select name='month' id='export-month'>
-          <option value=''>--All--</option>
-          {renderMonthOptions()}
-        </select>
-        <select name='year' id='export-year' onChange={(e) => yearChange(e)}>
-          <option value='2023'>2023</option>
-          <option value='2022'>2022</option>
-        </select>
-
-        {user.locations.map((itemValue) => {
-          return (
-            <div
-              className='location-search-group'
-              id='export-locations'
-              key={`export-${itemValue}`}
+        {actionSubmitted ? (
+          <p>Your export has started</p>
+        ) : (
+          <>
+            <p>Choose the date and location of the orders you want to export</p>
+            <select name='month' id='export-month'>
+              <option value=''>--All--</option>
+              {renderMonthOptions()}
+            </select>
+            <select
+              name='year'
+              id='export-year'
+              defaultValue={today.year()}
+              onChange={(e) => yearChange(e)}
             >
-              <input
-                type='checkbox'
-                name='locations'
-                id={itemValue}
-                value={itemValue}
-                defaultChecked='true'
-              />
-              <label htmlFor={itemValue}>
-                {
-                  ALL_LOCATIONS.find((el) => {
-                    return el.id === itemValue
-                  }).name
-                }
-              </label>
-            </div>
-          )
-        })}
+              {yearRange.map((year) => {
+                return (
+                  <option value={year} key={year}>
+                    {year}
+                  </option>
+                )
+              })}
+            </select>
+
+            {user.locations.map((itemValue) => {
+              return (
+                <div
+                  className='location-search-group'
+                  id='export-locations'
+                  key={`export-${itemValue}`}
+                >
+                  <input
+                    type='checkbox'
+                    name='locations'
+                    id={itemValue}
+                    value={itemValue}
+                    defaultChecked='true'
+                  />
+                  <label htmlFor={itemValue}>
+                    {
+                      ALL_LOCATIONS.find((el) => {
+                        return el.id === itemValue
+                      }).name
+                    }
+                  </label>
+                </div>
+              )
+            })}
+          </>
+        )}
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide}>Cancel</Button>
-        <Button onClick={handleExportSubmit}>Export CSV</Button>
+        <Button onClick={props.onHide}>
+          {actionSubmitted ? 'Close' : 'Cancel'}
+        </Button>
+        {!actionSubmitted && (
+          <Button onClick={handleExportSubmit}>Export CSV</Button>
+        )}
       </Modal.Footer>
     </Modal>
   )
