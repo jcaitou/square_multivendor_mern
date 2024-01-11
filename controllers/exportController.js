@@ -44,3 +44,14 @@ export const exportOrders = async (req, res, next) => {
     .status(StatusCodes.CREATED)
     .json({ msg: 'Export in progress, check your email' })
 }
+
+export const exportBarcodes = async (req, res, next) => {
+  agenda.now('export barcodes', {
+    squareName: req.user.name,
+    userId: req.user.userId,
+  })
+
+  res
+    .status(StatusCodes.CREATED)
+    .json({ msg: 'Export in progress, check your email' })
+}

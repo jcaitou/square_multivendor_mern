@@ -9,10 +9,10 @@ import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import customFetch from '../utils/customFetch'
 import _ from 'lodash'
-import Barcode from 'react-barcode'
 import { Fragment } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDashboardContext } from './DashboardLayout'
+import bwipjs from 'bwip-js'
 
 const singleProductQuery = (id) => {
   return {
@@ -88,6 +88,30 @@ const EditProduct = ({ queryClient }) => {
   // const navigation = useNavigation()
   // const isSubmitting = navigation.state === 'submitting'
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  //generate barcode:
+  const renderBarcode = (sku) => {
+    const barcode = []
+
+    let canvas = document.createElement('canvas')
+    try {
+      bwipjs.toCanvas(canvas, {
+        bcid: 'code128', // Barcode type
+        text: sku, // Text to encode
+        scale: 3, // 3x scaling factor
+        height: 10, // Bar height, in millimeters
+        includetext: true, // Show human-readable text
+        textxalign: 'center', // Always good to set this
+      })
+      console.log(canvas.toDataURL('image/png'))
+    } catch (e) {
+      console.log(e)
+      // `e` may be a string or Error object
+    }
+
+    barcode.push(<img src={canvas.toDataURL('image/png')}></img>)
+    return barcode
+  }
 
   //delete helpers:
   const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
@@ -231,53 +255,64 @@ const EditProduct = ({ queryClient }) => {
             />
             {productVariations.map((variation, index) => (
               <Fragment key={index}>
-                <div className='form-variation'>
-                  <FormRow
-                    type='text'
-                    name='name'
-                    labelText='variation name'
-                    value={variation.itemVariationData.name}
-                    onChange={(e) =>
-                      handleEditProduct(e, index, 'itemVariationData.name')
-                    }
-                  />
-                  <FormRow
-                    type='text'
-                    name='sku'
-                    labelText='SKU'
-                    maxLength={25}
-                    value={variation.itemVariationData.sku}
-                    onChange={(e) =>
-                      handleEditProduct(e, index, 'itemVariationData.sku')
-                    }
-                  />
-                  <FormRow
-                    type='number'
-                    name='price'
-                    labelText='price'
-                    value={variation.itemVariationData.priceMoney.amount}
-                    onChange={(e) =>
-                      handleEditProduct(
-                        e,
-                        index,
-                        'itemVariationData.priceMoney.amount'
-                      )
-                    }
-                  />
-                  {index > 0 && (
-                    <div
-                      className='btn remove-var-btn'
-                      onClick={() => handleDeleteVariation(index)}
-                    >
-                      X
-                    </div>
-                  )}
-                </div>
-                {variation.itemVariationData.sku != '' && (
+                <div className='variation-wrapper'>
+                  <div className='form-variation'>
+                    <FormRow
+                      type='text'
+                      name='name'
+                      labelText='variation name'
+                      value={variation.itemVariationData.name}
+                      onChange={(e) =>
+                        handleEditProduct(e, index, 'itemVariationData.name')
+                      }
+                    />
+                    <FormRow
+                      type='text'
+                      name='sku'
+                      labelText='SKU'
+                      maxLength={25}
+                      value={variation.itemVariationData.sku}
+                      onChange={(e) =>
+                        handleEditProduct(e, index, 'itemVariationData.sku')
+                      }
+                    />
+                    <FormRow
+                      type='number'
+                      name='price'
+                      labelText='price'
+                      value={variation.itemVariationData.priceMoney.amount}
+                      onChange={(e) =>
+                        handleEditProduct(
+                          e,
+                          index,
+                          'itemVariationData.priceMoney.amount'
+                        )
+                      }
+                    />
+                    {index > 0 && (
+                      <div
+                        className='btn remove-var-btn'
+                        onClick={() => handleDeleteVariation(index)}
+                      >
+                        X
+                      </div>
+                    )}
+                  </div>
+                  {/* {variation.itemVariationData.sku != '' && (
                   <Barcode
                     value={`${userSku}-${variation.itemVariationData.sku}`}
                   />
-                )}
+                )} */}
+                  {variation.itemVariationData.sku != '' && (
+                    <>
+                      <div className='variation-barcode'>
+                        {renderBarcode(
+                          `${userSku}-${variation.itemVariationData.sku}`
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
               </Fragment>
             ))}
 

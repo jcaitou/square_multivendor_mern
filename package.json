@@ -19,7 +19,9 @@
   "license": "ISC",
   "dependencies": {
     "agenda": "^5.0.0",
+    "archiver": "^6.0.1",
     "bcryptjs": "^2.4.3",
+    "bwip-js": "^4.2.0",
     "cloudinary": "^1.37.3",
     "concurrently": "^8.0.1",
     "cookie-parser": "^1.4.6",

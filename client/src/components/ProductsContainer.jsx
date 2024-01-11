@@ -1,15 +1,20 @@
-import Product from './Product'
-import StateBar from './StateBar'
 import Wrapper from '../assets/wrappers/ProductsContainer'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAllProductsContext } from '../pages/AllProducts'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
-import { CSVLink } from 'react-csv'
+
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import PageBtnContainer from './CursorPageBtnContainer'
+import {
+  Product,
+  StateBar,
+  ModalExportBarcode,
+  ModalExportProducts,
+  ModalImportProducts,
+} from '.'
 
 const ProductsContainer = ({ queryClient }) => {
   const { data } = useAllProductsContext()
@@ -24,6 +29,7 @@ const ProductsContainer = ({ queryClient }) => {
   const [loading, setLoading] = useState(false)
   //export helpers:
   const [exportProductsModalShow, setExportProductsModalShow] = useState(false)
+  const [exportBarcodesModalShow, setExportBarcodesModalShow] = useState(false)
   //import helpers:
   const [importFile, setImportFile] = useState(null)
   const [importProductsModalShow, setImportProductsModalShow] = useState(false)
@@ -174,6 +180,15 @@ const ProductsContainer = ({ queryClient }) => {
       <Wrapper>
         <div className='product-actions'>
           <div className='grouped-actions'>
+            <Link to={'../add-product'} className='btn'>
+              Add Product
+            </Link>
+            <button
+              className='btn'
+              onClick={() => setImportProductsModalShow(true)}
+            >
+              Import Products
+            </button>
             {products.length > 0 && (
               <button
                 className='btn'
@@ -182,19 +197,14 @@ const ProductsContainer = ({ queryClient }) => {
                 Export Products
               </button>
             )}
-            {/* <CSVLink
-              data={variationsData}
-              filename={`products-export-${dateString}.csv`}
-              className='btn'
-            >
-              Export Products(old)
-            </CSVLink> */}
-            <button
-              className='btn'
-              onClick={() => setImportProductsModalShow(true)}
-            >
-              Import Products
-            </button>
+            {products.length > 0 && (
+              <button
+                className='btn'
+                onClick={() => setExportBarcodesModalShow(true)}
+              >
+                Export Barcodes
+              </button>
+            )}
           </div>
 
           <div className='grouped-actions'>
@@ -209,9 +219,6 @@ const ProductsContainer = ({ queryClient }) => {
                 {deleteMode ? 'Delete All' : 'Batch Delete Products'}
               </button>
             )}
-            <Link to={'../add-product'} className='btn'>
-              Add Product
-            </Link>
           </div>
         </div>
         {products.length === 0 && <h2>No products to display...</h2>}
@@ -232,7 +239,7 @@ const ProductsContainer = ({ queryClient }) => {
         </div>
         {products.length > 0 && <PageBtnContainer cursor={cursor} />}
       </Wrapper>
-      <ImportProductsModal
+      <ModalImportProducts
         loading={loading}
         handleFileImport={handleFileImport}
         handleImportSubmit={handleImportSubmit}
@@ -243,11 +250,15 @@ const ProductsContainer = ({ queryClient }) => {
           setImportFile(null)
         }}
       />
-      <ExportProductsModal
+      <ModalExportProducts
         show={exportProductsModalShow}
         variationsData={variationsData}
         dateString={dateString}
         onHide={() => setExportProductsModalShow(false)}
+      />
+      <ModalExportBarcode
+        show={exportBarcodesModalShow}
+        onHide={() => setExportBarcodesModalShow(false)}
       />
       <ConfirmBatchDeleteModal
         handleBatchDeleteProducts={handleBatchDeleteProducts}
@@ -351,138 +362,6 @@ function ConfirmBatchDeleteModal({
         <Button onClick={handleBatchDeleteProducts} disabled={loading}>
           Yes
         </Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
-function ImportProductsModal({
-  handleImportSubmit,
-  loading,
-  handleFileImport,
-  importFile,
-  ...props
-}) {
-  return (
-    <Modal
-      {...props}
-      size='lg'
-      aria-labelledby='contained-modal-title-vcenter'
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id='contained-modal-title-vcenter'>
-          Import Products by CSV
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>
-          Download a <span>sample CSV template</span> to see how you should
-          format your data.
-        </p>
-        <form>
-          <input type={'file'} accept={'.csv'} onChange={handleFileImport} />
-        </form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={props.onHide} disabled={loading}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleImportSubmit}
-          disabled={importFile == null || loading}
-        >
-          Import CSV
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
-
-function ExportProductsModal({ variationsData, dateString, ...props }) {
-  const [exportPage, setExportPage] = useState(true)
-  const [actionSubmitted, setActionSubmitted] = useState(false)
-  const handleExportTypeChange = (e) => {
-    const value = e.target.value
-    if (value === 'page') {
-      setExportPage(true)
-    } else {
-      setExportPage(false)
-    }
-  }
-  const handleExportSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      await customFetch.get('/exports/export-all-products')
-      toast.success('Full product export will be sent to your email')
-      setActionSubmitted(true)
-    } catch (error) {
-      toast.error(error?.response?.data?.msg)
-      return error
-    }
-  }
-
-  return (
-    <Modal
-      {...props}
-      size='lg'
-      aria-labelledby='contained-modal-title-vcenter'
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id='contained-modal-title-vcenter'>
-          Export Product List by CSV
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {actionSubmitted ? (
-          <p>Your export has started</p>
-        ) : (
-          <>
-            <p>Choose your export option:</p>
-            <input
-              type='radio'
-              id='page'
-              name='export-option'
-              value='page'
-              checked={exportPage}
-              onChange={(e) => handleExportTypeChange(e)}
-            />
-            <label htmlFor='page'>
-              Export the products in the current view
-            </label>
-            <input
-              type='radio'
-              id='full'
-              name='export-option'
-              value='full'
-              checked={!exportPage}
-              onChange={(e) => handleExportTypeChange(e)}
-            />
-            <label htmlFor='full'>Full export (to email)</label>
-          </>
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={props.onHide}>
-          {actionSubmitted ? 'Close' : 'Cancel'}
-        </Button>
-        {!actionSubmitted &&
-          (exportPage ? (
-            <CSVLink
-              data={variationsData}
-              filename={`products-export-${dateString}.csv`}
-              onClick={() => {
-                setActionSubmitted(true)
-              }}
-              className='btn'
-            >
-              Export CSV
-            </CSVLink>
-          ) : (
-            <button className='btn' onClick={handleExportSubmit}>
-              Export CSV
-            </button>
-          ))}
       </Modal.Footer>
     </Modal>
   )

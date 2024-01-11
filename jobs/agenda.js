@@ -19,6 +19,7 @@ import inventoryExport from './jobs_list/inventoryExport.js'
 import orderExport from './jobs_list/orderExport.js'
 // import inventoryWarning from './jobs_list/inventoryWarning.js'
 import newDiscountEmail from './jobs_list/newDiscountEmail.js'
+import barcodeExport from './jobs_list/barcodeExport.js'
 // import copyOrders from './jobs_list/copyOrders.js'
 productImport(agenda)
 inventoryImport(agenda)
@@ -27,6 +28,7 @@ inventoryExport(agenda)
 orderExport(agenda)
 // inventoryWarning(agenda)
 newDiscountEmail(agenda)
+barcodeExport(agenda)
 // copyOrders(agenda)
 
 agenda.on('ready', async () => {

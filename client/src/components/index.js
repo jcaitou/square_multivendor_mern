@@ -22,6 +22,7 @@ export { default as DiscountsContainer } from './DiscountsContainer'
 
 export { default as FileAction } from './FileAction'
 export { default as Order } from './Order'
+export { default as Product } from './Product'
 
 export { default as OrderSearchContainer } from './OrderSearchContainer'
 export { default as SalesSearchContainer } from './SalesSearchContainer'
@@ -31,3 +32,7 @@ export { default as AreaChartContainer } from './AreaChartContainer'
 export { default as BarChartContainer } from './BarChartContainer'
 export { default as StatItem } from './StatItem'
 export { default as Loading } from './Loading'
+
+export { default as ModalExportBarcode } from './ModalExportBarcode'
+export { default as ModalExportProducts } from './ModalExportProducts'
+export { default as ModalImportProducts } from './ModalImportProducts'

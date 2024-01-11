@@ -26,9 +26,14 @@ const Wrapper = styled.section`
   }
   .grouped-actions {
     display: flex;
-    -webkit-box-pack: end;
-    justify-content: center;
     column-gap: 10px;
+    max-width: 500px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .grouped-actions .btn {
+    height: fit-content;
   }
 `
 export default Wrapper

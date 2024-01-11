@@ -38,6 +38,9 @@ const Wrapper = styled.section`
     row-gap: 1rem;
     width: 100%;
   }
+  .variation-barcode {
+    margin-top: 10px;
+  }
   .form-btn {
     align-self: end;
     margin-top: 1rem;
