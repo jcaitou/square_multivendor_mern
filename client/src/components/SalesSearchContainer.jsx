@@ -87,7 +87,7 @@ const SalesSearchContainer = () => {
               })}
             </select>
           </div> */}
-          <button className='btn btn-block form-btn'>submit</button>
+          {/* <button className='btn btn-block form-btn'>submit</button> */}
           <FormRowSelect
             name='sort'
             defaultValue={sort || 'a-z'}

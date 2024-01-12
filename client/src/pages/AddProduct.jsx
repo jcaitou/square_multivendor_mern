@@ -1,26 +1,71 @@
 import { FormRow, FormRowSelect } from '../components'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
-import { JOB_STATUS, JOB_TYPE } from '../../../utils/constants'
+
 import { Form, useNavigation, useNavigate, redirect } from 'react-router-dom'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
+import { useQuery } from '@tanstack/react-query'
+import { useLoaderData } from 'react-router-dom'
+import { singleProductQuery } from './EditProduct'
+import _ from 'lodash'
+
+export const loader =
+  (queryClient) =>
+  async ({ request }) => {
+    const params = Object.fromEntries([
+      ...new URL(request.url).searchParams.entries(),
+    ])
+    console.log(params)
+    if (_.isEmpty(params)) {
+      return null
+    } else {
+      try {
+        await queryClient.ensureQueryData(singleProductQuery(params.copy))
+        return params.copy
+      } catch (error) {
+        toast.error(error?.response?.data?.msg)
+        return redirect('/dashboard/all-products')
+      }
+    }
+  }
 
 const AddProduct = ({ queryClient }) => {
+  const idToCopy = useLoaderData()
+
+  //for the case where product is copied:
+  const { data } = useQuery(singleProductQuery(idToCopy))
+  const productToCopy = data?.object
+  var variationsToCopy = null
+  if (productToCopy) {
+    variationsToCopy = productToCopy.itemData.variations.map((variation) => {
+      return {
+        name: variation.itemVariationData.name,
+        sku: variation.itemVariationData.sku,
+        price: (variation.itemVariationData.priceMoney.amount / 100).toFixed(2),
+        id: `${Date.now()}${Math.floor(Math.random() * 10000)}`,
+      }
+    })
+  }
+
   const navigate = useNavigate()
   // const navigation = useNavigation()
   // const isSubmitting = navigation.state === 'submitting'
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [productTitle, setProductTitle] = useState('')
+  const [productTitle, setProductTitle] = useState(
+    productToCopy ? productToCopy.itemData.name : ''
+  )
   const [variationEdited, setVariationEdited] = useState(false)
-  const [variations, setVariations] = useState([
-    {
-      name: '',
-      sku: '',
-      price: '',
-      id: `${Date.now()}${Math.floor(Math.random() * 10000)}`,
-    },
-  ])
+  const [variations, setVariations] = useState(
+    variationsToCopy || [
+      {
+        name: '',
+        sku: '',
+        price: '',
+        id: `${Date.now()}${Math.floor(Math.random() * 10000)}`,
+      },
+    ]
+  )
 
   const handleAddVariation = () => {
     setVariations([
@@ -112,6 +157,13 @@ const AddProduct = ({ queryClient }) => {
     <Wrapper>
       <Form method='post' className='form' onSubmit={handleAddProductSubmit}>
         <h4 className='form-title'>add product</h4>
+        {productToCopy && (
+          <>
+            <p className='alert alert-danger' role='alert'>
+              Note: The copied product is not saved until you press "Submit"!
+            </p>
+          </>
+        )}
 
         <div className='form-center'>
           <FormRow

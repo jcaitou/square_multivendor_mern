@@ -36,3 +36,5 @@ export { default as Loading } from './Loading'
 export { default as ModalExportBarcode } from './ModalExportBarcode'
 export { default as ModalExportProducts } from './ModalExportProducts'
 export { default as ModalImportProducts } from './ModalImportProducts'
+
+export { default as HoverTooltip } from './HoverTooltip'

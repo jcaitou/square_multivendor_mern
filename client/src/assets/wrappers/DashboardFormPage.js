@@ -68,8 +68,14 @@ const Wrapper = styled.section`
   }
 
   .date-search {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 750px) {
+    .date-search {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+    }
   }
 
   .date-group {
@@ -77,6 +83,7 @@ const Wrapper = styled.section`
     grid-template-columns: auto 1fr;
     grid-column-gap: 20px;
     grid-row-gap: 10px;
+    align-items: center;
   }
 
   .date-group input[type='date'] {

@@ -14,19 +14,21 @@ import { useQuery } from '@tanstack/react-query'
 import { useDashboardContext } from './DashboardLayout'
 import bwipjs from 'bwip-js'
 
-const singleProductQuery = (id) => {
+export const singleProductQuery = (id) => {
   return {
     queryKey: ['product', id],
     queryFn: async () => {
       const { data } = await customFetch.get(`/products/${id}`)
       return data
     },
+    enabled: !!id,
   }
 }
 
 export const loader =
   (queryClient) =>
   async ({ params }) => {
+    console.log(params)
     try {
       await queryClient.ensureQueryData(singleProductQuery(params.id))
       return params.id
@@ -55,7 +57,6 @@ const EditProduct = ({ queryClient }) => {
   const {
     data: { object: product },
   } = useQuery(singleProductQuery(id))
-  console.log(product)
   const [productTitle, setProductTitle] = useState(product.itemData.name)
   function generateInitialProductVariations(product) {
     return product.itemData.variations.map((variation) => {
@@ -103,13 +104,13 @@ const EditProduct = ({ queryClient }) => {
         includetext: true, // Show human-readable text
         textxalign: 'center', // Always good to set this
       })
-      console.log(canvas.toDataURL('image/png'))
     } catch (e) {
       console.log(e)
       // `e` may be a string or Error object
     }
 
-    barcode.push(<img src={canvas.toDataURL('image/png')}></img>)
+    const key = `barcode-${sku}`
+    barcode.push(<img key={key} src={canvas.toDataURL('image/png')}></img>)
     return barcode
   }
 
@@ -298,19 +299,13 @@ const EditProduct = ({ queryClient }) => {
                       </div>
                     )}
                   </div>
-                  {/* {variation.itemVariationData.sku != '' && (
-                  <Barcode
-                    value={`${userSku}-${variation.itemVariationData.sku}`}
-                  />
-                )} */}
+
                   {variation.itemVariationData.sku != '' && (
-                    <>
-                      <div className='variation-barcode'>
-                        {renderBarcode(
-                          `${userSku}-${variation.itemVariationData.sku}`
-                        )}
-                      </div>
-                    </>
+                    <div className='variation-barcode'>
+                      {renderBarcode(
+                        `${userSku}-${variation.itemVariationData.sku}`
+                      )}
+                    </div>
                   )}
                 </div>
               </Fragment>

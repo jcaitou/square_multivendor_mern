@@ -21,7 +21,14 @@ const Wrapper = styled.article`
   }
   label {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 750px) {
+    label {
+      display: grid;
+      grid-template-columns: 1fr auto;
+    }
   }
   .main-icon {
     width: 60px;

@@ -1,3 +1,6 @@
+import { HoverTooltip } from '.'
+import { RiInformationLine } from 'react-icons/ri'
+
 const SearchByDate = ({ defaultStartDate, defaultEndDate }) => {
   const debounce = (onChange) => {
     let timeout
@@ -14,7 +17,13 @@ const SearchByDate = ({ defaultStartDate, defaultEndDate }) => {
     <>
       <div className='date-search'>
         <div className='date-group'>
-          <label htmlFor='startDate'>Start date:</label>
+          <HoverTooltip
+            title='Leave both start and end date empty to search entire history.'
+            id='tt-date'
+          >
+            <label htmlFor='startDate'>Start date:</label>
+          </HoverTooltip>
+
           <input
             type='date'
             id='startDate'
@@ -57,6 +66,8 @@ const SearchByDate = ({ defaultStartDate, defaultEndDate }) => {
             // }}
           />
         </div>
+
+        <button className='btn btn-block'>submit</button>
       </div>
     </>
   )

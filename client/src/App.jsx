@@ -36,6 +36,7 @@ import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as adminLayoutLoader } from './pages/AdminLayout'
 
 import { loader as allProductsLoader } from './pages/AllProducts'
+import { loader as addProductLoader } from './pages/AddProduct'
 import { loader as editProductLoader } from './pages/EditProduct'
 import { loader as allInventoryLoader } from './pages/Inventory'
 import { loader as allDiscountsLoader } from './pages/AllDiscounts'
@@ -86,6 +87,7 @@ const router = createBrowserRouter([
           {
             path: 'add-product',
             element: <AddProduct queryClient={queryClient} />,
+            loader: addProductLoader(queryClient),
           },
           {
             path: 'all-products',
