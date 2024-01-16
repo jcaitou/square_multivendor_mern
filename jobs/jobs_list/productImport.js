@@ -418,11 +418,11 @@ export default (agenda) => {
           .flat()
 
         try {
-          const inventoryResponse =
-            await squareClient.inventoryApi.batchChangeInventory({
-              idempotencyKey: nanoid(),
-              changes: inventoryChanges,
-            })
+          // const inventoryResponse =
+          //   await squareClient.inventoryApi.batchChangeInventory({
+          //     idempotencyKey: nanoid(),
+          //     changes: inventoryChanges,
+          //   })
         } catch (error) {
           hasError = true
           for (let j = 0; j < organizedProducts[i].length; j++) {

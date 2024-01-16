@@ -1,5 +1,4 @@
 import React from 'react'
-import Wrapper from '../assets/wrappers/ProductsContainer'
 import { useLoaderData, redirect } from 'react-router-dom'
 import customFetch from '../utils/customFetch'
 import { useContext, createContext } from 'react'
@@ -8,25 +7,18 @@ import {
   InventorySearchContainer,
 } from '../components'
 import { useQuery } from '@tanstack/react-query'
-import { ALL_LOCATIONS } from '../../../utils/constants'
+import { useDashboardContext } from './DashboardLayout'
+import { userQuery } from './DashboardLayout'
 
-const allLocationsArray = ALL_LOCATIONS.map((el) => el.id)
-
-const allInventoryQuery = (searchValues) => {
+const allInventoryQuery = (searchValues, user) => {
   const { search, sort, locations } = searchValues
   const locationsQueryKey =
-    !locations || locations.length == 0 ? allLocationsArray : locations
+    !locations || locations.length == 0 ? user.locations : locations
   return {
     queryKey: ['inventory', search ?? '', sort ?? 'a-z', locationsQueryKey],
     queryFn: async () => {
       const { data } = await customFetch.get(
         '/inventory',
-        // {
-        //   params: {
-        //     ...params,
-        //     locations: locations,
-        //   },
-        // },
         {
           params: searchValues,
         },
@@ -54,54 +46,20 @@ export const loader =
     const params = Object.fromEntries([...p.entries()])
     params.locations = locations
 
-    await queryClient.ensureQueryData(allInventoryQuery(params))
+    const { user } = await queryClient.ensureQueryData(userQuery)
+
+    await queryClient.ensureQueryData(allInventoryQuery(params, user))
     return {
       searchValues: { ...params, locations: locations },
     }
   }
 
-// export const loader = async ({ request }) => {
-//   try {
-//     const p = new URL(request.url).searchParams
-//     let locations = []
-//     p.forEach((value, key) => {
-//       if (key === 'locations') {
-//         locations.push(value)
-//       }
-//     })
-//     const params = Object.fromEntries([...p.entries()])
-
-//     const { data } = await customFetch.get(
-//       '/inventory',
-//       {
-//         params: {
-//           ...params,
-//           locations: locations,
-//         },
-//       },
-//       {
-//         paramsSerializer: {
-//           indexes: null,
-//         },
-//       }
-//     )
-
-//     return {
-//       data,
-//       searchValues: { ...params, locations: locations },
-//     }
-//   } catch (error) {
-//     toast.error(error?.response?.data?.msg)
-//     return error
-//   }
-// }
-
 const AllInventoryContext = createContext()
 
 const Inventory = ({ queryClient }) => {
   const { searchValues } = useLoaderData()
-  const { data } = useQuery(allInventoryQuery(searchValues))
-  // const { data, searchValues } = useLoaderData()
+  const { user } = useDashboardContext()
+  const { data } = useQuery(allInventoryQuery(searchValues, user))
 
   return (
     <AllInventoryContext.Provider value={{ data, searchValues }}>

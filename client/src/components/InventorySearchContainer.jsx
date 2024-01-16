@@ -2,14 +2,15 @@ import { FormRowSearch, FormRow, FormRowSelect, FormRowCheckbox } from '.'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { Form, useSubmit, Link } from 'react-router-dom'
 import { Fragment } from 'react'
-import { ALL_LOCATIONS, INVENTORY_SORT_BY } from '../../../utils/constants'
+import { INVENTORY_SORT_BY } from '../../../utils/constants'
 import { useAllInventoryContext } from '../pages/Inventory'
 import { useDashboardContext } from '../pages/DashboardLayout'
+import { SearchByLocation } from '.'
 
 const InventorySearchContainer = () => {
   const { searchValues } = useAllInventoryContext()
   const { search, sort, locations } = searchValues
-  const { user } = useDashboardContext()
+  const { user, storeLocations } = useDashboardContext()
   const submit = useSubmit()
 
   const debounce = (onChange, preFunction = null) => {
@@ -24,35 +25,6 @@ const InventorySearchContainer = () => {
         onChange(form)
       }, 1000)
     }
-  }
-
-  const locationChangeAll = (e) => {
-    const form = e.currentTarget.form
-    const locationInputs = document.querySelectorAll('input[name=locations]')
-    locationInputs.forEach((input) => {
-      input.checked = e.currentTarget.checked
-    })
-    if (e.currentTarget.checked) {
-      submit(form)
-    }
-  }
-
-  const locationChange = (e) => {
-    const form = e.currentTarget.form
-    const locationInputs = document.querySelectorAll('input[name=locations]')
-    const allLocationInput = document.querySelector(
-      'input[value=locations-all]'
-    )
-    let prop = true
-    for (let i = 0; i < locationInputs.length; i++) {
-      if (locationInputs[i].checked === false) {
-        prop = false
-        break
-      }
-    }
-    allLocationInput.checked = prop
-
-    submit(form)
   }
 
   const sortLabels = {
@@ -83,60 +55,14 @@ const InventorySearchContainer = () => {
               submit(e.currentTarget.form)
             }}
           />
-
-          {user.locations.length > 1 && (
-            <>
-              <div className='form-row'>
-                <label htmlFor='locations' className='form-label'>
-                  locations
-                </label>
-                <div className='locations-search'>
-                  <div className='location-search-group'>
-                    <input
-                      type='checkbox'
-                      value='locations-all'
-                      defaultChecked={
-                        locations.length === 0 ||
-                        locations.length === user.locations.length
-                      }
-                      onChange={(e) => locationChangeAll(e)}
-                    />
-                    <label htmlFor='locations-all'>All</label>
-                  </div>
-                  {user.locations.map((itemValue) => {
-                    return (
-                      <div
-                        className='location-search-group'
-                        key={`select-${itemValue}`}
-                      >
-                        <input
-                          type='checkbox'
-                          name='locations'
-                          id={`locations-${itemValue}`}
-                          value={itemValue}
-                          defaultChecked={
-                            locations.length === 0 ||
-                            locations.includes(itemValue)
-                          }
-                          // onChange={debounce((form) => {
-                          //   submit(form)
-                          // }, locationChange)}
-                          onChange={(e) => locationChange(e)}
-                        />
-                        <label htmlFor={`locations-${itemValue}`}>
-                          {
-                            ALL_LOCATIONS.find((el) => {
-                              return el.id === itemValue
-                            }).name
-                          }
-                        </label>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </>
+          {user.locationsHistory.length > 1 && (
+            <SearchByLocation
+              user={user}
+              searchLocations={locations}
+              allStoreLocations={storeLocations}
+            />
           )}
+
           <Link to='/dashboard/inventory' className='btn form-btn delete-btn'>
             Reset Search Values
           </Link>

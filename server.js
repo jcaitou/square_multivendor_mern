@@ -20,6 +20,7 @@ import userRouter from './routers/userRouter.js'
 import uploadRouter from './routers/uploadRouter.js'
 import exportRouter from './routers/exportRouter.js'
 import webhookRouter from './routers/webhookRouter.js'
+import locationRouter from './routers/locationRouter.js'
 
 //public
 import { dirname } from 'path'
@@ -28,7 +29,10 @@ import path from 'path'
 
 //middleware
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js'
-import { authenticateUser } from './middleware/authMiddleware.js'
+import {
+  authenticateUser,
+  authorizePermissions,
+} from './middleware/authMiddleware.js'
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -49,10 +53,6 @@ app.use(helmet())
 app.use(mongoSanitize())
 
 app.set('trust proxy', 3)
-// app.get('/ip', (request, response) => response.send(request.ip))
-// app.get('/x-forwarded-for', (request, response) =>
-//   response.send(request.headers['x-forwarded-for'])
-// )
 
 app.use('/api/v1/products', authenticateUser, productRouter)
 app.use('/api/v1/inventory', authenticateUser, inventoryRouter)
@@ -61,6 +61,7 @@ app.use('/api/v1/orders', authenticateUser, orderRouter)
 app.use('/api/v1/uploads', authenticateUser, uploadRouter)
 app.use('/api/v1/exports', authenticateUser, exportRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
+app.use('/api/v1/locations', authenticateUser, locationRouter)
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/webhooks', webhookRouter)
 

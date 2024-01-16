@@ -30,10 +30,7 @@ export const getAllOrders = async (req, res) => {
   const matchObj = {
     $and: [
       { 'orderItems.itemVendor': id },
-      // { 'orderItems.itemName': 'Bird Hug Sticker' },
-      // { location: locations },
       { location: { $exists: true, $in: locations } },
-      // { location: 'L1NN4715DCC58' },
     ],
   }
 
@@ -196,13 +193,26 @@ export const getAllOrders = async (req, res) => {
 }
 
 export const getSalesbyItem = async (req, res) => {
-  const { startDate, endDate, sort } = req.query
+  const { startDate, endDate, sort, locations: locationsQuery } = req.query
   const { products } = req.body
 
   const id = new mongoose.Types.ObjectId(req.user.userId)
 
+  //search by locations:
+  let locations
+  if (!locationsQuery) {
+    locations = req.user.locations
+  } else if (Array.isArray(locationsQuery)) {
+    locations = locationsQuery
+  } else {
+    locations = [locationsQuery]
+  }
+
   const matchObj = {
-    'orderItems.itemVendor': id,
+    $and: [
+      { 'orderItems.itemVendor': id },
+      { location: { $exists: true, $in: locations } },
+    ],
   }
 
   if (products && products.length != 0) {

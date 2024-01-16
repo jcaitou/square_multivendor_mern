@@ -1,7 +1,7 @@
 import { squareClient } from '../../utils/squareUtils.js'
-import { ALL_LOCATIONS } from '../../utils/constants.js'
 import Order from '../../models/OrderModel.js'
 import User from '../../models/UserModel.js'
+import Location from '../../models/LocationModel.js'
 import day from 'dayjs'
 
 export default (agenda) => {
@@ -18,8 +18,9 @@ export default (agenda) => {
     // }).sort('-updatedAt')
     // return res.status(StatusCodes.OK).json({ oldOrders })
 
-    const locationIds = ALL_LOCATIONS.map((el) => {
-      return el.id
+    const allLocations = await Location.find()
+    const locationIds = allLocations.map((el) => {
+      return el._id
     })
 
     let cursor = 'initial'

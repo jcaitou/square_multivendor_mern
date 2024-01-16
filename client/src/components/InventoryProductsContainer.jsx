@@ -7,7 +7,6 @@ import Wrapper from '../assets/wrappers/InventoryTable'
 import { Form, useNavigate } from 'react-router-dom'
 import { useAllInventoryContext } from '../pages/Inventory'
 import { useDashboardContext } from '../pages/DashboardLayout'
-import { ALL_LOCATIONS } from '../../../utils/constants'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
@@ -20,7 +19,7 @@ const ProductsContainer = ({ queryClient }) => {
     searchValues,
   } = useAllInventoryContext()
   const sort = searchValues.sort
-  const { user } = useDashboardContext()
+  const { user, storeLocations } = useDashboardContext()
 
   let locations
   if (searchValues.locations.length > 0) {
@@ -47,8 +46,8 @@ const ProductsContainer = ({ queryClient }) => {
   let dataHeaders = null
   if (products.length > 0) {
     locationHeaders = locations.map((location) => {
-      const loc = ALL_LOCATIONS.find((el) => el.id == location)
-      return { label: loc.name, key: loc.id }
+      const loc = storeLocations.find((el) => el._id == location)
+      return { label: loc.name, key: loc._id }
     })
 
     dataHeaders = [
@@ -298,7 +297,7 @@ const ProductsContainer = ({ queryClient }) => {
                   <th>Product Name</th>
                   <th>SKU</th>
                   {locations.map((location) => {
-                    const loc = ALL_LOCATIONS.find((el) => el.id == location)
+                    const loc = storeLocations.find((el) => el._id == location)
                     return (
                       <th
                         className='stock-qty-header'
@@ -468,7 +467,7 @@ function ExportInventoryModal({ products, dataHeaders, dateString, ...props }) {
           (exportPage ? (
             <CSVLink
               data={products.flat().map((el) => {
-                let newEl = { ...el, variationSku: el.variationSku.slice(5) }
+                let newEl = { ...el }
                 for (let i = 0; i < el.locationQuantities.length; i++) {
                   newEl[el.locationQuantities[i].locationId] =
                     el.locationQuantities[i].quantity

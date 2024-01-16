@@ -1,7 +1,8 @@
 import { nanoid } from 'nanoid'
-import { FILE_UPLOAD_STATUS, ALL_LOCATIONS } from '../../utils/constants.js'
+import { FILE_UPLOAD_STATUS } from '../../utils/constants.js'
 import { squareClient } from '../../utils/squareUtils.js'
 import FileAction from '../../models/FileActionModel.js'
+import Location from '../../models/LocationModel.js'
 import csv from 'csvtojson'
 import createCsvWriter from 'csv-writer'
 import * as fs from 'fs'
@@ -59,7 +60,8 @@ export default (agenda) => {
     let hasError = false
 
     //array of valid location names:
-    let allLocationNames = ALL_LOCATIONS.map((el) => el.name)
+    const allLocations = await Location.find()
+    let allLocationNames = allLocations.map((el) => el.name)
 
     //this is the total number of locations included in the file:
     let headerLocations = dataHeaders.filter((el) =>
@@ -126,8 +128,8 @@ export default (agenda) => {
           return {}
         }
 
-        //don't need to check if location ID exists because headerLocations is already checked against the ALL_LOCATIONS const
-        let locationId = ALL_LOCATIONS.find((location) => {
+        //don't need to check if location ID exists because headerLocations is already checked against the allLocations list
+        let locationId = allLocations.find((location) => {
           return location.name.toUpperCase() == el.toUpperCase()
         })
 

@@ -1,13 +1,11 @@
-import Wrapper from '../assets/wrappers/SmallSidebar';
-import { FaTimes } from 'react-icons/fa';
-import NavLinks from './NavLinks';
-import Logo from './Logo';
-import { NavLink } from 'react-router-dom';
-import links from '../utils/links';
-import { useDashboardContext } from '../pages/DashboardLayout';
+import Wrapper from '../assets/wrappers/SmallSidebar'
+import { FaTimes } from 'react-icons/fa'
+import NavLinks from './NavLinks'
+import Logo from './Logo'
+import { useDashboardContext } from '../pages/DashboardLayout'
 
 const SmallSidebar = () => {
-  const { showSidebar, toggleSidebar } = useDashboardContext();
+  const { showSidebar, toggleSidebar } = useDashboardContext()
   return (
     <Wrapper>
       <div
@@ -26,7 +24,7 @@ const SmallSidebar = () => {
         </div>
       </div>
     </Wrapper>
-  );
-};
+  )
+}
 
-export default SmallSidebar;
+export default SmallSidebar

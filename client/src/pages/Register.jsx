@@ -1,7 +1,6 @@
 import { FormRow } from '../components'
 import Wrapper from '../assets/wrappers/RegisterAndLoginPage'
 import { Fragment } from 'react'
-import { ALL_LOCATIONS } from '../../../utils/constants'
 import {
   Form,
   redirect,
@@ -27,7 +26,7 @@ export const action = async ({ request }) => {
 }
 
 const Register = () => {
-  const { user } = useDashboardContext()
+  const { user, storeLocations } = useDashboardContext()
   const navigate = useNavigate()
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
@@ -38,16 +37,16 @@ const Register = () => {
       <Form method='post' className='form'>
         <FormRow type='text' name='name' labelText='Vendor Name' />
         <FormRow type='email' name='email' />
-        {ALL_LOCATIONS.map((location) => {
+        {storeLocations.map((location) => {
           return (
-            <Fragment key={location.id}>
+            <Fragment key={location._id}>
               <input
                 type='checkbox'
                 name='locations'
-                id={`locations-${location.id}`}
-                value={location.id}
+                id={`locations-${location._id}`}
+                value={location._id}
               />
-              <label htmlFor={`locations-${location.id}`}>
+              <label htmlFor={`locations-${location._id}`}>
                 {location.name}
               </label>
             </Fragment>

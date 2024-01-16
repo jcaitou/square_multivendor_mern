@@ -22,9 +22,26 @@ export const userQuery = {
   },
 }
 
+export const storeLocationsQuery = {
+  queryKey: ['storeLocations'],
+  queryFn: async () => {
+    const { data } = await customFetch.get('/locations/')
+    return data
+  },
+}
+
 export const loader = (queryClient) => async () => {
   try {
-    return await queryClient.ensureQueryData(userQuery)
+    const userQueryPromise = queryClient.ensureQueryData(userQuery)
+    const storeLocationsQueryPromise =
+      queryClient.ensureQueryData(storeLocationsQuery)
+    const [userData, storeLocationsData] = await Promise.all([
+      userQueryPromise,
+      storeLocationsQueryPromise,
+    ])
+
+    return { userData, storeLocationsData }
+    //return await queryClient.ensureQueryData(userQuery)
   } catch (error) {
     return redirect('/')
   }
@@ -43,7 +60,7 @@ const DashboardContext = createContext()
 
 const Dashboard = ({ isDarkThemeEnabled, queryClient }) => {
   const { user } = useQuery(userQuery)?.data
-  // const { user } = useLoaderData()
+  const { locations: storeLocations } = useQuery(storeLocationsQuery)?.data
   const navigate = useNavigate()
   const navigation = useNavigation()
   const isPageLoading = navigation.state === 'loading'
@@ -88,6 +105,7 @@ const Dashboard = ({ isDarkThemeEnabled, queryClient }) => {
     <DashboardContext.Provider
       value={{
         user,
+        storeLocations,
         showSidebar,
         isDarkTheme,
         toggleDarkTheme,

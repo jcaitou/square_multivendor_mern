@@ -1,11 +1,12 @@
 import Order from '../../models/OrderModel.js'
+import Location from '../../models/LocationModel.js'
 import mongoose from 'mongoose'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import day from 'dayjs'
 import createCsvWriter from 'csv-writer'
-import { ALL_LOCATIONS, STORE_EMAIL } from '../../utils/constants.js'
+import { STORE_EMAIL } from '../../utils/constants.js'
 import { transporter } from '../../middleware/nodemailerMiddleware.js'
 import User from '../../models/UserModel.js'
 
@@ -15,6 +16,7 @@ export default (agenda) => {
 
     //copy below
 
+    const allLocations = await Location.find()
     const user = await User.findOne({ _id: userTemp.userId })
     const id = new mongoose.Types.ObjectId(user._id)
 
@@ -117,8 +119,8 @@ export default (agenda) => {
     //start of write to csv
     for (let i = 0; i < orders.length; i++) {
       for (let j = 0; j < orders[i].filteredOrderItems.length; j++) {
-        const locationName = ALL_LOCATIONS.find((el) => {
-          return el.id === orders[i].location
+        const locationName = allLocations.find((el) => {
+          return el._id === orders[i].location
         })
         await csvWriter.writeRecords([
           {

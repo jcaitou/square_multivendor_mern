@@ -1,9 +1,10 @@
 import { Fragment } from 'react'
 import Wrapper from '../assets/wrappers/Order'
-import { ALL_LOCATIONS } from '../../../utils/constants'
+import { useDashboardContext } from '../pages/DashboardLayout'
 import day from 'dayjs'
 
 const Order = ({ order }) => {
+  const { storeLocations } = useDashboardContext()
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
@@ -17,8 +18,8 @@ const Order = ({ order }) => {
         </span>
         <span className='location'>
           {
-            ALL_LOCATIONS.find((el) => {
-              return el.id === order.location
+            storeLocations.find((el) => {
+              return el._id === order.location
             }).name
           }
         </span>

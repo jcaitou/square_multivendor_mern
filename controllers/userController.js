@@ -40,6 +40,7 @@ export const updateUserSettings = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'user updated' })
 }
 
+//THIS FUNCTION (updateUserLocations) IS NOT USED, BUT KEEP IT FOR NOW, IN CASE THE INVENTORY INITIALIZATION SCREWS UP IN THE FUTURE
 export const updateUserLocations = async (req, res) => {
   const { userId, locationToAdd } = req.body
   //check that both userId and locationToAdd exists and is valid

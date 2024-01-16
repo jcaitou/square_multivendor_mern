@@ -36,7 +36,15 @@ export const getStorewideDiscounts = async (req, res) => {
     if (!response) {
       throw new SquareApiError('error while calling the Square API')
     }
-    if (response.result) {
+    let pricingRule = response.result.objects.find((el) => {
+      return el.type === 'PRICING_RULE'
+    })
+
+    const discountHasNotPassed = day().isBefore(
+      day(pricingRule.pricingRuleData.validUntilDate).add(15, 'day')
+    )
+
+    if (response.result && discountHasNotPassed) {
       parsedResponse.push(
         JSONBig.parse(JSONBig.stringify(response.result.objects))
       )
@@ -56,12 +64,6 @@ export const getStorewideDiscounts = async (req, res) => {
     )
     return startDateA.isBefore(startDateB) ? -1 : 1
   })
-
-  // if (response.result) {
-  //   parsedResponse = JSONBig.parse(JSONBig.stringify(response.result.objects))
-  // } else {
-  //   parsedResponse = []
-  // }
 
   res.status(StatusCodes.OK).json({
     storewideDiscounts: parsedResponse,
@@ -159,7 +161,22 @@ export const getAllDiscounts = async (req, res) => {
 }
 
 export const upsertDiscount = async (req, res) => {
+  const vendorLocations = req.user.locations
+  // productData.itemData.variations[i].presentAtAllLocations = false
+  // productData.itemData.variations[i].presentAtLocationIds =
+  //   vendorLocations
+
   let { pricingRuleObj, discountObj, productSetObj } = req.body
+  pricingRuleObj.presentAtAllLocations = false
+  pricingRuleObj.presentAtLocationIds = vendorLocations
+  discountObj.presentAtAllLocations = false
+  discountObj.presentAtLocationIds = vendorLocations
+  productSetObj.presentAtAllLocations = false
+  productSetObj.presentAtLocationIds = vendorLocations
+
+  // console.log(vendorLocations)
+  // console.log(pricingRuleObj, discountObj, productSetObj)
+  // return res.status(StatusCodes.CREATED).json({ msg: 'ok' })
   try {
     const response = await squareClient.catalogApi.batchUpsertCatalogObjects({
       idempotencyKey: nanoid(),

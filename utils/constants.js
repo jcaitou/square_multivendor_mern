@@ -58,4 +58,11 @@ export const DEFAULT_REPORT_PERIOD = {
   TODAY: 'today',
 }
 
+export const CONTRACT_TYPE = {
+  ROTATING: 'rotating',
+  STARTER: 'starter',
+  ESSENTIAL: 'essential',
+  CUSTOM: 'custom',
+}
+
 export const STORE_EMAIL = 'mailtrap@jcdevs.site'

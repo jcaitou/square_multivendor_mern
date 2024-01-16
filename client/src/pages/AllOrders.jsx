@@ -7,19 +7,18 @@ import PageBtnContainer from '../components/PageBtnContainer'
 import { useDashboardContext } from './DashboardLayout'
 import { OrderSearchContainer } from '../components'
 import { useContext, createContext, useState } from 'react'
-import { ALL_LOCATIONS } from '../../../utils/constants'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { useQuery } from '@tanstack/react-query'
 import day from 'dayjs'
+import { userQuery } from './DashboardLayout'
 
-const allLocationsArray = ALL_LOCATIONS.map((el) => el.id)
-
-const allOrdersQuery = (searchValues) => {
+const allOrdersQuery = (searchValues, user) => {
   const { startDate, endDate, sort, locations } = searchValues
 
   const locationsQueryKey =
-    !locations || locations.length == 0 ? allLocationsArray : locations
+    !locations || locations.length == 0 ? user.locations : locations
+
   return {
     queryKey: [
       'orders',
@@ -63,7 +62,10 @@ export const loader =
     const params = Object.fromEntries([...p.entries()])
     params.locations = locations
 
-    await queryClient.ensureQueryData(allOrdersQuery(params))
+    const { user } = await queryClient.ensureQueryData(userQuery)
+
+    await queryClient.ensureQueryData(allOrdersQuery(params, user))
+
     return {
       searchValues: { ...params, locations: locations },
     }
@@ -73,6 +75,7 @@ const AllOrdersContext = createContext()
 
 const AllOrders = () => {
   const { searchValues } = useLoaderData()
+  const { user } = useDashboardContext()
   const {
     data: {
       currentPage,
@@ -82,7 +85,7 @@ const AllOrders = () => {
       ordersMoneyTotal,
       monthToDateTotal,
     },
-  } = useQuery(allOrdersQuery(searchValues))
+  } = useQuery(allOrdersQuery(searchValues, user))
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
@@ -148,7 +151,7 @@ const AllOrders = () => {
 }
 
 function ExportOrdersModal({ ...props }) {
-  const { user } = useDashboardContext()
+  const { user, storeLocations } = useDashboardContext()
   const today = day()
   const userStartMonth = day(user.createdAt).month()
   const userStartYear = day(user.createdAt).year()
@@ -287,8 +290,8 @@ function ExportOrdersModal({ ...props }) {
                   />
                   <label htmlFor={itemValue}>
                     {
-                      ALL_LOCATIONS.find((el) => {
-                        return el.id === itemValue
+                      storeLocations.find((el) => {
+                        return el._id === itemValue
                       }).name
                     }
                   </label>

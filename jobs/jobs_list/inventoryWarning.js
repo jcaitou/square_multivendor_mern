@@ -1,7 +1,8 @@
 import { transporter } from '../../middleware/nodemailerMiddleware.js'
 import User from '../../models/UserModel.js'
+import Location from '../../models/LocationModel.js'
 import { squareClient } from '../../utils/squareUtils.js'
-import { ALL_LOCATIONS, STORE_EMAIL } from '../../utils/constants.js'
+import { STORE_EMAIL } from '../../utils/constants.js'
 import dedent from 'dedent-js'
 
 export default (agenda) => {
@@ -60,11 +61,9 @@ export default (agenda) => {
           return el.locationId === counts[i]['locationId']
         })
 
-        console.log(Number(counts[i]['quantity']))
-        console.log(Number(relevantLocation?.inventoryAlertThreshold))
-
-        const locationName = ALL_LOCATIONS.find((el) => {
-          return el.id === counts[i]['locationId']
+        const allLocations = await Location.find()
+        const locationName = allLocations.find((el) => {
+          return el._id === counts[i]['locationId']
         }).name
 
         if (Number(counts[i]['quantity']) == 0) {

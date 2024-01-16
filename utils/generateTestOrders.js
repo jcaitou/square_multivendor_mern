@@ -8,7 +8,7 @@ import {
   SquareApiError,
 } from '../errors/customError.js'
 import JSONBig from 'json-bigint'
-import { ALL_LOCATIONS } from '../utils/constants.js'
+import Location from '../models/LocationModel.js'
 
 const productVariations = [
   '5SFHJSVMCIT6L6NHBCRPXAWB',
@@ -64,8 +64,9 @@ const productVariations = [
 ]
 
 export const generateTestOrders = async (req, res) => {
-  let locationInd = getRandomInt(ALL_LOCATIONS.length)
-  let chosenLocation = ALL_LOCATIONS[locationInd].id
+  const allLocations = await Location.find()
+  let locationInd = getRandomInt(allLocations.length)
+  let chosenLocation = allLocations[locationInd]._id
 
   const numOfProducts = getRandomInt(5)
 
@@ -152,14 +153,15 @@ import User from '../models/UserModel.js'
 import day from 'dayjs'
 
 export const copyOrders = async (req, res) => {
+  const allLocations = await Location.find()
   const startDate = day().subtract(2, 'day')
   // const oldOrders = await Order.find({
   //   updatedAt: { $gte: startDate.toDate() },
   // }).sort('-updatedAt')
   // return res.status(StatusCodes.OK).json({ oldOrders })
 
-  const locationIds = ALL_LOCATIONS.map((el) => {
-    return el.id
+  const locationIds = allLocations.map((el) => {
+    return el._id
   })
 
   const searchOrders = await squareClient.ordersApi.searchOrders({

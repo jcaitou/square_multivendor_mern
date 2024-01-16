@@ -1,13 +1,14 @@
 import { transporter } from '../../middleware/nodemailerMiddleware.js'
 import { squareClient } from '../../utils/squareUtils.js'
 import User from '../../models/UserModel.js'
+import Location from '../../models/LocationModel.js'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import createCsvWriter from 'csv-writer'
 import path from 'path'
 import day from 'dayjs'
 import { SquareApiError } from '../../errors/customError.js'
-import { ALL_LOCATIONS, STORE_EMAIL } from '../../utils/constants.js'
+import { STORE_EMAIL } from '../../utils/constants.js'
 
 export default (agenda) => {
   agenda.define('export all inventory', async function (job, done) {
@@ -15,6 +16,7 @@ export default (agenda) => {
     const squareName = job.attrs.data.squareName
     const locations = job.attrs.data.locations
 
+    const allLocations = await Location.find()
     const user = await User.findOne({ _id: userId })
 
     let searchQuery = {
@@ -104,8 +106,8 @@ export default (agenda) => {
     ]
 
     for (let i = 0; i < locations.length; i++) {
-      let currLocation = ALL_LOCATIONS.find((location) => {
-        return location.id.toUpperCase() == locations[i].toUpperCase()
+      let currLocation = allLocations.find((location) => {
+        return location._id.toUpperCase() == locations[i].toUpperCase()
       })
       header.push({ id: locations[i], title: currLocation.name })
     }

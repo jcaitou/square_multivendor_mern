@@ -5,13 +5,13 @@ import { Fragment } from 'react'
 import { SALES_SORT_BY } from '../../../utils/constants'
 import { useItemSalesContext } from '../pages/ItemSales'
 import { useDashboardContext } from '../pages/DashboardLayout'
-import { SearchByDate } from '.'
+import { SearchByDate, SearchByLocation } from '.'
 import { setReportDefaultPeriod } from '../utils/setReportDefaultPeriod'
 
 const SalesSearchContainer = () => {
   const { searchValues } = useItemSalesContext()
-  const { startDate, endDate, sort } = searchValues
-  const { user } = useDashboardContext()
+  const { startDate, endDate, sort, locations } = searchValues
+  const { user, storeLocations } = useDashboardContext()
   const submit = useSubmit()
 
   const resetLink = setReportDefaultPeriod(
@@ -68,35 +68,23 @@ const SalesSearchContainer = () => {
         <div className='form-center'>
           <SearchByDate defaultStartDate={startDate} defaultEndDate={endDate} />
 
-          {/* <div className='form-row'>
-            <label htmlFor={sort} className='form-label'>
-              Sort
-            </label>
-            <select
-              name={sort}
-              id={sort}
-              className='form-select'
-              defaultValue={sort || qtyDesc}
-            >
-              {[...Object.values(SALES_SORT_BY)].map((itemValue) => {
-                return (
-                  <option key={itemValue} value={itemValue}>
-                    {sortLabels[itemValue]}
-                  </option>
-                )
-              })}
-            </select>
-          </div> */}
-          {/* <button className='btn btn-block form-btn'>submit</button> */}
           <FormRowSelect
             name='sort'
-            defaultValue={sort || 'a-z'}
+            defaultValue={sort || 'qtyDesc'}
             list={[...Object.values(SALES_SORT_BY)]}
             listLabels={sortLabels}
             onChange={(e) => {
               submit(e.currentTarget.form)
             }}
           />
+
+          {user.locationsHistory.length > 1 && (
+            <SearchByLocation
+              user={user}
+              searchLocations={locations}
+              allStoreLocations={storeLocations}
+            />
+          )}
           <Link to={resetLink} className='btn form-btn delete-btn'>
             Reset Search Values
           </Link>

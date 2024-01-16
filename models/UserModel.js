@@ -17,11 +17,8 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       unique: true,
     },
-    locations: [
-      {
-        type: String,
-      },
-    ],
+    locations: [String],
+    locationsHistory: [String],
     settings: {
       receiveInventoryWarningEmails: {
         type: Boolean,

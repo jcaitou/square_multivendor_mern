@@ -130,17 +130,6 @@ export const upsertProduct = async (req, res) => {
           productData.itemData.variations[i],
         ]
       }
-
-      // if (productData.itemData.variations[i].id.includes('#variation')) {
-      //   productData.itemData.variations[i].customAttributeValues = {
-      //     vendor_name: {
-      //       stringValue: req.user.name,
-      //     },
-      //   }
-      // }
-      // productData.itemData.variations[
-      //   i
-      // ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
     }
   } else {
     //this is a new product
@@ -168,31 +157,6 @@ export const upsertProduct = async (req, res) => {
       updateObj.itemData.variations[i].presentAtLocationIds = vendorLocations
     }
   }
-
-  // if (
-  //   productData.id == '#newitem' &&
-  //   user.settings.defaultInventoryWarningLevel > 0
-  // ) {
-  //   for (let i = 0; i < productData.itemData.variations.length; i++) {
-  //     updateObj.itemData.variations[i].customAttributeValues = {
-  //       vendor_name: {
-  //         stringValue: req.user.name,
-  //       },
-  //     }
-  //     updateObj.itemData.variations[
-  //       i
-  //     ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
-  //     productData.itemData.variations[i].itemVariationData.locationOverrides =
-  //       locationOverrides
-  //     productData.itemData.variations[i].presentAtAllLocations = false
-  //     productData.itemData.variations[i].presentAtLocationIds = vendorLocations
-  //   }
-  // }
-
-  console.log(updateObj)
-
-  // const parsedProduct = JSONBig.parse(JSONBig.stringify(updateObj))
-  // return res.status(StatusCodes.CREATED).json({ parsedProduct, productData })
 
   const response = await squareClient.catalogApi.upsertCatalogObject({
     idempotencyKey: key,
@@ -229,11 +193,11 @@ export const upsertProduct = async (req, res) => {
 
     const inventoryKey = nanoid()
     try {
-      const inventoryResponse =
-        await squareClient.inventoryApi.batchChangeInventory({
-          idempotencyKey: inventoryKey,
-          changes: inventoryChanges,
-        })
+      // const inventoryResponse =
+      //   await squareClient.inventoryApi.batchChangeInventory({
+      //     idempotencyKey: inventoryKey,
+      //     changes: inventoryChanges,
+      //   })
       res.status(StatusCodes.CREATED).json({ parsedResponse })
     } catch (error) {
       console.log(error)

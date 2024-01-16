@@ -72,9 +72,6 @@ const AddDiscount = ({ queryClient }) => {
   const handleAddProductSubmit = async (event) => {
     event.preventDefault()
     var formData = new FormData(document.querySelector('#discount-form'))
-    // for (const pair of formData.entries()) {
-    //   console.log(`${pair[0]}, ${pair[1]}`)
-    // }
 
     let pricingRuleData = {
       name: `[${user.name}] ${formData.get('title')}`,

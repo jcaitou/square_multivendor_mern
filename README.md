@@ -84,7 +84,7 @@ When setting up from scratch:
 console.log(response.result);
 } catch(error) {
 console.log(error);
-} 2. Add locations in square and get the location IDs (maybe change this into a function) 3. Manually add first category named '[Administrator]
+} 2. Add locations in square and get the location IDs. There is no point in changing this into a function because I will always need to manually edit the constants.js file with the location ID. (maybe change this into a function) 3. Manually add first category named '[Administrator]
 Create first account (User with administrator role, needs to have locations array and square ID)
 
 # Changed from sandbox to production:
@@ -95,3 +95,12 @@ change location name constants in constants.js
 
 disable mailtrap and enable sending from domain (need to edit all email addresses)
 changed endpoint of all webhooks in square
+
+right now I am using the Square built-in function to initialize inventory counts when new products OR new inventory locations are added (https://squareup.com/help/ca/en/article/7746-tracking-your-inventory-with-square-for-retail?utm_medium=web&utm_source=dashboard
+be careful that if something breaks in the future, I may have to add the functionality back)
+
+when I add a location, do I always need to add it to admin accounts?
+refactor ALL squareClient to try..catch block with the error handler
+functions that are written but no front end yet:
+locationController.js
+createLocation, assignLocation, removeLocation

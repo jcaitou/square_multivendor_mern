@@ -7,16 +7,21 @@ import PageBtnContainer from '../components/PageBtnContainer'
 import { SalesSearchContainer } from '../components'
 import { useContext, createContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useDashboardContext } from './DashboardLayout'
+import { userQuery } from './DashboardLayout'
 
-const allItemSalesQuery = (params) => {
-  const { startDate, endDate, sort, page } = params
+const allItemSalesQuery = (params, user) => {
+  const { startDate, endDate, sort, locations, page } = params
+  const locationsQueryKey =
+    !locations || locations.length == 0 ? user.locations : locations
   return {
     queryKey: [
       'itemsales',
       page ?? 1,
       startDate ?? '',
       endDate ?? '',
-      sort ?? 'a-z',
+      sort ?? 'qtyDesc',
+      locationsQueryKey,
     ],
     queryFn: async () => {
       const { data } = await customFetch.get(
@@ -48,59 +53,22 @@ export const loader =
     const params = Object.fromEntries([...p.entries()])
     params.locations = locations
 
-    await queryClient.ensureQueryData(allItemSalesQuery(params))
+    const { user } = await queryClient.ensureQueryData(userQuery)
+
+    await queryClient.ensureQueryData(allItemSalesQuery(params, user))
     return {
       searchValues: { ...params, locations: locations },
     }
   }
 
-// export const loader = async ({ request }) => {
-//   try {
-//     const p = new URL(request.url).searchParams
-//     let locations = []
-//     p.forEach((value, key) => {
-//       if (key === 'locations') {
-//         locations.push(value)
-//       }
-//     })
-//     const params = Object.fromEntries([...p.entries()])
-
-//     const { data } = await customFetch.get(
-//       '/orders/sales',
-//       {
-//         params: {
-//           ...params,
-//           locations: locations,
-//         },
-//       },
-//       {
-//         paramsSerializer: {
-//           indexes: null,
-//         },
-//       }
-//     )
-
-//     return {
-//       data,
-//       searchValues: { ...params, locations: locations },
-//     }
-//   } catch (error) {
-//     toast.error(error?.response?.data?.msg)
-//     return error
-//   }
-// }
-
 const ItemSalesContext = createContext()
 
 const ItemSales = () => {
   const { searchValues } = useLoaderData()
+  const { user } = useDashboardContext()
   const {
     data: { currentPage, sales, numOfPages, totalItems },
-  } = useQuery(allItemSalesQuery(searchValues))
-  // const {
-  //   data: { currentPage, sales, numOfPages, totalItems },
-  //   searchValues,
-  // } = useLoaderData()
+  } = useQuery(allItemSalesQuery(searchValues, user))
   const CADMoney = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',

@@ -15,7 +15,7 @@ import {
   MdSettings,
 } from 'react-icons/md'
 
-const links = [
+export const links = [
   { text: 'orders', path: 'all-orders', icon: <GiReceiveMoney /> },
   { text: 'sales by product', path: 'item-sales', icon: <MdOutlineBarChart /> },
   { text: 'products', path: 'all-products', icon: <MdOutlineInventory2 /> },
@@ -29,4 +29,23 @@ const links = [
   },
 ]
 
-export default links
+export const adminLinks = [
+  {
+    text: 'register a vendor',
+    path: 'admin/register',
+    icon: <GiReceiveMoney />,
+  },
+  { text: 'orders', path: 'all-orders', icon: <GiReceiveMoney /> },
+  { text: 'sales by product', path: 'item-sales', icon: <MdOutlineBarChart /> },
+  { text: 'products', path: 'all-products', icon: <MdOutlineInventory2 /> },
+  { text: 'inventory', path: 'inventory', icon: <MdOutlineInventory /> },
+  { text: 'discounts', path: 'discounts', icon: <MdOutlineDiscount /> },
+  { text: 'imports', path: 'file-actions', icon: <MdUploadFile /> },
+  {
+    text: 'settings',
+    path: 'settings',
+    icon: <MdSettings />,
+  },
+]
+//
+// export default { links, adminLinks }
