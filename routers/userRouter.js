@@ -8,6 +8,7 @@ import {
   getCurrentUser,
   getApplicationStats,
   updateUser,
+  activateDeactivateUser,
   updateUserSettings,
   updateUserLocations,
 } from '../controllers/userController.js'
@@ -18,6 +19,10 @@ router.get('/current-user', getCurrentUser)
 //   getApplicationStats,
 // ])
 // router.patch('/update-user', validateUpdateUserInput, updateUser)
+router.patch('/activation', [
+  authorizePermissions('admin'),
+  activateDeactivateUser,
+])
 router.patch('/update-user-settings', updateUserSettings)
 router.patch('/update-user-locations', [
   authorizePermissions('admin'),

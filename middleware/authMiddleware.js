@@ -13,12 +13,19 @@ export const authenticateUser = (req, res, next) => {
   }
 
   try {
-    const { userId, role, name, squareId, locations } = verifyJWT(token)
-    req.user = { userId, role, name, squareId, locations }
+    const { userId, role, name, squareId, locations, active } = verifyJWT(token)
+    req.user = { userId, role, name, squareId, locations, active }
     next()
   } catch (error) {
     throw new UnauthenticatedError('authentication invalid (cookie is invalid)')
   }
+}
+
+export const checkUserIsActive = (req, res, next) => {
+  if (req.user.active === false) {
+    throw new UnauthorizedError('deactivated users cannot access this route')
+  }
+  next()
 }
 
 export const authorizePermissions = (...roles) => {

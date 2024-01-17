@@ -79,13 +79,7 @@ export const validateRegisterInput = withValidationErrors([
         throw new BadRequestError('email already exists')
       }
     }),
-  // body('password')
-  //   .notEmpty()
-  //   .withMessage('password is required')
-  //   .isLength({ min: 8 })
-  //   .withMessage('password must be at least 8 characters long'),
-  body('locations').notEmpty().withMessage('locations is required'),
-  // body('squareId').notEmpty().withMessage('square ID is required'),
+  // body('locations').notEmpty().withMessage('locations is required'),
 ])
 
 export const validatePasswordInput = withValidationErrors([

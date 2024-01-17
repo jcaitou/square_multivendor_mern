@@ -14,6 +14,7 @@ import {
   MdOutlineBarChart,
   MdSettings,
 } from 'react-icons/md'
+import { IoCreateOutline } from 'react-icons/io5'
 
 export const links = [
   { text: 'orders', path: 'all-orders', icon: <GiReceiveMoney /> },
@@ -27,6 +28,7 @@ export const links = [
     path: 'settings',
     icon: <MdSettings />,
   },
+  { text: 'test orders', path: 'test-orders', icon: <IoCreateOutline /> },
 ]
 
 export const adminLinks = [

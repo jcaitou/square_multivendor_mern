@@ -149,6 +149,7 @@ const AddProduct = ({ queryClient }) => {
       }
     } catch (error) {
       toast.error(error?.response?.data?.msg)
+      setIsSubmitting(false)
       return error
     }
   }
@@ -207,13 +208,6 @@ const AddProduct = ({ queryClient }) => {
               )}
             </div>
           ))}
-
-          {/* <FormRowSelect
-            name='jobType'
-            labelText='job type'
-            defaultValue={JOB_TYPE.FULL_TIME}
-            list={Object.values(JOB_TYPE)}
-          /> */}
 
           <button
             type='button'

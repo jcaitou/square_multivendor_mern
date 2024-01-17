@@ -25,30 +25,11 @@ export const loader = (queryClient) => async () => {
   }
 }
 
-// export const loader = async ({ request }) => {
-//   try {
-//     const { data } = await customFetch.get('/discounts')
-//     const {
-//       data: { storewideDiscounts },
-//     } = await customFetch.get('/discounts/storewide')
-
-//     return {
-//       data,
-//       storewideDiscounts,
-//     }
-//   } catch (error) {
-//     toast.error(error?.response?.data?.msg)
-//     return error
-//   }
-// }
-
 const AllDiscountsContext = createContext()
 
 const AllDiscounts = () => {
   const { vendorDiscounts, storewideDiscounts } =
     useQuery(allDiscountsQuery)?.data
-  // console.log(data)
-  // const { data, storewideDiscounts } = useLoaderData()
   return (
     <AllDiscountsContext.Provider
       value={{ vendorDiscounts, storewideDiscounts }}

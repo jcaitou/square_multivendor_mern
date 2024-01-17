@@ -29,6 +29,15 @@ export const updateUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'user updated' })
 }
 
+export const activateDeactivateUser = async (req, res) => {
+  const user = await User.findByIdAndUpdate(req.body.userId, {
+    active: req.body.makeActive,
+  })
+  res.status(StatusCodes.OK).json({
+    msg: `user is now ${req.body.makeActive ? 'activated' : 'deactivated'}`,
+  })
+}
+
 export const updateUserSettings = async (req, res) => {
   const { key, value } = req.body
   const user = await User.findOne({ _id: req.user.userId })

@@ -203,6 +203,7 @@ const EditDiscount = ({ queryClient }) => {
       }
     } catch (error) {
       toast.error(error?.response?.data?.msg)
+      setIsSubmitting(false)
       return error
     }
   }

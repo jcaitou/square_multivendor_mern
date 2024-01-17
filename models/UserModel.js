@@ -1,7 +1,5 @@
 import mongoose from 'mongoose'
 import { DEFAULT_REPORT_PERIOD } from '../utils/constants.js'
-// import Inc from 'mongoose-sequence'
-// const AutoIncrement = Inc(mongoose)
 
 const UserSchema = new mongoose.Schema(
   {

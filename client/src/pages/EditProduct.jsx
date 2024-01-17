@@ -127,8 +127,9 @@ const EditProduct = ({ queryClient }) => {
       toast.success('Product deleted successfully')
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
-      console.log(error)
       toast.error(error?.response?.data?.msg)
+      setIsSubmitting(false)
+      return error
     }
   }
 
@@ -209,7 +210,6 @@ const EditProduct = ({ queryClient }) => {
     }
     try {
       setIsSubmitting(true)
-      console.log(productData)
       await customFetch.patch(`/products/${productData.id}`, productData)
       queryClient.invalidateQueries(['products'])
       queryClient.invalidateQueries(['product', id])
@@ -219,6 +219,7 @@ const EditProduct = ({ queryClient }) => {
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
       toast.error(error?.response?.data?.msg)
+      setIsSubmitting(false)
       return error
     }
   }

@@ -1,6 +1,7 @@
 import Wrapper from '../assets/wrappers/ProductsContainer'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAllProductsContext } from '../pages/AllProducts'
+import { useDashboardContext } from '../pages/DashboardLayout'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
@@ -18,6 +19,7 @@ import {
 
 const ProductsContainer = ({ queryClient }) => {
   const { data } = useAllProductsContext()
+  const { user } = useDashboardContext()
   const products = data?.items || []
   const cursor = data?.cursor
   const today = new Date()
@@ -91,8 +93,9 @@ const ProductsContainer = ({ queryClient }) => {
       setLoading(false)
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
-      console.log(error)
       toast.error(error?.response?.data?.msg)
+      setLoading(false)
+      return error
     }
   }
 
@@ -115,8 +118,9 @@ const ProductsContainer = ({ queryClient }) => {
         setSingleIdToDelete(null)
         navigate('/dashboard/all-products', { replace: true })
       } catch (error) {
-        console.log(error)
         toast.error(error?.response?.data?.msg)
+        setLoading(false)
+        return error
       }
     }
   }
@@ -162,8 +166,9 @@ const ProductsContainer = ({ queryClient }) => {
         setDeleteMode(false)
         navigate('/dashboard/all-products', { replace: true })
       } catch (error) {
-        console.log(error)
         toast.error(error?.response?.data?.msg)
+        setLoading(false)
+        return error
       }
     }
   }
@@ -180,15 +185,19 @@ const ProductsContainer = ({ queryClient }) => {
       <Wrapper>
         <div className='product-actions'>
           <div className='grouped-actions'>
-            <Link to={'../add-product'} className='btn'>
-              Add Product
-            </Link>
-            <button
-              className='btn'
-              onClick={() => setImportProductsModalShow(true)}
-            >
-              Import Products
-            </button>
+            {user.active && (
+              <>
+                <Link to={'../add-product'} className='btn'>
+                  Add Product
+                </Link>
+                <button
+                  className='btn'
+                  onClick={() => setImportProductsModalShow(true)}
+                >
+                  Import Products
+                </button>
+              </>
+            )}
             {products.length > 0 && (
               <button
                 className='btn'

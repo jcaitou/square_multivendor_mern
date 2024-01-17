@@ -135,6 +135,29 @@ const Wrapper = styled.section`
     color: var(--disabled-text-color);
   }
 
+  .test-order-form-row-group {
+    display: flex;
+    column-gap: 20px;
+  }
+
+  .test-order-form-row-group > .form-row:first-of-type {
+    flex-grow: 1;
+  }
+
+  .test-order-add-sub-buttons {
+    display: flex;
+    justify-content: space-evenly;
+  }
+  .checkbox-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 10px;
+  }
+  .checkbox-group .form-label {
+    margin-bottom: 0;
+  }
   @media (min-width: 750px) {
     .form-choice {
       grid-template-columns: 1fr 1fr;

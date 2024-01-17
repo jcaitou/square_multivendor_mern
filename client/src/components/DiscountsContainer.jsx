@@ -34,8 +34,6 @@ const DiscountsContainer = () => {
       opt = 'in to'
     }
 
-    // e.target.setAttribute('disabled', true)
-
     try {
       setIsSubmitting(true)
       let response = await customFetch.post('/discounts/storewide', {
@@ -47,8 +45,9 @@ const DiscountsContainer = () => {
       // e.target.removeAttribute('disabled')
       navigate('/dashboard/discounts', { replace: true })
     } catch (error) {
-      console.log(error)
       toast.error(error?.response?.data?.msg)
+      setIsSubmitting(false)
+      return error
     }
   }
 
@@ -65,9 +64,10 @@ const DiscountsContainer = () => {
         setSingleIdToDelete(null)
         navigate('/dashboard/discounts', { replace: true })
       } catch (error) {
-        console.log(error)
         toast.error(error?.response?.data?.msg)
         setConfirmDeleteDiscountModalShow(false)
+        setIsSubmitting(false)
+        return error
       }
     }
   }
@@ -89,13 +89,18 @@ const DiscountsContainer = () => {
   return (
     <>
       <Wrapper>
-        <div className='product-actions'>
-          <div className='grouped-actions'>
-            <Link to={'../add-discount'} className='btn'>
-              Add Discount
-            </Link>
-          </div>
-        </div>
+        {user.active && (
+          <>
+            <div className='product-actions'>
+              <div className='grouped-actions'>
+                <Link to={'../add-discount'} className='btn'>
+                  Add Discount
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
+
         {user.role === 'user' && <h2>Storewide Discounts</h2>}
         {user.role === 'user' && storewideDiscounts.length <= 0 && (
           <p>No storewide discounts available</p>

@@ -140,6 +140,7 @@ const ProductsContainer = ({ queryClient }) => {
       discardChanges()
     } catch (error) {
       toast.error(error?.response?.data?.msg)
+      setLoading(false)
       return error
     }
   }
@@ -194,6 +195,7 @@ const ProductsContainer = ({ queryClient }) => {
       discardWarningChanges()
     } catch (error) {
       toast.error(error?.response?.data?.msg)
+      setLoading(false)
       return error
     }
   }
@@ -220,8 +222,9 @@ const ProductsContainer = ({ queryClient }) => {
       setImportFile(null)
       navigate('/dashboard/inventory', { replace: true })
     } catch (error) {
-      console.log(error)
       toast.error(error?.response?.data?.msg)
+      setLoading(false)
+      return error
     }
   }
 
@@ -251,12 +254,16 @@ const ProductsContainer = ({ queryClient }) => {
                   Export Inventory
                 </button>
               )}
-              <button
-                className='btn'
-                onClick={() => setImportInventoryModalShow(true)}
-              >
-                Import Inventory
-              </button>
+              {user.active && (
+                <>
+                  <button
+                    className='btn'
+                    onClick={() => setImportInventoryModalShow(true)}
+                  >
+                    Import Inventory
+                  </button>
+                </>
+              )}
             </div>
             {products.length > 0 && (
               <div className='inventory-action-group'>

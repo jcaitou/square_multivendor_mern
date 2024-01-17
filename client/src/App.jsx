@@ -23,6 +23,7 @@ import {
   UserSettings,
   AllOrders,
   ItemSales,
+  GenerateTestOrders, // remove later
 } from './pages'
 import { ErrorElement } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
@@ -31,6 +32,7 @@ import { action as registerAction } from './pages/Register'
 import { action as loginAction } from './pages/Login'
 import { action as deleteProductAction } from './pages/DeleteProduct'
 import { action as userSettingsAction } from './pages/UserSettings'
+import { action as generateTestOrdersAction } from './pages/GenerateTestOrders' //remove later
 
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as adminLayoutLoader } from './pages/AdminLayout'
@@ -46,6 +48,7 @@ import { loader as fileActionLoader } from './pages/FileActions'
 import { loader as allOrdersLoader } from './pages/AllOrders'
 import { loader as itemSalesLoader } from './pages/ItemSales'
 import { loader as statsLoader } from './pages/Stats'
+import { loader as generateTestOrdersLoader } from './pages/GenerateTestOrders'
 
 checkDefaultTheme()
 
@@ -152,6 +155,13 @@ const router = createBrowserRouter([
             path: 'settings',
             element: <UserSettings queryClient={queryClient} />,
             action: userSettingsAction,
+          },
+          {
+            path: 'test-orders',
+            element: <GenerateTestOrders queryClient={queryClient} />,
+            action: generateTestOrdersAction(queryClient),
+            loader: generateTestOrdersLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: 'profile',

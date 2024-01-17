@@ -32,31 +32,9 @@ export const loader =
     }
   }
 
-// export const loader = async ({ request }) => {
-//   try {
-//     const params = Object.fromEntries([
-//       ...new URL(request.url).searchParams.entries(),
-//     ])
-
-//     const { data } = await customFetch.get('/products', {
-//       params,
-//     })
-
-//     return {
-//       data,
-//       searchValues: { ...params },
-//     }
-//   } catch (error) {
-//     toast.error(error?.response?.data?.msg)
-//     return error
-//   }
-// }
-
 const AllProducts = ({ queryClient }) => {
   const { searchValues } = useLoaderData()
   const { data } = useQuery(allProductsQuery(searchValues))
-
-  // const { data, searchValues } = useLoaderData()
 
   return (
     <AllProductsContext.Provider value={{ data, searchValues }}>

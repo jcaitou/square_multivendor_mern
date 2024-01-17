@@ -13,25 +13,31 @@ import dedent from 'dedent-js'
 export const register = async (req, res) => {
   let newUserObj = req.body
   newUserObj.role = 'user'
-  newUserObj.settings = {
-    receiveInventoryWarningEmails: true,
-    defaultInventoryWarningLevel: 5,
-    defaultDiscountOptIn: false,
-  }
+  // newUserObj.settings = {
+  //   receiveInventoryWarningEmails: true,
+  //   defaultInventoryWarningLevel: 5,
+  //   defaultDiscountOptIn: false,
+  // }
 
-  const response = await squareClient.catalogApi.upsertCatalogObject({
-    idempotencyKey: nanoid(),
-    object: {
-      type: 'CATEGORY',
-      id: '#new',
-      categoryData: {
-        name: req.body.name,
+  // console.log(newUserObj)
+  // return res.status(StatusCodes.CREATED).json({ msg: 'user created' })
+
+  let response
+  try {
+    response = await squareClient.catalogApi.upsertCatalogObject({
+      idempotencyKey: nanoid(),
+      object: {
+        type: 'CATEGORY',
+        id: '#new',
+        categoryData: {
+          name: req.body.name,
+        },
       },
-    },
-  })
-
-  if (!response) {
-    throw new SquareApiError('error while creating new category')
+    })
+  } catch (error) {
+    throw new SquareApiError(
+      error?.errors[0].detail || 'error while creating category'
+    )
   }
 
   const totalUsers = await User.countDocuments()
@@ -129,6 +135,7 @@ export const login = async (req, res) => {
     squareId: user.squareId,
     locations: user.locations,
     role: user.role,
+    active: user.active,
   })
 
   const oneDay = 1000 * 60 * 60 * 24

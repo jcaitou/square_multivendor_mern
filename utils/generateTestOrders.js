@@ -10,58 +10,110 @@ import {
 import JSONBig from 'json-bigint'
 import Location from '../models/LocationModel.js'
 
-const productVariations = [
-  '5SFHJSVMCIT6L6NHBCRPXAWB',
-  'B6RSP2PW65UHNQWE3KFDLGLS',
-  'DZBE5VNBLKPRTQVQJ47VICZW',
-  'ITGZCKMTV56EXIQ6ADJGWB6U',
-  'A3IMZQZPEYDEOY7USQKKT7DW',
-  'KMYIFU6GYTBAMBG3AESEUZ2J',
-  '5M6U7K4J7MEP6J466SPSK7SG',
-  'MCQW5PK7SC27OCWXQRQ36NS7',
-  'WVKHL2AAEP6LB64Z2I5DC3KW',
-  'EUNPJSKNHSJ4AAZD3VZV55LZ',
-  'Y3JI77FJMFQHCTGFHRQEJTA2',
-  'F46VKV7JSSMDRFPL35AXJKJO',
-  'YPYPDZ637JSFWP4EOY6G52L3',
-  'AVKOMKBZHA4QRLJUQ6Z2OGJQ',
-  'XVIO33SGOHXRYHJIZNVYRPMQ',
-  'HWVKOMUBZGTE4RSOB52GHEO4',
-  'GIWPBNQ3U7FE67PSS4SOOJZQ',
-  'AEZTPZRCXQII7MY37YCPZU2V',
-  'Y2Z4YH25LS7XIKONOJ66W4IG',
-  '3BZTWQR4EFBA7DFALDJY7LAR',
-  'R23MCFB4HE5GTJRB3PP5KON6',
-  'E4KLMJ4DVL5PTPHJ75NMUD5Q',
-  'DZ22YJR4KIWVPO3BMIOHYF2C',
-  'QAUU4AML3QBPQP62PSWAEYSY',
-  'MX2A7XTD2RAO4WEA2CSDL6PT',
-  'O5APRSU7T3QQCCLDMUI7V4P4',
-  'XDI2KEZHIIC24ADWGES5VA75',
-  'ZJCN4IZ3WLQRNNYXM3GYUDQ4',
-  'RIEVEGDYIDOFWZGRHAQQ6B2L',
-  'EAZ7TZ7FY2Z77LVJFBC5LTLJ',
-  'SK5YKFAZ2PXMVXSW43QOZAIE',
-  'WNBTBGQZWOKO5LS67PZSEQVX',
-  'LXH3CDSLBUMDLVSZLOWZKPFG',
-  'I3L2WYUSISO77BUILHCQA7SG',
-  'GIZ5Z6S6ANX5XP2W4J46GO7Y',
-  'DRTP3QPRZDEQNZTBQCE3BGWF',
-  'AUUMWRK4SY7CIJLTP5R6OIBZ',
-  'KT7W2SXOIRUZCGYZHGPQADLL',
-  'W4CL55A3RVDFDI7ZR66YYGAR',
-  '2KIEW3VB5Q2UPJGB5MT22KKS',
-  '2WGBFTARD4Q5WW37RRSAL4N6',
-  'B2NYKSDRWO7MRH5K3RDBFPP4',
-  'QXZYGFBKOCTXF2KUDP5M3BNY',
-  'BFSIF2EVKAHECVL4IENEAKXD',
-  'C27XWSIJSRZEGX4MYNQACB7R',
-  'IHIWQWQJZIQF73QNM4FYZ6GU',
-  'EVOC5N3EE5DNRTTN6FSRRTKP',
-  'VX4X7PH2S5M7THG3JAJPTKLZ',
-  'XCIAJTYESP64BLRJFBKVC25G',
-  '2VZUKB6FWYUEXYS54QURNXHX',
-]
+const customerId = '4TSRAG6TZEH03AX4NW187DQE60' //always use the default test customer
+
+export const generateSpecificTestOrder = async (req, res) => {
+  const { location, items, discount } = req.body
+  const lineItems = items.map((el) => {
+    return {
+      ...el,
+      itemType: 'ITEM',
+    }
+  })
+
+  const order = {
+    locationId: location,
+    customerId: customerId, //always the default test customer
+    lineItems: lineItems,
+    serviceCharges: [
+      {
+        uid: 'marketplace-fee',
+        name: 'Marketplace Fee',
+        percentage: '13',
+        calculationPhase: 'TOTAL_PHASE',
+        // taxable: false,
+        scope: 'ORDER',
+      },
+    ],
+  }
+
+  if (discount) {
+    order.discounts = [
+      {
+        name: '10% Off',
+        percentage: '10',
+        scope: 'ORDER',
+      },
+    ]
+  }
+  console.log(location, order)
+  let orderResponse
+  //calculateOrder / createOrder
+  try {
+    orderResponse = await squareClient.ordersApi.createOrder({
+      order: order,
+    })
+  } catch (error) {
+    console.log(error)
+    throw new SquareApiError(
+      error?.errors[0].detail || 'error while creating order'
+    )
+  }
+
+  const orderId = orderResponse.result.order.id
+  let netAmountDue = Number(orderResponse.result.order.netAmountDueMoney.amount)
+
+  console.log(netAmountDue)
+
+  switch (netAmountDue % 5) {
+    case 1:
+    case 2:
+    case 6:
+    case 7:
+      netAmountDue = Math.floor(netAmountDue / 5) * 5
+      break
+    case 3:
+    case 4:
+    case 8:
+    case 9:
+      netAmountDue = Math.floor(netAmountDue / 5 + 1) * 5
+      break
+  }
+
+  const parsedResponse = JSONBig.parse(
+    JSONBig.stringify(orderResponse.result.order)
+  )
+
+  console.log(netAmountDue)
+  console.log(orderId)
+
+  // create payment and pay the order
+  try {
+    await squareClient.paymentsApi.createPayment({
+      sourceId: 'CASH',
+      idempotencyKey: nanoid(),
+      amountMoney: {
+        amount: netAmountDue,
+        currency: 'CAD',
+      },
+      orderId: orderId,
+      customerId: customerId, //always the default test customer
+      locationId: location,
+      cashDetails: {
+        buyerSuppliedMoney: {
+          amount: netAmountDue,
+          currency: 'CAD',
+        },
+      },
+    })
+  } catch (error) {
+    throw new SquareApiError(
+      error?.errors[0].detail || 'error while paying order'
+    )
+  }
+
+  res.status(StatusCodes.OK).json({ parsedResponse })
+}
 
 export const generateTestOrders = async (req, res) => {
   const allLocations = await Location.find()
@@ -80,26 +132,14 @@ export const generateTestOrders = async (req, res) => {
       itemType: 'ITEM',
     })
   }
-  // const arrayEmpty = new Array(numOfProducts)
-
-  // const lineItems = arrayEmpty.map((el) => {
-  //   let itemInd = getRandomInt(productVariations.length)
-  //   return {
-  //     quantity: '1',
-  //     catalogObjectId: productVariations[itemInd],
-  //     itemType: 'ITEM',
-  //   }
-  // })
-
-  // console.log(lineItems)
-
-  // return res.status(StatusCodes.OK).json({ msg: 'ok' })
+  console.log(chosenLocation, lineItems)
+  return res.status(StatusCodes.OK).json({ msg: 'ok' })
 
   try {
     const orderResponse = await squareClient.ordersApi.createOrder({
       order: {
         locationId: chosenLocation,
-        customerId: 'R0WM5P8MTP3SCHVQZM4FVEC970', //always the default test customer
+        customerId: customerId, //always the default test customer
         lineItems: lineItems,
       },
     })
