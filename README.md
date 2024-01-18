@@ -1,19 +1,23 @@
 # Need to add:
 
-Store model (?):
--active locations
+Store model:
 -payments to vendors
 
 Report bug feature
 
 # Email hooks:
 
--monthly reports: sales summary, expected revnue
+-daily: inventory report of which items are low in stock
+-monthly reports: sales summary csv, expected revnue
+-email reminder when rent is due
+-email when payout is paid
+-email when new storewide discount is created (need to improve)
 
 # Static page content:
 
 -how to import products
 -how to import inventory
+-setting up SKUS - what are SKUs, how to design your own SKUs
 
 # When setting up from scratch:
 
@@ -120,8 +124,6 @@ changed endpoint of all webhooks in square
 right now I am using the Square built-in function to initialize inventory counts when new products OR new inventory locations are added (https://squareup.com/help/ca/en/article/7746-tracking-your-inventory-with-square-for-retail?utm_medium=web&utm_source=dashboard
 be careful that if something breaks in the future, I may have to add the functionality back)
 
-when I add a location, do I always need to add it to admin accounts?
-
 # functions that are written but no front end yet:
 
 locationController.js
@@ -129,8 +131,8 @@ createLocation, assignLocation, removeLocation
 
 # next functions to write:
 
--disable vendor: make vendor unable to add products, edit products, import products, add discounts, edit discounts
--refactor ALL squareClient to try..catch block with the error handler
+-when I add a location, do I always need to add it to admin accounts?
+-refactor ALL squareClient to try..catch block with the error handler:
 
 ```js
 let response

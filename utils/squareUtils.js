@@ -1,6 +1,11 @@
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import path from 'path'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const rootFilePath = path.resolve(__dirname, '../.env')
 import { Client, Environment, ApiError } from 'square'
 import * as dotenv from 'dotenv'
-dotenv.config()
+dotenv.config({ path: rootFilePath })
 const { PORT, SQ_ENVIRONMENT, SQ_APPLICATION_ID, SQ_APPLICATION_SECRET } =
   process.env
 
