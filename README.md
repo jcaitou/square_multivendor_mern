@@ -177,3 +177,12 @@ app.use('/api/v1/generate-orders', testOrdersRouter)
 
 /routers/testOrdersRouter.js
 /utils/generateTestOrders.js
+cron.js - generateRandomTestOrdersInner()
+
+Current status:
+-all major functions that vendors need have been built
+-generate test orders function is active for vendors to test out the system
+
+Need to build:
+-static content so that vendors can test out the system with all the info that they need (eg. how to import products correctly)
+-the entire contracts model - keep track of when rent is due and when payouts need to be made

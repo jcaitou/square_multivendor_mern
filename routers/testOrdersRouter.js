@@ -1,13 +1,13 @@
 import { Router } from 'express'
 import {
-  generateTestOrders,
+  generateRandomTestOrders,
   generateSpecificTestOrder,
-  copyOrders,
+  copyOrder,
 } from '../utils/generateTestOrders.js'
 
 const router = Router()
 
-router.route('/').post(generateSpecificTestOrder)
-router.route('/copy-orders').post(copyOrders)
+router.route('/').post(generateSpecificTestOrder, copyOrder)
+router.route('/random-generator').post(generateRandomTestOrders)
 
 export default router

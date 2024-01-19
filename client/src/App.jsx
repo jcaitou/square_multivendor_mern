@@ -25,7 +25,7 @@ import {
   ItemSales,
   GenerateTestOrders, // remove later
 } from './pages'
-import { ErrorElement } from './components'
+import { ErrorElement, ScrollToTop } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
 import { action as registerAction } from './pages/Register'
@@ -192,7 +192,7 @@ const router = createBrowserRouter([
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RouterProvider router={router}></RouterProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

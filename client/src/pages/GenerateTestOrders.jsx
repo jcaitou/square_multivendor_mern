@@ -33,8 +33,6 @@ export const action =
       set(data, key, value)
     })
 
-    console.log(data)
-
     try {
       await customFetch.post('/generate-orders/', data)
       // queryClient.invalidateQueries(['jobs'])
@@ -53,7 +51,6 @@ const GenerateTestOrders = () => {
   const { storeLocations } = useDashboardContext()
   const [numProducts, setNumProducts] = useState(1)
   const { data } = useQuery(allProductsQuery)
-  console.log(data)
   const products = data?.items
     .map((item) => {
       let itemVariations = item.itemData.variations.map((variation) => {

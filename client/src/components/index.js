@@ -27,7 +27,9 @@ export { default as Product } from './Product'
 
 export { default as OrderSearchContainer } from './OrderSearchContainer'
 export { default as SalesSearchContainer } from './SalesSearchContainer'
+
 export { default as ErrorElement } from './ErrorElement'
+export { default as ScrollToTop } from './ScrollToTop'
 
 export { default as AreaChartContainer } from './AreaChartContainer'
 export { default as BarChartContainer } from './BarChartContainer'

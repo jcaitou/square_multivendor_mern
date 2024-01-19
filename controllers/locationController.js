@@ -18,7 +18,7 @@ export const getAllLocations = async (req, res) => {
 }
 
 //input: req.body.name
-//when i create a location, always add it to admin accounts?
+//new locations are automatically added to admin accounts
 export const createLocation = async (req, res) => {
   const locationName = req.body.name
 
@@ -47,6 +47,16 @@ export const createLocation = async (req, res) => {
     name: locationName,
     _id: locationId,
   })
+
+  const admins = await User.updateMany(
+    { role: 'admin' },
+    {
+      $addToSet: {
+        locations: locationId,
+        locationsHistory: locationId,
+      },
+    }
+  )
 
   res.status(StatusCodes.CREATED).json({ newLocation })
 }

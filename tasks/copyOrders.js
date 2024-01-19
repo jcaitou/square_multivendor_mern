@@ -1,14 +1,3 @@
-// import * as dotenv from 'dotenv'
-// // dotenv.config()
-// import { dirname } from 'path'
-// import { fileURLToPath } from 'url'
-// import path from 'path'
-
-// const __dirname = dirname(fileURLToPath(import.meta.url))
-// const rootFilePath = path.resolve(__dirname, '../.env')
-// console.log(rootFilePath)
-// dotenv.config({ path: rootFilePath })
-
 import cron from 'node-cron'
 import mongoose from 'mongoose'
 import { squareClient } from '../utils/squareUtils.js'
@@ -23,17 +12,18 @@ import {
   SquareApiError,
 } from '../errors/customError.js'
 
-try {
-  await mongoose.connect(process.env.MONGO_URL)
-  console.log('Mongoose connected, cron is running...')
-  await copyOrders()
-  process.exit(0)
-} catch (error) {
-  console.log(error)
-  process.exit(1)
-}
+//the following is for when you upload to render:
+// try {
+//   await mongoose.connect(process.env.MONGO_URL)
+//   console.log('Mongoose connected, cron is running...')
+//   await copyOrders()
+//   process.exit(0)
+// } catch (error) {
+//   console.log(error)
+//   process.exit(1)
+// }
 
-async function copyOrders() {
+export const copyOrders = async () => {
   const ALL_LOCATIONS = await Location.find()
 
   const startDate = day().subtract(1, 'day')
@@ -130,22 +120,18 @@ async function copyOrders() {
         }
 
         return {
-          orderItemInfo: {
-            itemName: item.name,
-            itemVariationName: variationName,
-            itemVariationId: item.catalogObjectId,
-            itemId: itemResponse.result.object.itemVariationData.itemId,
-            itemSku: itemResponse.result.object.itemVariationData.sku,
-            quantity: item.quantity,
-            basePrice: Number(item.basePriceMoney.amount),
-            totalDiscount: Number(item.totalDiscountMoney.amount),
-            totalMoney: Number(
-              item.totalMoney.amount - item.totalServiceChargeMoney.amount
-            ),
-            itemVendor: user._id,
-          },
-          locationInfo: locationInfo,
-          user,
+          itemName: item.name,
+          itemVariationName: variationName,
+          itemVariationId: item.catalogObjectId,
+          itemId: itemResponse.result.object.itemVariationData.itemId,
+          itemSku: itemResponse.result.object.itemVariationData.sku,
+          quantity: item.quantity,
+          basePrice: Number(item.basePriceMoney.amount),
+          totalDiscount: Number(item.totalDiscountMoney.amount),
+          totalMoney: Number(
+            item.totalMoney.amount - item.totalServiceChargeMoney.amount
+          ),
+          itemVendor: user._id,
         }
       })
 
@@ -156,7 +142,7 @@ async function copyOrders() {
         location: allOrders[i].locationId,
         orderDate: allOrders[i].createdAt,
         version: allOrders[i]?.version || 0,
-        orderItems: orderItems.map((el) => el.orderItemInfo),
+        orderItems: orderItems,
       }
 
       let newOrder

@@ -1,5 +1,11 @@
 import Wrapper from '../assets/wrappers/Dashboard'
-import { Navbar, BigSidebar, SmallSidebar, Loading } from '../components'
+import {
+  Navbar,
+  BigSidebar,
+  SmallSidebar,
+  Loading,
+  ScrollToTop,
+} from '../components'
 import { useState, createContext, useContext } from 'react'
 import { checkDefaultTheme } from '../utils/checkDefaultTheme'
 import {
@@ -113,6 +119,7 @@ const Dashboard = ({ isDarkThemeEnabled, queryClient }) => {
         logoutUser,
       }}
     >
+      <ScrollToTop />
       <Wrapper>
         <main className='dashboard'>
           <SmallSidebar />
