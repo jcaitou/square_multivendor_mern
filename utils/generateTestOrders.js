@@ -223,6 +223,7 @@ export const copyOrder = async (req, res) => {
 }
 
 export const generateRandomTestOrdersInner = async () => {
+  console.log('started')
   //choose a location:
   const allLocations = await Location.find()
   let locationInd = getRandomInt(allLocations.length)
@@ -235,6 +236,7 @@ export const generateRandomTestOrdersInner = async () => {
   )
 
   let items = []
+  console.log(items)
   while (items.length === 0) {
     locationInd = getRandomInt(allLocations.length)
     chosenLocation = allLocations[locationInd]._id
@@ -256,7 +258,8 @@ export const generateRandomTestOrdersInner = async () => {
       } catch (error) {
         console.log(searchQuery)
         throw new SquareApiError(
-          error?.errors[0].detail || 'error while obtaining inventory'
+          error?.errors[0].detail ||
+            'error while obtaining vendor catalog items'
         )
       }
       let products = vendorProductResponse.result.items
@@ -275,8 +278,25 @@ export const generateRandomTestOrdersInner = async () => {
       const itemInd = getRandomInt(variationsData.length)
       let chosenItem = variationsData[itemInd].variationId
 
+      let inventoryResponse
+      try {
+        inventoryResponse =
+          await squareClient.inventoryApi.retrieveInventoryCount(
+            chosenItem,
+            chosenLocation
+          )
+      } catch (error) {
+        console.log(chosenItem, chosenLocation)
+        throw new SquareApiError(
+          error?.errors[0].detail || 'error while obtaining inventory'
+        )
+      }
+
+      console.log(inventoryResponse.result.counts[0])
+
       if (
-        variationsData[itemInd].presentAtLocationIds.includes(chosenLocation)
+        variationsData[itemInd].presentAtLocationIds.includes(chosenLocation) &&
+        Number(inventoryResponse.result.counts[0].quantity) > 0
       ) {
         items.push({
           quantity: '1',
@@ -289,13 +309,14 @@ export const generateRandomTestOrdersInner = async () => {
   //choose whether to use discount or not
   const discount = Math.random() < 0.5
 
-  const orderId = await generateSpecificTestOrderInner(
-    chosenLocation,
-    items,
-    discount
-  )
-
-  const newOrder = await copyOrderInner(orderId)
+  if (items.length > 0) {
+    const orderId = await generateSpecificTestOrderInner(
+      chosenLocation,
+      items,
+      discount
+    )
+    await copyOrderInner(orderId)
+  }
 
   console.log(`Random order generated at ${day().format('MMM DD HH:mm')}`)
   return 'random test order successfully created'

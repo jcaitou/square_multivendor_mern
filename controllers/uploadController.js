@@ -5,6 +5,9 @@ import { FILE_UPLOAD_STATUS } from '../utils/constants.js'
 import { BadRequestError } from '../errors/customError.js'
 import agenda from '../jobs/agenda.js'
 import cloudinary from 'cloudinary'
+import { STORE_EMAIL } from '../utils/constants.js'
+import dedent from 'dedent-js'
+import { transporter } from '../middleware/nodemailerMiddleware.js'
 
 export const getAllFileActions = async (req, res, next) => {
   const queryObj = { createdBy: req.user.userId }
@@ -73,6 +76,39 @@ export const batchUpdateUploadFile = async (req, res, next) => {
   }
 
   res.status(StatusCodes.CREATED).json({ msg: 'process started' })
+}
+
+export const submitContactForm = async (req, res) => {
+  const user = await User.findOne({ _id: req.user.userId })
+
+  // let attachments = [
+  //   {
+  //     filename: `${date}-product-export.csv`,
+  //     path: resultFilepath,
+  //   },
+  // ]
+
+  let messageText = dedent`
+    From: ${req.user.name} / ${user.email}
+
+    Subject: ${req.body.subject}
+
+    Message: ${req.body.message}
+    `
+
+  let message = {
+    from: STORE_EMAIL,
+    to: 'tkjchoi@gmail.com',
+    subject: 'User feedback',
+    text: messageText,
+    // attachments: attachments,
+  }
+  transporter.sendMail(message, (err, info) => {
+    if (err) {
+      console.log(err)
+    }
+  })
+  res.status(StatusCodes.OK).json({ msg: 'ok' })
 }
 
 export const startFileAction = async (req, res) => {

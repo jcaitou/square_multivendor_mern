@@ -9,6 +9,25 @@ import { useQuery } from '@tanstack/react-query'
 import { useState, Fragment } from 'react'
 import { useNavigation } from 'react-router-dom'
 import { set } from 'lodash'
+import { userQuery } from './DashboardLayout'
+
+const allInventoryQuery = (user) => {
+  return {
+    queryKey: ['inventory', '', 'a-z', user.locations],
+    queryFn: async () => {
+      const { data } = await customFetch.get(
+        '/inventory',
+        {},
+        {
+          paramsSerializer: {
+            indexes: null,
+          },
+        }
+      )
+      return data
+    },
+  }
+}
 
 const allProductsQuery = {
   queryKey: ['products', '', ''],
@@ -19,7 +38,11 @@ const allProductsQuery = {
 }
 
 export const loader = (queryClient) => async () => {
-  await queryClient.ensureQueryData(allProductsQuery)
+  const { user } = await queryClient.ensureQueryData(userQuery)
+
+  await queryClient.ensureQueryData(allInventoryQuery(user))
+  // await queryClient.ensureQueryData(allProductsQuery)
+
   return null
 }
 
@@ -35,7 +58,10 @@ export const action =
 
     try {
       await customFetch.post('/generate-orders/', data)
-      // queryClient.invalidateQueries(['jobs'])
+      queryClient.invalidateQueries(['inventory'])
+      queryClient.invalidateQueries(['stats'])
+      queryClient.invalidateQueries(['orders'])
+      queryClient.invalidateQueries(['itemsales'])
       toast.success('Test order successfully generated')
       return redirect('/dashboard/all-orders')
     } catch (error) {
@@ -50,23 +76,27 @@ const GenerateTestOrders = () => {
   const { user } = useOutletContext()
   const { storeLocations } = useDashboardContext()
   const [numProducts, setNumProducts] = useState(1)
-  const { data } = useQuery(allProductsQuery)
-  const products = data?.items
-    .map((item) => {
-      let itemVariations = item.itemData.variations.map((variation) => {
-        let productName = item.itemData.name
-        if (item.itemData.variations.length > 1) {
-          productName = `${productName} (${variation.itemVariationData.name})`
-        }
-        return {
-          name: productName,
-          variationId: variation.id,
-        }
-      })
+  const [location, setLocation] = useState(user?.locations[0])
+  // const { data } = useQuery(allProductsQuery)
+  const { data: inventoryData } = useQuery(allInventoryQuery(user))
+  const products = inventoryData?.organizedItems.flat()
 
-      return itemVariations
-    })
-    .flat()
+  // const products = data?.items
+  //   .map((item) => {
+  //     let itemVariations = item.itemData.variations.map((variation) => {
+  //       let productName = item.itemData.name
+  //       if (item.itemData.variations.length > 1) {
+  //         productName = `${productName} (${variation.itemVariationData.name})`
+  //       }
+  //       return {
+  //         name: productName,
+  //         variationId: variation.id,
+  //       }
+  //     })
+
+  //     return itemVariations
+  //   })
+  //   .flat()
 
   return (
     <Wrapper>
@@ -81,6 +111,7 @@ const GenerateTestOrders = () => {
               name='location'
               id='location'
               className='form-select'
+              onChange={(e) => setLocation(e.target.value)}
               defaultValue={user?.locations[0]}
             >
               {user?.locations &&
@@ -111,22 +142,34 @@ const GenerateTestOrders = () => {
                       name={`items[${index}].catalogObjectId`}
                       id={`items[${index}].catalogObjectId`}
                       className='form-select'
-                      defaultValue={
-                        products &&
-                        (index < products.length
-                          ? products[index]?.variationId
-                          : products[0]?.variationId)
-                      }
+                      // defaultValue={
+                      //   products &&
+                      //   (index < products.length
+                      //     ? products[index]?.variationId
+                      //     : products[0]?.variationId)
+                      // }
                     >
+                      <option>--select a product--</option>
                       {products && (
                         <>
                           {products.map((item) => {
+                            let displayName = item.productName
+                            if (item.productName !== item.variationName) {
+                              displayName =
+                                displayName + ' ' + item.variationName
+                            }
+                            const currLocation = item.locationQuantities.find(
+                              (el) => {
+                                return el.locationId === location
+                              }
+                            )
                             return (
                               <option
                                 key={item.variationId}
                                 value={item.variationId}
+                                disabled={currLocation.quantity < 2}
                               >
-                                {item.name}
+                                {displayName}
                               </option>
                             )
                           })}
@@ -146,11 +189,11 @@ const GenerateTestOrders = () => {
                       id={`items[${el}].quantity`}
                       name={`items[${el}].quantity`}
                       min='1'
-                      max='3'
+                      max='1'
                       step='1'
                       className='form-input'
-                      defaultValue='1'
-                      required
+                      value='1'
+                      readOnly
                     />
                   </div>
                 </div>

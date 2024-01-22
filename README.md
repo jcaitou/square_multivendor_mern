@@ -3,8 +3,6 @@
 Store model:
 -payments to vendors
 
-Report bug feature
-
 # Email hooks:
 
 -daily: inventory report of which items are low in stock
@@ -121,6 +119,8 @@ squareUtils.js changed environment to Environment.Production
 disable mailtrap and enable sending from domain (need to edit all email addresses)
 changed endpoint of all webhooks in square
 
+# NOTE:
+
 right now I am using the Square built-in function to initialize inventory counts when new products OR new inventory locations are added (https://squareup.com/help/ca/en/article/7746-tracking-your-inventory-with-square-for-retail?utm_medium=web&utm_source=dashboard
 be careful that if something breaks in the future, I may have to add the functionality back)
 
@@ -131,7 +131,6 @@ createLocation, assignLocation, removeLocation
 
 # next functions to write:
 
--when I add a location, do I always need to add it to admin accounts?
 -refactor ALL squareClient to try..catch block with the error handler:
 
 ```js
@@ -162,11 +161,12 @@ updateUserLocations (userController.js) - replaced with the locationController.j
 # ONLY FOR OPEN BETA - GENERATING TEST ORDERS
 
 Front-end:
-client/src/App.jsx - test-orders route
+client/src/App.jsx - test-orders route, register is made available to everyone
 client/src/utils/links.jsx - test-orders link
 client/src/pages/GenerateTestOrders.jsx
 Back-end:
 server.js
+authRouter.js - disabled authorize permissions for new user creation
 
 ```js
 //only for use while testing:
@@ -182,7 +182,9 @@ cron.js - generateRandomTestOrdersInner()
 Current status:
 -all major functions that vendors need have been built
 -generate test orders function is active for vendors to test out the system
+-all users can now create an account and test the system
 
 Need to build:
+-report a bug page
 -static content so that vendors can test out the system with all the info that they need (eg. how to import products correctly)
 -the entire contracts model - keep track of when rent is due and when payouts need to be made

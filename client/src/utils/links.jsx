@@ -15,6 +15,7 @@ import {
   MdSettings,
 } from 'react-icons/md'
 import { IoCreateOutline } from 'react-icons/io5'
+import { TbBug } from 'react-icons/tb'
 
 export const links = [
   { text: 'orders', path: 'all-orders', icon: <GiReceiveMoney /> },
@@ -29,6 +30,7 @@ export const links = [
     icon: <MdSettings />,
   },
   { text: 'test orders', path: 'test-orders', icon: <IoCreateOutline /> },
+  { text: 'feedback', path: 'feedback', icon: <TbBug /> },
 ]
 
 export const adminLinks = [

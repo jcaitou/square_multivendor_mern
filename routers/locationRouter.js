@@ -6,7 +6,10 @@ import {
   assignLocation,
   removeLocation,
 } from '../controllers/locationController.js'
-import { authorizePermissions } from '../middleware/authMiddleware.js'
+import {
+  authorizePermissions,
+  authenticateUser,
+} from '../middleware/authMiddleware.js'
 
 router.get('/', getAllLocations)
 router.post('/create-location', authorizePermissions('admin'), createLocation)

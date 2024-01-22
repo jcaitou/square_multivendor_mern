@@ -8,6 +8,6 @@ import {
 const router = Router()
 
 router.route('/').post(generateSpecificTestOrder, copyOrder)
-router.route('/random-generator').post(generateRandomTestOrders)
+router.route('/random-generator').post(generateSpecificTestOrder, copyOrder)
 
 export default router

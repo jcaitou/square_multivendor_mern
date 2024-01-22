@@ -6,6 +6,7 @@ const FormRow = ({
   onChange,
   maxLength = false,
   required = true,
+  rows = 6,
 }) => {
   if (type === 'number') {
     return (
@@ -24,6 +25,20 @@ const FormRow = ({
           onChange={onChange}
           required={required}
         />
+      </div>
+    )
+  } else if (type === 'textarea') {
+    return (
+      <div className='form-row'>
+        <label htmlFor={name} className='form-label'>
+          {labelText || name}
+        </label>
+        <textarea
+          id={name}
+          name={name}
+          rows={rows}
+          className='form-textarea'
+        ></textarea>
       </div>
     )
   } else {

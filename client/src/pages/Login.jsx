@@ -35,13 +35,13 @@ const Login = () => {
         </button>
         {/* <button type='button' className='btn btn-block'>
           explore the app
-        </button>
+        </button> */}
         <p>
           Not a member yet?
           <Link to='/register' className='member-btn'>
             Register
           </Link>
-        </p> */}
+        </p>
       </Form>
     </Wrapper>
   )

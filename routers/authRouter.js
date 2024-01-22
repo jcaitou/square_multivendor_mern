@@ -25,11 +25,15 @@ const apiLimiter = rateLimiter({
   message: { msg: 'IP rate limit exceeded, retry in 15 minutes.' },
 })
 
-router.post('/register', authenticateUser, [
-  authorizePermissions('admin'),
-  validateRegisterInput,
-  register,
-])
+router.post(
+  '/register',
+  // authenticateUser,
+  [
+    // authorizePermissions('admin'),
+    validateRegisterInput,
+    register,
+  ]
+)
 router.post('/register-specific', registerSpecific) //only for adding specific user info during testing phase
 router.post(
   '/update-password',

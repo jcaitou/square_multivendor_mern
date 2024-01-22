@@ -24,6 +24,8 @@ import {
   AllOrders,
   ItemSales,
   GenerateTestOrders, // remove later
+  WelcomeGuide, // remove later,
+  Feedback,
 } from './pages'
 import { ErrorElement, ScrollToTop } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
@@ -33,9 +35,12 @@ import { action as loginAction } from './pages/Login'
 import { action as deleteProductAction } from './pages/DeleteProduct'
 import { action as userSettingsAction } from './pages/UserSettings'
 import { action as generateTestOrdersAction } from './pages/GenerateTestOrders' //remove later
+import { action as feedbackAction } from './pages/Feedback'
 
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as adminLayoutLoader } from './pages/AdminLayout'
+
+import { loader as registerLoader } from './pages/Register'
 
 import { loader as allProductsLoader } from './pages/AllProducts'
 import { loader as addProductLoader } from './pages/AddProduct'
@@ -76,12 +81,22 @@ const router = createBrowserRouter([
         action: loginAction(queryClient),
       },
       {
+        path: 'register',
+        element: <Register />,
+        action: registerAction,
+        loader: registerLoader(queryClient),
+      },
+      {
         path: 'dashboard',
         element: <DashboardLayout queryClient={queryClient} />,
         loader: dashboardLoader(queryClient),
         children: [
           {
             index: true,
+            element: <WelcomeGuide />,
+            errorElement: <ErrorElement />,
+          },
+          {
             element: <Stats />,
             loader: statsLoader(queryClient),
             errorElement: <ErrorElement />,
@@ -162,6 +177,11 @@ const router = createBrowserRouter([
             action: generateTestOrdersAction(queryClient),
             loader: generateTestOrdersLoader(queryClient),
             errorElement: <ErrorElement />,
+          },
+          {
+            path: 'feedback',
+            element: <Feedback />,
+            action: feedbackAction,
           },
           {
             path: 'profile',

@@ -19,5 +19,7 @@ export { default as FileActions } from './FileActions'
 export { default as UserSettings } from './UserSettings'
 export { default as AllOrders } from './AllOrders'
 export { default as ItemSales } from './ItemSales'
+export { default as Feedback } from './Feedback'
 
 export { default as GenerateTestOrders } from './GenerateTestOrders'
+export { default as WelcomeGuide } from './WelcomeGuide'

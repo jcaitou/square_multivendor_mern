@@ -13,14 +13,7 @@ import dedent from 'dedent-js'
 export const register = async (req, res) => {
   let newUserObj = req.body
   newUserObj.role = 'user'
-  // newUserObj.settings = {
-  //   receiveInventoryWarningEmails: true,
-  //   defaultInventoryWarningLevel: 5,
-  //   defaultDiscountOptIn: false,
-  // }
-
-  // console.log(newUserObj)
-  // return res.status(StatusCodes.CREATED).json({ msg: 'user created' })
+  newUserObj.locations = ['LEDWQ3C33S4F4', 'LT70Y6CNYBA67']
 
   let response
   try {
@@ -49,7 +42,7 @@ export const register = async (req, res) => {
 
   const user = await User.create(newUserObj)
 
-  console.log(user)
+  console.log(newPassword)
 
   const emailText = dedent`
     Dear ${newUserObj.name},

@@ -1,3 +1,11 @@
+// import { dirname } from 'path'
+// import { fileURLToPath } from 'url'
+// import path from 'path'
+// const __dirname = dirname(fileURLToPath(import.meta.url))
+// const rootFilePath = path.resolve(__dirname, '../.env')
+// import * as dotenv from 'dotenv'
+// dotenv.config({ path: rootFilePath })
+
 export const JOB_STATUS = {
   PENDING: 'pending',
   INTERVIEW: 'interview',
