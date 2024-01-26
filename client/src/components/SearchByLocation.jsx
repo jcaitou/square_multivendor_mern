@@ -2,7 +2,6 @@ import { useSubmit } from 'react-router-dom'
 
 const SearchByLocation = ({ user, searchLocations, allStoreLocations }) => {
   const submit = useSubmit()
-
   const locationChangeAll = (e) => {
     const form = e.currentTarget.form
     const locationInputs = document.querySelectorAll('input[name=locations]')
@@ -66,6 +65,9 @@ const SearchByLocation = ({ user, searchLocations, allStoreLocations }) => {
             <label htmlFor='locations-all'>All</label>
           </div>
           {user.locationsHistory.map((itemValue) => {
+            const currLocation = allStoreLocations.find((el) => {
+              return el._id === itemValue
+            })
             return (
               <div
                 className='location-search-group'
@@ -86,11 +88,7 @@ const SearchByLocation = ({ user, searchLocations, allStoreLocations }) => {
                   }}
                 />
                 <label htmlFor={`locations-${itemValue}`}>
-                  {
-                    allStoreLocations.find((el) => {
-                      return el._id === itemValue
-                    }).name
-                  }
+                  {currLocation.name}
                 </label>
               </div>
             )

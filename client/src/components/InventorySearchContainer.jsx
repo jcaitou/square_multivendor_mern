@@ -1,7 +1,6 @@
-import { FormRowSearch, FormRow, FormRowSelect, FormRowCheckbox } from '.'
+import { FormRowSearch, FormRowSelect } from '.'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { Form, useSubmit, Link } from 'react-router-dom'
-import { Fragment } from 'react'
 import { INVENTORY_SORT_BY } from '../../../utils/constants'
 import { useAllInventoryContext } from '../pages/Inventory'
 import { useDashboardContext } from '../pages/DashboardLayout'

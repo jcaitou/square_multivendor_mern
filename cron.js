@@ -1,12 +1,12 @@
 import cron from 'node-cron'
 import mongoose from 'mongoose'
 import { copyOrders } from './tasks/copyOrders.js'
+import { generateReceivables } from './tasks/generateReceivables.js'
 import { generateRandomTestOrdersInner } from './utils/generateTestOrders.js'
 
 try {
   await mongoose.connect(process.env.MONGO_URL)
   console.log('Mongoose connected, cron is running...')
-  generateRandomTestOrdersInner()
 } catch (error) {
   console.log(error)
   process.exit(1)
@@ -15,6 +15,8 @@ try {
 // //run once:
 // copyOrders()
 // generateRandomTestOrdersInner()
+await generateReceivables()
+process.exit(0)
 
 // //this is needed in the future:
 // cron.schedule('*/20 7-23 * * *', () => {

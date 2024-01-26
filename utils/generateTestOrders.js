@@ -223,7 +223,6 @@ export const copyOrder = async (req, res) => {
 }
 
 export const generateRandomTestOrdersInner = async () => {
-  console.log('started')
   //choose a location:
   const allLocations = await Location.find()
   let locationInd = getRandomInt(allLocations.length)
@@ -274,6 +273,10 @@ export const generateRandomTestOrdersInner = async () => {
           })
         })
         .flat()
+
+      if (variationsData.length < 1) {
+        continue
+      }
 
       const itemInd = getRandomInt(variationsData.length)
       let chosenItem = variationsData[itemInd].variationId

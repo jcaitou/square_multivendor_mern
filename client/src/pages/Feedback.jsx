@@ -1,6 +1,6 @@
-import { Link, Form, redirect, useNavigation } from 'react-router-dom'
+import { Form, redirect, useNavigation } from 'react-router-dom'
 import Wrapper from '../assets/wrappers/Feedback'
-import { FormRow, Logo } from '../components'
+import { UncontrolledFormRow } from '../components'
 import customFetch from '../utils/customFetch'
 import { toast } from 'react-toastify'
 
@@ -27,8 +27,8 @@ const Feedback = () => {
         for improvement in general.
       </p>
       <Form method='post' className='form'>
-        <FormRow type='text' name='subject' />
-        <FormRow type='textarea' rows='6' name='message' />
+        <UncontrolledFormRow type='text' name='subject' />
+        <UncontrolledFormRow type='textarea' rows='6' name='message' />
         <button type='submit' className='btn btn-block' disabled={isSubmitting}>
           {isSubmitting ? 'submitting...' : 'submit'}
         </button>

@@ -5,6 +5,7 @@ const FormRowSelect = ({
   listLabels,
   defaultValue = '',
   onChange,
+  doubleList = false,
 }) => {
   return (
     <div className='form-row'>
@@ -18,10 +19,14 @@ const FormRowSelect = ({
         defaultValue={defaultValue}
         onChange={onChange}
       >
-        {list.map((itemValue) => {
+        {list.map((itemValue, index) => {
           return (
             <option key={itemValue} value={itemValue}>
-              {listLabels ? listLabels[itemValue] : itemValue}
+              {listLabels && doubleList
+                ? listLabels[index]
+                : listLabels
+                ? listLabels[itemValue]
+                : itemValue}
             </option>
           )
         })}

@@ -67,18 +67,22 @@ export const createLocation = async (req, res) => {
 //req.body.locationId (location to be assigned)
 export const assignLocation = async (req, res) => {
   const locationToAdd = req.body.locationId
+  const userId = req.body.userId
+  const user = await assignLocationInner(locationToAdd, userId)
+  res.status(StatusCodes.OK).json({ user })
+}
+export const assignLocationInner = async (locationToAdd, userId) => {
+  // const locationToAdd = req.body.locationId
   const location = await Location.findById(locationToAdd)
   if (!location) {
     throw new BadRequestError('invalid location ID')
   }
 
-  const user = await User.findOne({ _id: req.body.userId })
+  const user = await User.findOne({ _id: userId })
   const currentLocations = user.locations
   const allLocations = user.locationsHistory
   if (currentLocations.includes(locationToAdd)) {
-    return res
-      .status(StatusCodes.OK)
-      .json({ msg: 'Location already exists for user' })
+    return user.toJSON()
   } else {
     currentLocations.push(locationToAdd)
   }
@@ -191,7 +195,7 @@ export const assignLocation = async (req, res) => {
   }
 
   //below is for intiializing discounts to the newly assigned:
-  const discounts = await Discount.find({ createdBy: req.user.userId })
+  const discounts = await Discount.find({ createdBy: userId })
   const discountIds = discounts
     .map((el) => [el.pricingRuleId, el.discountId, el.productSetId])
     .flat()
@@ -226,7 +230,7 @@ export const assignLocation = async (req, res) => {
   //above is for intiializing discounts to the new store:
 
   const updatedVendor = await User.findByIdAndUpdate(
-    req.body.userId,
+    userId,
     {
       locations: currentLocations,
       locationsHistory: allLocations,
@@ -237,7 +241,7 @@ export const assignLocation = async (req, res) => {
   )
   const userWithoutPassword = updatedVendor.toJSON()
 
-  res.status(StatusCodes.OK).json({ user: userWithoutPassword })
+  return userWithoutPassword
 }
 
 export const removeLocation = async (req, res) => {

@@ -21,6 +21,8 @@ import uploadRouter from './routers/uploadRouter.js'
 import exportRouter from './routers/exportRouter.js'
 import webhookRouter from './routers/webhookRouter.js'
 import locationRouter from './routers/locationRouter.js'
+import contractRouter from './routers/contractRouter.js'
+import paymentRouter from './routers/paymentRouter.js'
 
 //public
 import { dirname } from 'path'
@@ -61,6 +63,8 @@ app.use('/api/v1/orders', authenticateUser, orderRouter)
 app.use('/api/v1/uploads', authenticateUser, uploadRouter)
 app.use('/api/v1/exports', authenticateUser, exportRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
+app.use('/api/v1/contracts', authenticateUser, contractRouter)
+app.use('/api/v1/payments', authenticateUser, paymentRouter) //currently not really used
 app.use('/api/v1/locations', locationRouter)
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/webhooks', webhookRouter)

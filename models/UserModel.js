@@ -37,6 +37,7 @@ const UserSchema = new mongoose.Schema(
       },
     },
     active: {
+      //if user is not active, then the "create products" and other functions will not appear for them
       type: Boolean,
       default: true,
     },

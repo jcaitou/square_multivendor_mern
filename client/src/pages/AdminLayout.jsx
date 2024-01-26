@@ -1,7 +1,16 @@
 import { Outlet, redirect, useLoaderData, useNavigate } from 'react-router-dom'
 import customFetch from '../utils/customFetch'
+import { useQuery } from '@tanstack/react-query'
 
-export const loader = async () => {
+export const allVendorsQuery = {
+  queryKey: ['allvendors'],
+  queryFn: async () => {
+    const { data } = await customFetch.get('/users/all-users')
+    return data
+  },
+}
+
+export const loader = (queryClient) => async () => {
   try {
     const { data } = await customFetch.get('/users/current-user')
 
@@ -9,7 +18,7 @@ export const loader = async () => {
       return redirect('/dashboard')
     }
 
-    console.log(data)
+    await queryClient.ensureQueryData(allVendorsQuery)
     return data
   } catch (error) {
     return redirect('/')
@@ -17,7 +26,8 @@ export const loader = async () => {
 }
 
 const AdminLayout = () => {
-  return <Outlet />
+  const { users } = useQuery(allVendorsQuery)?.data
+  return <Outlet context={{ users }} />
 }
 
 export default AdminLayout

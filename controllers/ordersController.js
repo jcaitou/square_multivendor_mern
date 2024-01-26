@@ -9,6 +9,7 @@ import {
   SquareApiError,
 } from '../errors/customError.js'
 import Order from '../models/OrderModel.js'
+import User from '../models/UserModel.js'
 import mongoose from 'mongoose'
 import day from 'dayjs'
 
@@ -208,11 +209,18 @@ export const getSalesbyItem = async (req, res) => {
     locations = [locationsQuery]
   }
 
-  const matchObj = {
-    $and: [
-      { 'orderItems.itemVendor': id },
-      { location: { $exists: true, $in: locations } },
-    ],
+  let matchObj
+  if (req.user.role === 'admin') {
+    matchObj = {
+      $and: [{ location: { $exists: true, $in: locations } }],
+    }
+  } else {
+    matchObj = {
+      $and: [
+        { 'orderItems.itemVendor': id },
+        { location: { $exists: true, $in: locations } },
+      ],
+    }
   }
 
   if (products && products.length != 0) {
@@ -267,12 +275,15 @@ export const getSalesbyItem = async (req, res) => {
         price: { $sum: '$orderItems.totalMoney' },
         discounts: { $sum: '$orderItems.totalDiscount' },
         name: { $first: '$orderItems.itemName' },
+        vendor: { $first: '$orderItems.itemVendor' },
       },
     },
     { $sort: sortQuery },
   ])
     .skip(skip)
     .limit(limit)
+
+  await User.populate(orders, { path: 'vendor', select: 'name' })
 
   const totalItems = await Order.aggregate([
     queryObj,

@@ -1,4 +1,4 @@
-import { FormRow } from '../components'
+import { UncontrolledFormRow } from '../components'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import {
   Form,
@@ -177,7 +177,11 @@ const AddDiscount = ({ queryClient }) => {
           <h4 className='form-title'>add discount</h4>
 
           <div className='form-center'>
-            <FormRow type='text' name='title' labelText='discount name' />
+            <UncontrolledFormRow
+              type='text'
+              name='title'
+              labelText='discount name'
+            />
 
             <h5>When should the discount be active?</h5>
 

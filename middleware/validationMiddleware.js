@@ -7,7 +7,8 @@ import {
 } from '../errors/customError.js'
 import mongoose from 'mongoose'
 import User from '../models/UserModel.js'
-import { start } from 'agenda/dist/agenda/start.js'
+import Contract from '../models/ContractModel.js'
+import RentPayment from '../models/RentPaymentModel.js'
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -143,5 +144,33 @@ export const validateOrderQueryInput = withValidationErrors([
       throw new Error('Start date must be before end date')
     }
     return true
+  }),
+])
+
+export const validateContractIdParam = withValidationErrors([
+  param('id').custom(async (value, { req }) => {
+    const isValidId = mongoose.Types.ObjectId.isValid(value)
+    if (!isValidId) throw new BadRequestError('invalid MongoDB id')
+    const contract = await Contract.findById(value)
+    if (!contract) throw new NotFoundError(`no job with id : ${value}`)
+
+    const isAdmin = req.user.role === 'admin'
+    const isOwner = req.user.userId === contract.vendor.toString()
+    if (!isAdmin && !isOwner)
+      throw new UnauthorizedError('not authorized to access this route')
+  }),
+])
+
+export const validatePaymentIdParam = withValidationErrors([
+  param('id').custom(async (value, { req }) => {
+    const isValidId = mongoose.Types.ObjectId.isValid(value)
+    if (!isValidId) throw new BadRequestError('invalid MongoDB id')
+    const payment = await RentPayment.findById(value)
+    if (!payment) throw new NotFoundError(`no job with id : ${value}`)
+
+    const isAdmin = req.user.role === 'admin'
+    const isOwner = req.user.userId === payment.vendor.toString()
+    if (!isAdmin && !isOwner)
+      throw new UnauthorizedError('not authorized to access this route')
   }),
 ])

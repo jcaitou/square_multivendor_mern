@@ -38,13 +38,6 @@ export const FILE_UPLOAD_STATUS = {
   COMPLETE_WITH_ERROR: 'error',
 }
 
-// export const ALL_LOCATIONS = [
-//   { name: 'Metrotown', id: 'LVBCM6VKTYDHH' },
-//   { name: 'Richmond Center', id: 'L1NN4715DCC58' },
-// ]
-
-export const ALL_LOCATIONS = [{ name: 'Richmond Center', id: 'LEDWQ3C33S4F4' }]
-
 export const ORDERS_SORT_BY = {
   DATE_DESCENDING: 'dateDesc',
   DATE_ASCENDING: 'dateAsc',
@@ -71,6 +64,13 @@ export const CONTRACT_TYPE = {
   STARTER: 'starter',
   ESSENTIAL: 'essential',
   CUSTOM: 'custom',
+}
+
+export const PAYMENT_STATUS = {
+  UPCOMING: 'upcoming',
+  DUE: 'due',
+  PAST_DUE: 'past due',
+  PAID: 'paid',
 }
 
 export const STORE_EMAIL = 'mailtrap@jcdevs.site'

@@ -73,6 +73,7 @@ const ItemSales = () => {
     style: 'currency',
     currency: 'CAD',
   })
+  console.log(sales)
   return (
     <ItemSalesContext.Provider value={{ searchValues }}>
       <Wrapper>
@@ -90,7 +91,10 @@ const ItemSales = () => {
             return (
               <Fragment key={item._id}>
                 <div className='item-details'>
-                  <span className='order-item-name'>{item.name}</span>
+                  <span className='order-item-name'>
+                    {item.name}{' '}
+                    {user.role === 'admin' && ` (${item.vendor.name})`}
+                  </span>
                   <span>{item.quantity}</span>
                   <span>{CADMoney.format(item.basePrice / 100)}</span>
                   <span>

@@ -26,6 +26,11 @@ import {
   GenerateTestOrders, // remove later
   WelcomeGuide, // remove later,
   Feedback,
+  ContractStatus,
+  AdminContracts,
+  AdminContract,
+  AdminPayments,
+  AdminPayment,
 } from './pages'
 import { ErrorElement, ScrollToTop } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
@@ -36,6 +41,8 @@ import { action as deleteProductAction } from './pages/DeleteProduct'
 import { action as userSettingsAction } from './pages/UserSettings'
 import { action as generateTestOrdersAction } from './pages/GenerateTestOrders' //remove later
 import { action as feedbackAction } from './pages/Feedback'
+import { action as startContractAction } from './pages/AdminContract'
+import { action as editPaymentAction } from './pages/AdminPayment'
 
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as adminLayoutLoader } from './pages/AdminLayout'
@@ -54,6 +61,11 @@ import { loader as allOrdersLoader } from './pages/AllOrders'
 import { loader as itemSalesLoader } from './pages/ItemSales'
 import { loader as statsLoader } from './pages/Stats'
 import { loader as generateTestOrdersLoader } from './pages/GenerateTestOrders'
+import { loader as contractStatusLoader } from './pages/ContractStatus'
+import { loader as adminContractsLoader } from './pages/AdminContracts'
+import { loader as adminContractLoader } from './pages/AdminContract'
+import { loader as adminPaymentsLoader } from './pages/AdminPayments'
+import { loader as adminPaymentLoader } from './pages/AdminPayment'
 
 checkDefaultTheme()
 
@@ -97,8 +109,15 @@ const router = createBrowserRouter([
             errorElement: <ErrorElement />,
           },
           {
+            path: 'stats',
             element: <Stats />,
             loader: statsLoader(queryClient),
+            errorElement: <ErrorElement />,
+          },
+          {
+            path: 'contract',
+            element: <ContractStatus />,
+            loader: contractStatusLoader(queryClient),
             errorElement: <ErrorElement />,
           },
           // { path: 'stats', element: <Stats />, loader: statsLoader },
@@ -194,12 +213,36 @@ const router = createBrowserRouter([
           {
             path: 'admin',
             element: <AdminLayout />,
-            loader: adminLayoutLoader,
+            loader: adminLayoutLoader(queryClient),
             children: [
               {
                 path: 'register',
                 element: <Register />,
                 action: registerAction,
+              },
+              {
+                path: 'contracts',
+                element: <AdminContracts />,
+                loader: adminContractsLoader(queryClient),
+                // action: registerAction,
+              },
+              {
+                path: 'contracts/:id',
+                element: <AdminContract />,
+                loader: adminContractLoader(queryClient),
+                action: startContractAction(queryClient),
+              },
+              {
+                path: 'payments',
+                element: <AdminPayments />,
+                loader: adminPaymentsLoader(queryClient),
+                // action: registerAction,
+              },
+              {
+                path: 'payments/:id',
+                element: <AdminPayment />,
+                loader: adminPaymentLoader(queryClient),
+                action: editPaymentAction(queryClient),
               },
             ],
           },

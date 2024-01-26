@@ -98,6 +98,10 @@ const GenerateTestOrders = () => {
   //   })
   //   .flat()
 
+  if (products.length === 0) {
+    return <h2>Add some products before generating test orders!</h2>
+  }
+
   return (
     <Wrapper>
       <Form method='post' className='form'>

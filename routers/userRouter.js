@@ -6,7 +6,7 @@ import { authorizePermissions } from '../middleware/authMiddleware.js'
 
 import {
   getCurrentUser,
-  getApplicationStats,
+  getAllUsers,
   updateUser,
   activateDeactivateUser,
   updateUserSettings,
@@ -14,17 +14,18 @@ import {
 } from '../controllers/userController.js'
 
 router.get('/current-user', getCurrentUser)
-// router.get('/admin/app-stats', [
-//   authorizePermissions('admin'),
-//   getApplicationStats,
-// ])
+router.get('/all-users', [authorizePermissions('admin'), getAllUsers])
 // router.patch('/update-user', validateUpdateUserInput, updateUser)
-router.patch('/activation', [
+
+router.patch('/update-user-settings', updateUserSettings)
+
+router.patch('/adm/activation', [
   authorizePermissions('admin'),
   activateDeactivateUser,
 ])
-router.patch('/update-user-settings', updateUserSettings)
-router.patch('/update-user-locations', [
+
+//THIS FUNCTION (updateUserLocations) IS NOT USED, BUT KEEP IT FOR NOW, IN CASE THE INVENTORY INITIALIZATION SCREWS UP IN THE FUTURE:
+router.patch('/adm/update-user-locations', [
   authorizePermissions('admin'),
   updateUserLocations,
 ])

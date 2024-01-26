@@ -41,3 +41,4 @@ export { default as ModalExportProducts } from './ModalExportProducts'
 export { default as ModalImportProducts } from './ModalImportProducts'
 
 export { default as HoverTooltip } from './HoverTooltip'
+export { default as AdminPaymentTable } from './AdminPaymentTable'

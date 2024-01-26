@@ -16,10 +16,9 @@ export const getCurrentUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: userWithoutPassword })
 }
 
-export const getApplicationStats = async (req, res) => {
-  const users = await User.countDocuments()
-  const jobs = await Job.countDocuments()
-  res.status(StatusCodes.OK).json({ users, jobs })
+export const getAllUsers = async (req, res) => {
+  const users = await User.find({}, { settings: 0, password: 0 })
+  res.status(StatusCodes.OK).json({ users })
 }
 
 export const updateUser = async (req, res) => {
@@ -29,6 +28,7 @@ export const updateUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'user updated' })
 }
 
+//if user is not active, then the "create products" and other functions will not appear for them
 export const activateDeactivateUser = async (req, res) => {
   const user = await User.findByIdAndUpdate(req.body.userId, {
     active: req.body.makeActive,

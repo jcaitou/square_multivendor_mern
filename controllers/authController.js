@@ -9,11 +9,18 @@ import { nanoid } from 'nanoid'
 import { transporter } from '../middleware/nodemailerMiddleware.js'
 import { STORE_EMAIL } from '../utils/constants.js'
 import dedent from 'dedent-js'
+import { createContractInner } from './contractController.js'
+import { createPayment } from './paymentController.js'
+import day from 'dayjs'
 
-export const register = async (req, res) => {
+//when we register a vendor, we ALWAYS create a contract and an initial payment object
+//the payment object doesn't mean that it's paid, it's more like an invoice that reminds us the payment is ude
+export const register = async (req, res, next) => {
   let newUserObj = req.body
   newUserObj.role = 'user'
-  newUserObj.locations = ['LEDWQ3C33S4F4', 'LT70Y6CNYBA67']
+
+  const locationId = req.body.location
+  delete newUserObj.location
 
   let response
   try {
@@ -54,12 +61,12 @@ export const register = async (req, res) => {
 
     Please remember to change your password as soon as possible.
 
-    Makers2
+    WeCreate
     `
   let message = {
     from: STORE_EMAIL,
     to: newUserObj.email,
-    subject: 'Welcome to Makers2!',
+    subject: 'Welcome to WeCreate!',
     text: emailText,
   }
   transporter.sendMail(message, (err, info) => {
@@ -69,6 +76,21 @@ export const register = async (req, res) => {
       //console.log(info)
     }
   })
+
+  // const vendorId = '65570807dc2e645ec0e10c9c'
+
+  const vendorId = user.id
+
+  console.log(vendorId, locationId)
+
+  const contract = await createContractInner(vendorId, locationId)
+
+  const payment = await createPayment(
+    contract.id,
+    vendorId,
+    contract.monthlyRent,
+    contract.startDate
+  )
 
   res.status(StatusCodes.CREATED).json({ msg: 'user created' })
 }
