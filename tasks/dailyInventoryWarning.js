@@ -34,7 +34,7 @@ async function dailyInventoryWarning() {
 
   const allPromises = []
 
-  for (let i = 0; i < allVendors.length; i++) {
+  vendorLoop: for (let i = 0; i < allVendors.length; i++) {
     if (allVendors[i].settings.receiveInventoryWarningEmails === false) {
       continue
     }
@@ -69,7 +69,11 @@ async function dailyInventoryWarning() {
         )
       }
       let products = vendorProductResponse.result.items
+      console.log(vendorProductResponse.result)
       cursor = vendorProductResponse.result?.cursor || null
+      if (!products) {
+        continue vendorLoop
+      }
       let variationsData = products
         .map((product) => {
           return product.itemData.variations.map((variation) => {
