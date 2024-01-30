@@ -8,6 +8,7 @@ import cloudinary from 'cloudinary'
 import { STORE_EMAIL } from '../utils/constants.js'
 import dedent from 'dedent-js'
 import { transporter } from '../middleware/nodemailerMiddleware.js'
+import { inventoryImport } from '../jobs/jobs_list/inventoryImport.js'
 
 export const getAllFileActions = async (req, res, next) => {
   const queryObj = { createdBy: req.user.userId }
@@ -54,7 +55,7 @@ export const batchUpdateUploadFile = async (req, res, next) => {
   })
 
   if (req.body.type == 'product') {
-    agenda.now('product import', {
+    const jobAttrs = {
       squareName: req.user.name,
       squareId: req.user.squareId,
       skuId: user.skuId,
@@ -63,16 +64,29 @@ export const batchUpdateUploadFile = async (req, res, next) => {
       fileUrl: cloudinaryResponse.secure_url,
       fileActionId: fileAction._id,
       defaultInventoryWarningLevel,
-    })
+    }
+    agenda.now('product import', jobAttrs)
   } else if (req.body.type == 'inventory-recount') {
-    agenda.now('inventory recount', {
+    const jobAttrs = {
       squareName: req.user.name,
       squareId: req.user.squareId,
       locations: user.locations,
       filename: req.file.filename,
       fileUrl: cloudinaryResponse.secure_url,
       fileActionId: fileAction._id,
-    })
+    }
+
+    console.log(jobAttrs)
+    await inventoryImport(jobAttrs)
+
+    // agenda.now('inventory recount', {
+    //   squareName: req.user.name,
+    //   squareId: req.user.squareId,
+    //   locations: user.locations,
+    //   filename: req.file.filename,
+    //   fileUrl: cloudinaryResponse.secure_url,
+    //   fileActionId: fileAction._id,
+    // })
   }
 
   res.status(StatusCodes.CREATED).json({ msg: 'process started' })

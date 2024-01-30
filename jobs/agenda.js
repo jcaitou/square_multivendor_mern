@@ -11,9 +11,10 @@ const agenda = new Agenda({
 })
 
 //import orderWebhook from './jobs_list/orderWebhook.js'
+import { agendaWrapper } from './agendaWrapper.js'
 //orderWebhook(agenda)
-import productImport from './jobs_list/productImport.js'
-import inventoryImport from './jobs_list/inventoryImport.js'
+import { productImport } from './jobs_list/productImport.js'
+import { inventoryImport } from './jobs_list/inventoryImport.js'
 import productExport from './jobs_list/productExport.js'
 import inventoryExport from './jobs_list/inventoryExport.js'
 import orderExport from './jobs_list/orderExport.js'
@@ -21,8 +22,9 @@ import orderExport from './jobs_list/orderExport.js'
 import newDiscountEmail from './jobs_list/newDiscountEmail.js'
 import barcodeExport from './jobs_list/barcodeExport.js'
 // import copyOrders from './jobs_list/copyOrders.js'
-productImport(agenda)
-inventoryImport(agenda)
+agendaWrapper(agenda, 'product import', productImport)
+agendaWrapper(agenda, 'inventory recount', inventoryImport)
+// inventoryImport(agenda)
 productExport(agenda)
 inventoryExport(agenda)
 orderExport(agenda)

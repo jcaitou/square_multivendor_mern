@@ -167,6 +167,7 @@ client/src/pages/GenerateTestOrders.jsx
 Back-end:
 server.js
 authRouter.js - disabled authorize permissions for new user creation
+newUserObj.locations = ['LEDWQ3C33S4F4', 'LT70Y6CNYBA67'] hardcoded locations
 
 ```js
 //only for use while testing:
@@ -185,6 +186,9 @@ Current status:
 -all users can now create an account and test the system
 
 Need to build:
--report a bug page
+-report a bug page - maybe add attachment
 -static content so that vendors can test out the system with all the info that they need (eg. how to import products correctly)
 -the entire contracts model - keep track of when rent is due and when payouts need to be made
+-when the account is made, that is assumed to be the first day of the contract
+same day on every month (or use 28th, if the start date is 29/30/31) - rent is due (& simulate payment right away)
+every 2 weeks (calculated using weekday) - issue payout

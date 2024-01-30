@@ -143,11 +143,11 @@ const ContractStatus = () => {
                     <td>
                       {`${day(paymentObj.forPeriodStart).format(
                         'DD-MMM-YYYY'
-                      )}${!contracts[contractInd].started && ' (TBC)'}`}
+                      )}${!contracts[contractInd].started ? ' (TBC)' : ''}`}
                     </td>
                     <td>
                       {`${day(paymentObj.forPeriodEnd).format('DD-MMM-YYYY')}${
-                        !contracts[contractInd].started && ' (TBC)'
+                        !contracts[contractInd].started ? ' (TBC)' : ''
                       }`}
                     </td>
                     <td>{formatCurrency(paymentObj.amountDue)}</td>

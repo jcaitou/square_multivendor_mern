@@ -31,6 +31,9 @@ import {
   AdminContract,
   AdminPayments,
   AdminPayment,
+  Guides,
+  GuideProductUpload,
+  GuideInventoryUpload,
 } from './pages'
 import { ErrorElement, ScrollToTop } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
@@ -103,13 +106,14 @@ const router = createBrowserRouter([
         element: <DashboardLayout queryClient={queryClient} />,
         loader: dashboardLoader(queryClient),
         children: [
+          // {
+          //   index: true,
+          //   element: <WelcomeGuide />,
+          //   errorElement: <ErrorElement />,
+          // },
           {
             index: true,
-            element: <WelcomeGuide />,
-            errorElement: <ErrorElement />,
-          },
-          {
-            path: 'stats',
+            // path: 'stats',
             element: <Stats />,
             loader: statsLoader(queryClient),
             errorElement: <ErrorElement />,
@@ -210,6 +214,29 @@ const router = createBrowserRouter([
           //   path: 'admin',
           //   element: <Admin />,
           // },
+          {
+            path: 'resources',
+            // element: <Guides />,
+            // loader: adminLayoutLoader(queryClient),
+            children: [
+              {
+                index: true,
+                element: <Guides />,
+              },
+              {
+                path: 'getting-started',
+                element: <WelcomeGuide />,
+              },
+              {
+                path: 'how-to-upload-products',
+                element: <GuideProductUpload />,
+              },
+              {
+                path: 'how-to-upload-inventory',
+                element: <GuideInventoryUpload />,
+              },
+            ],
+          },
           {
             path: 'admin',
             element: <AdminLayout />,

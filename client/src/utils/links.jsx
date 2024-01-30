@@ -13,6 +13,7 @@ import {
   MdOutlinePassword,
   MdOutlineBarChart,
   MdSettings,
+  MdOutlineHowToReg,
 } from 'react-icons/md'
 import { IoCreateOutline } from 'react-icons/io5'
 import { TbBug } from 'react-icons/tb'
@@ -33,6 +34,7 @@ export const links = [
   { text: 'test orders', path: 'test-orders', icon: <IoCreateOutline /> },
   { text: 'feedback', path: 'feedback', icon: <TbBug /> },
   { text: 'contract', path: 'contract', icon: <FaSignature /> },
+  { text: 'resources', path: 'resources', icon: <MdOutlineHowToReg /> },
 ]
 
 export const adminLinks = [
@@ -57,6 +59,24 @@ export const adminLinks = [
   {
     text: 'rent status (adm)',
     path: 'admin/payments',
+    icon: <GiReceiveMoney />,
+  },
+]
+
+export const guideLinks = [
+  {
+    text: 'Getting Started',
+    path: 'getting-started',
+    icon: <GiReceiveMoney />,
+  },
+  {
+    text: 'Uploading Products',
+    path: 'how-to-upload-products',
+    icon: <GiReceiveMoney />,
+  },
+  {
+    text: 'Uploading Inventory',
+    path: 'how-to-upload-inventory',
     icon: <GiReceiveMoney />,
   },
 ]

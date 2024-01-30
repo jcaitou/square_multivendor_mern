@@ -130,6 +130,7 @@ export const getProductsInventory = async (req, res) => {
     })
     return variationList
   })
+
   for (let i = 0; i < organizedItems.length; i++) {
     for (let j = 0; j < organizedItems[i].length; j++) {
       const variationInventory = inventoryResults.filter((inventoryObj) => {
@@ -157,6 +158,10 @@ export const getProductsInventory = async (req, res) => {
             return el.locationId == variationInventory[k].locationId
           }
         )
+
+        if (index < 0) {
+          continue
+        }
         organizedItems[i][j].locationQuantities[index].quantity =
           variationInventory[k].quantity
 

@@ -28,3 +28,6 @@ export { default as AdminPayment } from './AdminPayment'
 
 export { default as GenerateTestOrders } from './GenerateTestOrders'
 export { default as WelcomeGuide } from './WelcomeGuide'
+export { default as Guides } from './Guides'
+export { default as GuideProductUpload } from './GuideProductUpload'
+export { default as GuideInventoryUpload } from './GuideInventoryUpload'

@@ -14,7 +14,8 @@ import { createPayment } from './paymentController.js'
 import day from 'dayjs'
 
 //when we register a vendor, we ALWAYS create a contract and an initial payment object
-//the payment object doesn't mean that it's paid, it's more like an invoice that reminds us the payment is ude
+//the payment object doesn't mean that it's paid, it's more like an invoice that reminds us the payment is due
+//however: the locations are not active until the administrator manually posts the startContract route
 export const register = async (req, res, next) => {
   let newUserObj = req.body
   newUserObj.role = 'user'
@@ -77,11 +78,7 @@ export const register = async (req, res, next) => {
     }
   })
 
-  // const vendorId = '65570807dc2e645ec0e10c9c'
-
   const vendorId = user.id
-
-  console.log(vendorId, locationId)
 
   const contract = await createContractInner(vendorId, locationId)
 
