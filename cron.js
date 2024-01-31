@@ -13,10 +13,10 @@ try {
 }
 
 // //run once:
-// copyOrders()
+copyOrders()
 // generateRandomTestOrdersInner()
-await generateReceivables()
-process.exit(0)
+// await generateReceivables()
+// process.exit(0)
 
 // //this is needed in the future:
 // cron.schedule('*/20 7-23 * * *', () => {

@@ -1,17 +1,14 @@
 import InventoryProduct from './InventoryProduct'
 import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
 import Table from 'react-bootstrap/Table'
-import StateBar from './StateBar'
 import Wrapper from '../assets/wrappers/InventoryTable'
-import { Form, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAllInventoryContext } from '../pages/Inventory'
 import { useDashboardContext } from '../pages/DashboardLayout'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
-import { CSVLink } from 'react-csv'
-import PageBtnContainer from './CursorPageBtnContainer'
+import { StateBar, ModalImportInventory, ModalExportInventory } from '.'
 
 const ProductsContainer = ({ queryClient }) => {
   const {
@@ -78,7 +75,6 @@ const ProductsContainer = ({ queryClient }) => {
   //export helpers:
   const [exportInventoryModalShow, setExportInventoryModalShow] =
     useState(false)
-  const [importFile, setImportFile] = useState(null)
 
   //handle inventory change:
   const handleInventoryChange = (
@@ -200,34 +196,6 @@ const ProductsContainer = ({ queryClient }) => {
     }
   }
 
-  //import inventory functions:
-  const handleFileImport = (e) => {
-    setImportFile(e.target.files[0])
-  }
-
-  const handleImportSubmit = async (e) => {
-    e.preventDefault()
-
-    let data = new FormData()
-    data.append('type', 'inventory-recount')
-    data.append('update-file', importFile)
-
-    try {
-      setLoading(true)
-      let response = await customFetch.post('/uploads', data)
-      queryClient.invalidateQueries(['fileactions'])
-      toast.success('Batch update has started')
-      setLoading(false)
-      setImportInventoryModalShow(false)
-      setImportFile(null)
-      navigate('/dashboard/inventory', { replace: true })
-    } catch (error) {
-      toast.error(error?.response?.data?.msg)
-      setLoading(false)
-      return error
-    }
-  }
-
   return (
     <>
       <StateBar
@@ -338,17 +306,16 @@ const ProductsContainer = ({ queryClient }) => {
             </Table>
           )}
         </div>
-        {/* <PageBtnContainer cursor={cursor} /> */}
       </Wrapper>
-      <ImportInventoryModal
-        handleFileImport={handleFileImport}
-        handleImportSubmit={handleImportSubmit}
+      <ModalImportInventory
         loading={loading}
-        importFile={importFile}
+        queryClient={queryClient}
+        setLoading={setLoading}
         show={importInventoryModalShow}
+        setImportInventoryModalShow={setImportInventoryModalShow}
         onHide={() => setImportInventoryModalShow(false)}
       />
-      <ExportInventoryModal
+      <ModalExportInventory
         show={exportInventoryModalShow}
         products={products}
         dataHeaders={dataHeaders}
@@ -356,147 +323,6 @@ const ProductsContainer = ({ queryClient }) => {
         onHide={() => setExportInventoryModalShow(false)}
       />
     </>
-  )
-}
-
-function ImportInventoryModal({
-  handleImportSubmit,
-  loading,
-  handleFileImport,
-  importFile,
-  ...props
-}) {
-  return (
-    <Modal
-      {...props}
-      size='lg'
-      aria-labelledby='contained-modal-title-vcenter'
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id='contained-modal-title-vcenter'>
-          Edit Products Inventory by CSV
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>
-          Download a <span>sample CSV template</span> to see how you should
-          format your data.
-        </p>
-        <form>
-          <input type={'file'} accept={'.csv'} onChange={handleFileImport} />
-        </form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={props.onHide} disabled={loading}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleImportSubmit}
-          disabled={importFile == null || loading}
-        >
-          Import CSV
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
-
-function ExportInventoryModal({ products, dataHeaders, dateString, ...props }) {
-  const [exportPage, setExportPage] = useState(true)
-  const [actionSubmitted, setActionSubmitted] = useState(false)
-  const handleExportTypeChange = (e) => {
-    const value = e.target.value
-    if (value === 'page') {
-      setExportPage(true)
-    } else {
-      setExportPage(false)
-    }
-  }
-  const handleExportSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      await customFetch.get('/exports/export-all-inventory')
-      toast.success('Full inventory export will be sent to your email')
-      setActionSubmitted(true)
-    } catch (error) {
-      toast.error(error?.response?.data?.msg)
-      return error
-    }
-  }
-
-  return (
-    <Modal
-      {...props}
-      size='lg'
-      aria-labelledby='contained-modal-title-vcenter'
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id='contained-modal-title-vcenter'>
-          Export Products Inventory by CSV
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {actionSubmitted ? (
-          <p>Your export has started</p>
-        ) : (
-          <>
-            <p>Choose your export option:</p>
-            <input
-              type='radio'
-              id='page'
-              name='export-option'
-              value='page'
-              checked={exportPage}
-              onChange={(e) => handleExportTypeChange(e)}
-            />
-            <label htmlFor='page'>
-              Export the products in the current view
-            </label>
-            <input
-              type='radio'
-              id='full'
-              name='export-option'
-              value='full'
-              checked={!exportPage}
-              onChange={(e) => handleExportTypeChange(e)}
-            />
-            <label htmlFor='full'>Full export (to email)</label>
-          </>
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={props.onHide}>
-          {actionSubmitted ? 'Close' : 'Cancel'}
-        </Button>
-        {!actionSubmitted &&
-          (exportPage ? (
-            <CSVLink
-              data={products.flat().map((el) => {
-                let newEl = { ...el }
-                for (let i = 0; i < el.locationQuantities.length; i++) {
-                  newEl[el.locationQuantities[i].locationId] =
-                    el.locationQuantities[i].quantity
-                }
-                return newEl
-              })}
-              headers={dataHeaders}
-              filename={`inventory-export-${dateString}.csv`}
-              onClick={() => {
-                setActionSubmitted(true)
-              }}
-              className='btn'
-            >
-              Export CSV
-            </CSVLink>
-          ) : (
-            <button className='btn' onClick={handleExportSubmit}>
-              Export CSV
-            </button>
-          ))}
-      </Modal.Footer>
-    </Modal>
   )
 }
 

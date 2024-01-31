@@ -1,11 +1,3 @@
-// import { dirname } from 'path'
-// import { fileURLToPath } from 'url'
-// import path from 'path'
-// const __dirname = dirname(fileURLToPath(import.meta.url))
-// const rootFilePath = path.resolve(__dirname, '../.env')
-// import * as dotenv from 'dotenv'
-// dotenv.config({ path: rootFilePath })
-
 export const JOB_STATUS = {
   PENDING: 'pending',
   INTERVIEW: 'interview',
@@ -28,7 +20,7 @@ export const INVENTORY_SORT_BY = {
 export const FILE_TYPE = {
   PRODUCT_UPDATE: 'product',
   INVENTORY_RECOUNT: 'inventory-recount',
-  INVENTORY_UPDATE: 'inventory-update',
+  INVENTORY_RESTOCK: 'inventory-restock',
 }
 
 export const FILE_UPLOAD_STATUS = {

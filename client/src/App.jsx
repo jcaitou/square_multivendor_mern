@@ -38,6 +38,8 @@ import {
 import { ErrorElement, ScrollToTop } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
 
+import { action as addProductAction } from './pages/AddProduct'
+import { action as editProductAction } from './pages/EditProduct'
 import { action as registerAction } from './pages/Register'
 import { action as loginAction } from './pages/Login'
 import { action as deleteProductAction } from './pages/DeleteProduct'
@@ -129,6 +131,8 @@ const router = createBrowserRouter([
             path: 'add-product',
             element: <AddProduct queryClient={queryClient} />,
             loader: addProductLoader(queryClient),
+            action: addProductAction(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: 'all-products',
@@ -140,6 +144,7 @@ const router = createBrowserRouter([
             path: 'edit-product/:id',
             element: <EditProduct queryClient={queryClient} />,
             loader: editProductLoader(queryClient),
+            action: editProductAction(queryClient),
             errorElement: <ErrorElement />,
           },
           {

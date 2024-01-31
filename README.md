@@ -67,38 +67,23 @@ At this point, all future accounts can be added via normal operations (below)
 
 # Adding vendor accounts:
 
-1. Login with admin account and register via endpoint: /auth/register
+1. Login with admin account and register via form.
+   When we create an account, we always create it with a location, becuase if they don't even have a location that they are planning to move into, there's no point in creating an account of them.
+   Upon account creation, a contract item and an initial payment item will also be made.
 
-```js
-{
-    "name": "Cards",
-    "email": "asdf@gmail.com",
-    "role": "user"
-}
-```
-
-Front-end will be added soon.
 At this point, the vendor is able to login and has full control within the multivendor platform.
 However, their items are not available at any of the Square locations yet (ie. you will not be able to see their items in the POS terminal).
 
-2. On the actual contract start date (determined by when they move in):
-   Assign locations to the vendor via endpoint: /locations/assign-vendor-location
-
-```js
-{
-    "userId": "65548261e33a4afb1edd1183",
-    "locationId": "LT70Y6CNYBA67"
-}
-```
-
-Front-end will be added soon.
-Once the location is assigned, their products will show up in the Square POS Terminal.
+2. On the actual contract start date, go to "Contracts" and confirm the move-in dates.
+   At this point, the contract starts rolling. The location is also assigned along with this function, and the vendor's products will show up in the Square POS Terminal.
 
 3. During their contract period:
+   \*needs to be rewritten to include the contract model
    Vendor decides to rent another location: /locations/assign-vendor-location
    Vendor decides to leave a location: /locations/remove-vendor-location
 
 4. Vendor leaves all of our locations and is no longer selling:
+   \*needs to be rewritten to include the contract model
    Deactivate their account via: /users/activation
 
 ```js
@@ -155,7 +140,6 @@ try {
 
 # UNUSED FUNCTIONS:
 
-startFileAction (uploadController.js) - was previously used to start specific import tasks
 updateUserLocations (userController.js) - replaced with the locationController.js file
 
 # ONLY FOR OPEN BETA - GENERATING TEST ORDERS
@@ -167,7 +151,6 @@ client/src/pages/GenerateTestOrders.jsx
 Back-end:
 server.js
 authRouter.js - disabled authorize permissions for new user creation
-newUserObj.locations = ['LEDWQ3C33S4F4', 'LT70Y6CNYBA67'] hardcoded locations
 
 ```js
 //only for use while testing:
@@ -188,7 +171,8 @@ Current status:
 Need to build:
 -report a bug page - maybe add attachment
 -static content so that vendors can test out the system with all the info that they need (eg. how to import products correctly)
--the entire contracts model - keep track of when rent is due and when payouts need to be made
+-the entire contracts model - keep track of when rent is due and when payouts need to be made - need to test the automatic functions
 -when the account is made, that is assumed to be the first day of the contract
 same day on every month (or use 28th, if the start date is 29/30/31) - rent is due (& simulate payment right away)
 every 2 weeks (calculated using weekday) - issue payout
+-payouts

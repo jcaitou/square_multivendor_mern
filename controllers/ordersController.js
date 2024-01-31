@@ -13,6 +13,156 @@ import User from '../models/UserModel.js'
 import mongoose from 'mongoose'
 import day from 'dayjs'
 
+export const getAllOrdersAdm = async (req, res) => {
+  const { startDate, endDate, sort, locations: locationsQuery } = req.query
+
+  //search by locations:
+  let locations
+  if (!locationsQuery) {
+    locations = req.user.locations
+  } else if (Array.isArray(locationsQuery)) {
+    locations = locationsQuery
+  } else {
+    locations = [locationsQuery]
+  }
+
+  const matchObj = {
+    $and: [{ location: { $exists: true, $in: locations } }],
+  }
+
+  //search by dates:
+  let dateQuery = {}
+  if (startDate) {
+    dateQuery.$gte = new Date(startDate)
+  }
+  if (endDate) {
+    const formattedEndDate = day(endDate)
+      .hour(23)
+      .minute(59)
+      .second(59)
+      .millisecond(990)
+    dateQuery.$lte = formattedEndDate.toDate()
+  }
+  if (startDate || endDate) {
+    matchObj.orderDate = dateQuery
+  }
+
+  const queryObj = {
+    $match: matchObj,
+  }
+
+  //sort
+  const sortOptions = {
+    dateDesc: '-orderDate',
+    dateAsc: 'orderDate',
+    priceDesc: '-totalPrice',
+    priceAsc: 'totalPrice',
+  }
+
+  const sortKey = sortOptions[sort] || sortOptions.dateDesc
+
+  // setup pagination
+  const page = Number(req.query.page) || 1
+  const limit = Number(req.query.limit) || 100
+  const skip = (page - 1) * limit
+
+  const orders = await Order.aggregate([
+    queryObj,
+    {
+      $set: {
+        filteredOrderItems: '$orderItems',
+        orderItems: '$$REMOVE',
+      },
+    },
+    {
+      $addFields: {
+        totalPrice: {
+          $sum: '$filteredOrderItems.totalMoney',
+        },
+      },
+    },
+  ])
+    .sort(sortKey)
+    .skip(skip)
+    .limit(limit)
+
+  const totalOrdersQuery = await Order.aggregate([
+    queryObj,
+    {
+      $set: {
+        filteredOrderItems: '$orderItems',
+        orderItems: '$$REMOVE',
+      },
+    },
+    {
+      $addFields: {
+        totalPrice: {
+          $sum: '$filteredOrderItems.totalMoney',
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        n: { $sum: 1 },
+        price: { $sum: '$totalPrice' },
+      },
+    },
+  ])
+
+  //for the current month revenue:
+  const thisMonthStart = day()
+    .date(1)
+    .hour(0)
+    .minute(0)
+    .second(0)
+    .millisecond(1)
+
+  const monthToDateQueryObj = {
+    $match: {
+      orderDate: { $gte: thisMonthStart.toDate() },
+    },
+  }
+
+  const monthToDateQuery = await Order.aggregate([
+    monthToDateQueryObj,
+    {
+      $set: {
+        filteredOrderItems: '$orderItems',
+        orderItems: '$$REMOVE',
+      },
+    },
+    {
+      $addFields: {
+        totalPrice: {
+          $sum: '$filteredOrderItems.totalMoney',
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        n: { $sum: 1 },
+        price: { $sum: '$totalPrice' },
+      },
+    },
+  ])
+
+  const totalOrders = totalOrdersQuery[0]?.n || 0
+  const numOfPages = Math.ceil(totalOrders / limit)
+
+  const ordersMoneyTotal = totalOrdersQuery[0]?.price || 0
+
+  return res.status(StatusCodes.OK).json({
+    orders,
+    numOfPages,
+    currentPage: page,
+    ordersMoneyTotal,
+    monthToDateTotal: monthToDateQuery[0]?.price || 0,
+    totalOrders: totalOrders,
+  })
+}
+
 export const getAllOrders = async (req, res) => {
   const { startDate, endDate, sort, locations: locationsQuery } = req.query
 

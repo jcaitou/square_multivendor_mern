@@ -7,6 +7,7 @@ const StateBar = ({
   discardAction,
   submitAction,
   loading = null,
+  form = null,
   warningText = 'Unsaved changes',
   discardText = 'Discard',
   submitText = 'Save',
@@ -27,13 +28,24 @@ const StateBar = ({
             >
               {discardText}
             </Button>
-            <Button
-              variant='primary'
-              onClick={submitAction}
-              disabled={loading !== null ? loading : false}
-            >
-              {submitText}
-            </Button>
+            {form ? (
+              <button
+                type='submit'
+                className='btn btn-block form-btn '
+                form={form}
+                disabled={loading !== null ? loading : false}
+              >
+                {loading !== null && loading ? 'working...' : 'submit'}
+              </button>
+            ) : (
+              <Button
+                variant='primary'
+                onClick={submitAction}
+                disabled={loading !== null ? loading : false}
+              >
+                {submitText}
+              </Button>
+            )}
           </div>
         </div>
       </StateBarWrapper>

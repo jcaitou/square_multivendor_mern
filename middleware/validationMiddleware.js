@@ -30,20 +30,27 @@ const withValidationErrors = (validateValues) => {
   ]
 }
 
-export const validateProductCreateInput = withValidationErrors([
-  body('itemData.name').notEmpty().withMessage('product name is required'),
-  body('itemData.variations')
-    .notEmpty()
-    .withMessage('at least one variation is required'),
+export const validateProductInput = withValidationErrors([
+  body('title').notEmpty().withMessage('product name is required').trim(),
+  body('variations')
+    .isArray({ min: 1 })
+    .withMessage('at least one variation is required')
+    .custom(async (variations) => {
+      for (let i = 0; i < variations.length; i++) {
+        if (isNaN(variations[i].price) || Number(variations[i].price) <= 0) {
+          throw new BadRequestError('price needs to be a number greater than 0')
+        }
+      }
+    }),
 ])
 
-export const validateProductUpdateInput = withValidationErrors([
-  body('itemData.name').notEmpty().withMessage('product name is required'),
-  body('itemData.variations')
-    .notEmpty()
-    .withMessage('at least one variation is required'),
-  body('version').notEmpty().withMessage('version token is required'),
-])
+// export const validateProductUpdateInput = withValidationErrors([
+//   body('itemData.name').notEmpty().withMessage('product name is required'),
+//   body('itemData.variations')
+//     .notEmpty()
+//     .withMessage('at least one variation is required'),
+//   body('version').notEmpty().withMessage('version token is required'),
+// ])
 
 export const validateProductIdParam = withValidationErrors([
   param('id').custom(async (value, { req }) => {

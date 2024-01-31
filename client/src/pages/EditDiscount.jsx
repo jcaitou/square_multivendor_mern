@@ -1,5 +1,4 @@
 import Wrapper from '../assets/wrappers/DashboardFormPage'
-import ProductSelectionWrapper from '../assets/wrappers/ProductSelectionTable'
 import {
   Form,
   useNavigation,
@@ -10,10 +9,6 @@ import { useDashboardContext } from './DashboardLayout'
 import { useState, Fragment } from 'react'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
-import Table from 'react-bootstrap/Table'
-import InfiniteScroll from 'react-infinite-scroll-component'
 import ProductSelectionModal from '../components/ProductSelectionModal'
 
 export const loader = async ({ request, params }) => {
@@ -63,8 +58,6 @@ const EditDiscount = ({ queryClient }) => {
   )[0]
 
   const navigate = useNavigate()
-  // const navigation = useNavigation()
-  // const isSubmitting = navigation.state === 'submitting'
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [alwaysActive, setAlwaysActive] = useState(
@@ -76,11 +69,9 @@ const EditDiscount = ({ queryClient }) => {
       ? 'purchase-items'
       : 'no-condition'
   )
-  const [conditionNum, setConditionNum] = useState(null)
   const [details, setDetails] = useState(
     originalDiscount.discountData.percentage ? 'percentage' : 'amount'
   )
-  const [detailsNum, setDetailsNum] = useState(null)
   const [minSpend, setMinSpend] = useState(
     originalPricingRule.pricingRuleData.minimumOrderSubtotalMoney != null
   )
@@ -107,91 +98,18 @@ const EditDiscount = ({ queryClient }) => {
     setSelectProductsModalShow(false)
   }
 
-  const handleAddProductSubmit = async (event) => {
+  const handleAddDiscountSubmit = async (event) => {
     event.preventDefault()
-    var formData = new FormData(document.querySelector('#discount-form'))
-    // for (const pair of formData.entries()) {
-    //   console.log(`${pair[0]}, ${pair[1]}`)
-    // }
-
-    let pricingRuleData = {
-      name: `[${user.name}] ${formData.get('title')}`,
-      discountId: originalDiscount.id,
-      matchProductsId: originalProductSet.id,
-    }
-
-    let discountData = {
-      name: `[${user.name}] ${formData.get('title')}`,
-      modifyTaxBasis: 'MODIFY_TAX_BASIS',
-    }
-
-    let productSetData = {}
-
-    if (!formData.get('always-active')) {
-      pricingRuleData.validFromDate = formData.get('discount-start')
-      pricingRuleData.validFromLocalTime = '00:00:00'
-      pricingRuleData.validUntilDate = formData.get('discount-end')
-      pricingRuleData.validUntilLocalTime = '23:59:59'
-    }
-
-    if (formData.get('condition') == 'purchase-items') {
-      if (formData.get('num-items-condition') == 'exact') {
-        productSetData.quantityExact = formData.get('min-items')
-      } else if (formData.get('num-items-condition') == 'min') {
-        productSetData.quantityMin = formData.get('min-items')
-      }
-    }
-
-    if (formData.get('eligible-items') == 'all-items') {
-      productSetData.productIdsAny = [user.squareId]
-    } else {
-      productSetData.productIdsAny = selectedProducts
-    }
-
-    if (formData.get('discount-details') == 'percentage') {
-      discountData.discountType = 'FIXED_PERCENTAGE'
-      discountData.percentage = formData.get('percentage-off')
-    } else if (formData.get('discount-details') == 'amount') {
-      discountData.discountType = 'FIXED_AMOUNT'
-      discountData.amountMoney = {
-        amount: Math.round(parseFloat(formData.get('amount-off')) * 100),
-        currency: 'CAD',
-      }
-    }
-
-    if (formData.get('min-spend') == 'min-spend-true') {
-      pricingRuleData.minimumOrderSubtotalMoney = {
-        amount: Math.round(parseFloat(formData.get('min-spend-amount')) * 100),
-        currency: 'CAD',
-      }
-    }
-
-    let pricingRuleObj = {
-      type: 'PRICING_RULE',
-      id: originalPricingRule.id,
-      version: originalPricingRule.version,
-      pricingRuleData: pricingRuleData,
-    }
-
-    let discountObj = {
-      type: 'DISCOUNT',
-      id: originalDiscount.id,
-      version: originalDiscount.version,
-      discountData: discountData,
-    }
-
-    let productSetObj = {
-      type: 'PRODUCT_SET',
-      id: originalProductSet.id,
-      version: originalProductSet.version,
-      productSetData: productSetData,
-    }
+    const form = document.getElementById('discount-form')
+    let formData = new FormData(form)
+    const data = Object.fromEntries(formData)
+    data.selectionList = selectedProducts
 
     try {
       setIsSubmitting(true)
       let response = await customFetch.patch(
-        `/discounts/${originalProductSet.id}`,
-        { pricingRuleObj, discountObj, productSetObj }
+        `/discounts/${originalPricingRule.id}`,
+        data
       )
       queryClient.invalidateQueries(['discounts'])
       toast.success('Discount edited successfully')
@@ -215,7 +133,7 @@ const EditDiscount = ({ queryClient }) => {
           method='post'
           className='form'
           id='discount-form'
-          onSubmit={handleAddProductSubmit}
+          onSubmit={handleAddDiscountSubmit}
         >
           <h4 className='form-title'>edit discount</h4>
 
@@ -247,11 +165,11 @@ const EditDiscount = ({ queryClient }) => {
                     : 'choice-group date-group'
                 }
               >
-                <label htmlFor='discount-start'>Start date:</label>
+                <label htmlFor='discountStart'>Start date:</label>
                 <input
                   type='date'
-                  id='discount-start'
-                  name='discount-start'
+                  id='discountStart'
+                  name='discountStart'
                   required={!alwaysActive}
                   disabled={alwaysActive}
                   defaultValue={
@@ -259,11 +177,11 @@ const EditDiscount = ({ queryClient }) => {
                   }
                 />
 
-                <label htmlFor='discount-end'>End date:</label>
+                <label htmlFor='discountEnd'>End date:</label>
                 <input
                   type='date'
-                  id='discount-end'
-                  name='discount-end'
+                  id='discountEnd'
+                  name='discountEnd'
                   required={!alwaysActive}
                   disabled={alwaysActive}
                   defaultValue={
@@ -276,18 +194,19 @@ const EditDiscount = ({ queryClient }) => {
                 <div className='input-label-group'>
                   <input
                     type='checkbox'
-                    name='always-active'
-                    id='always-active'
+                    name='alwaysActive'
+                    id='alwaysActive'
                     value='true'
                     defaultChecked={
                       originalPricingRule?.pricingRuleData?.validFromDate ==
                       null
                     }
+                    disabled={user.role === 'admin'}
                     onChange={() => {
                       setAlwaysActive(!alwaysActive)
                     }}
                   />
-                  <label htmlFor='always-active'>Always Active</label>
+                  <label htmlFor='alwaysActive'>Always Active</label>
                 </div>
               </div>
             </div>
@@ -311,8 +230,8 @@ const EditDiscount = ({ queryClient }) => {
                   <span>
                     <label htmlFor='purchase-items'>Purchase</label>
                     <select
-                      name='num-items-condition'
-                      id='num-items-condition'
+                      name='numItemsCondition'
+                      id='numItemsCondition'
                       defaultValue={
                         originalProductSet.productSetData.quantityExact > 0
                           ? 'exact'
@@ -326,7 +245,7 @@ const EditDiscount = ({ queryClient }) => {
                     </select>
                     <input
                       type='number'
-                      name='min-items'
+                      name='minItems'
                       min='0'
                       defaultValue={
                         originalProductSet.productSetData.quantityExact ||
@@ -365,10 +284,11 @@ const EditDiscount = ({ queryClient }) => {
                 <div className='discount-option'>
                   <input
                     type='radio'
-                    name='eligible-items'
+                    name='eligibleItems'
                     value='all-items'
                     id='all-items'
                     defaultChecked={defaultAllItems}
+                    disabled={user.role === 'admin'}
                   />
                   <span>
                     <label htmlFor='all-items'>All Items</label>
@@ -378,7 +298,7 @@ const EditDiscount = ({ queryClient }) => {
                 <div className='discount-option'>
                   <input
                     type='radio'
-                    name='eligible-items'
+                    name='eligibleItems'
                     id='specific-items'
                     value='specific-items'
                     defaultChecked={!defaultAllItems}
@@ -393,7 +313,13 @@ const EditDiscount = ({ queryClient }) => {
                       type='button'
                       className='btn product-selection-button'
                       disabled={isSubmitting}
-                      onClick={() => setSelectProductsModalShow(true)}
+                      onClick={(e) => {
+                        const inputWrapper =
+                          e.target.closest('.discount-option')
+                        const input = inputWrapper.querySelector('input')
+                        input.checked = true
+                        setSelectProductsModalShow(true)
+                      }}
                     >
                       {selectedProducts.length > 0
                         ? 'Change Products'
@@ -409,7 +335,7 @@ const EditDiscount = ({ queryClient }) => {
             <div className='discount-option'>
               <input
                 type='radio'
-                name='discount-details'
+                name='discountDetails'
                 id='percentage'
                 value='percentage'
                 defaultChecked={
@@ -423,7 +349,7 @@ const EditDiscount = ({ queryClient }) => {
                 <label htmlFor='percentage'>Apply</label>
                 <input
                   type='number'
-                  name='percentage-off'
+                  name='percentageOff'
                   min='0'
                   max='100'
                   step='0.1'
@@ -437,7 +363,7 @@ const EditDiscount = ({ queryClient }) => {
             <div className='discount-option'>
               <input
                 type='radio'
-                name='discount-details'
+                name='discountDetails'
                 id='amount'
                 value='amount'
                 defaultChecked={
@@ -451,7 +377,7 @@ const EditDiscount = ({ queryClient }) => {
                 <label htmlFor='amount'>Apply $</label>
                 <input
                   type='number'
-                  name='amount-off'
+                  name='amountOff'
                   min='0'
                   step='0.01'
                   defaultValue={
@@ -473,7 +399,7 @@ const EditDiscount = ({ queryClient }) => {
               <div className='discount-option'>
                 <input
                   type='radio'
-                  name='min-spend'
+                  name='minSpend'
                   value='min-spend-true'
                   id='min-spend-true'
                   defaultChecked={
@@ -488,7 +414,7 @@ const EditDiscount = ({ queryClient }) => {
                   <label htmlFor='min-spend-true'>Spend at least $ </label>
                   <input
                     type='number'
-                    name='min-spend-amount'
+                    name='minSpendAmount'
                     min='0'
                     defaultValue={
                       originalPricingRule.pricingRuleData
@@ -506,7 +432,7 @@ const EditDiscount = ({ queryClient }) => {
               <div className='discount-option'>
                 <input
                   type='radio'
-                  name='min-spend'
+                  name='minSpend'
                   value='min-spend-false'
                   id='min-spend-false'
                   defaultChecked={

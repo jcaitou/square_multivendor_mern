@@ -8,7 +8,6 @@ import cloudinary from 'cloudinary'
 import { STORE_EMAIL } from '../utils/constants.js'
 import dedent from 'dedent-js'
 import { transporter } from '../middleware/nodemailerMiddleware.js'
-import { inventoryImport } from '../jobs/jobs_list/inventoryImport.js'
 
 export const getAllFileActions = async (req, res, next) => {
   const queryObj = { createdBy: req.user.userId }
@@ -66,7 +65,10 @@ export const batchUpdateUploadFile = async (req, res, next) => {
       defaultInventoryWarningLevel,
     }
     agenda.now('product import', jobAttrs)
-  } else if (req.body.type == 'inventory-recount') {
+  } else if (
+    req.body.type === 'inventory-restock' ||
+    req.body.type === 'inventory-recount'
+  ) {
     const jobAttrs = {
       squareName: req.user.name,
       squareId: req.user.squareId,
@@ -74,19 +76,10 @@ export const batchUpdateUploadFile = async (req, res, next) => {
       filename: req.file.filename,
       fileUrl: cloudinaryResponse.secure_url,
       fileActionId: fileAction._id,
+      isRecount: req.body.type === 'inventory-recount',
     }
 
-    console.log(jobAttrs)
-    await inventoryImport(jobAttrs)
-
-    // agenda.now('inventory recount', {
-    //   squareName: req.user.name,
-    //   squareId: req.user.squareId,
-    //   locations: user.locations,
-    //   filename: req.file.filename,
-    //   fileUrl: cloudinaryResponse.secure_url,
-    //   fileActionId: fileAction._id,
-    // })
+    agenda.now('inventory import', jobAttrs)
   }
 
   res.status(StatusCodes.CREATED).json({ msg: 'process started' })
@@ -123,22 +116,4 @@ export const submitContactForm = async (req, res) => {
     }
   })
   res.status(StatusCodes.OK).json({ msg: 'ok' })
-}
-
-export const startFileAction = async (req, res) => {
-  //if status is already running, do nothing and exit
-
-  const fileActionInfo = await Job.findById(req.params.id)
-
-  //else:
-  const fileAction = await FileAction.findByIdAndUpdate(
-    req.params.id,
-    {
-      status: FILE_UPLOAD_STATUS.RUNNING,
-    },
-    {
-      new: true,
-    }
-  )
-  res.status(StatusCodes.OK).json({ fileAction: fileAction })
 }

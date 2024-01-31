@@ -51,314 +51,153 @@ const GuideInventoryUpload = () => {
       </p>
 
       <p>
-        Go to your inventory page and export a full list. Edit the numbers for
-        the relevant location, and then import the file again. It's as simple as
-        that!
+        Always start by exporting a full list of the current inventory count
+        from your inventory page.{' '}
+        <strong>Save this file somewhere and do not write over it!</strong> (Use
+        "Save As" instead). This is important because if you make a mistake,
+        this is the only file you have as a backup.
       </p>
       <p>
-        The template is already pre-filled with some examples to get you going.
-        You just need to know these 2 ground rules:
-      </p>
-      <ol>
-        <li>Do NOT edit the names of the header columns.</li>
-        <li>
-          Do NOT fill in productId/variationId columns unless you are trying to
-          edit an existing product.
-        </li>
-      </ol>
-      <h2>Field Explanations</h2>
-      <p>
-        For those who like to read, here is a detailed explanation of every
-        field:
-      </p>
-      <section className='field-explanation'>
-        <p>
-          <strong>productName</strong>: The name of the product. If you include
-          multiple rows with the exact same product name, you will create one
-          single product with multiple variations.
-          <br />
-          Make sure you use the exact same name if the products are supposed to
-          be grouped together.
-        </p>
-        <Table striped bordered>
-          <thead>
-            <tr>
-              <th>productName</th>
-              <th>variationName</th>
-              <th>variationSku</th>
-              <th>variationPrice</th>
-              <th>productId</th>
-              <th>variationId</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Life is Awesome T-shirt</td>
-              <td>Large</td>
-              <td>T-AWESOME-L</td>
-              <td>24.97</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>
-                Life is Awesome <span className='text-danger'>Tee shirt</span>
-              </td>
-              <td>Medium</td>
-              <td>T-AWESOME-M</td>
-              <td>24.97</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Life is Awesome T-shirt</td>
-              <td>Small</td>
-              <td>T-AWESOME-S</td>
-              <td>24.97</td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </Table>
-        <p>
-          Uploading this file will create two <strong>new</strong> products:
-          <br />
-          "Life is Awesome T-shirt" with two variations (L, S)
-          <br />
-          "Life is Awesome" Tee shirt" with one variation (M)
-          <br />
-          Even if you already have an existing product called "Life is Awesome
-          T-shirt", you'll make a new product on top of that with the exact same
-          name.
-        </p>
-        <p>
-          <strong>variationName</strong>: The variation of the product
-          (optional). If your product has variations (for example, colors or
-          sizes), you can distinguish between the different variations through
-          this field.
-          <br />
-          For products with no variations, this is not required.
-        </p>
-        <p>
-          <strong>variationSku</strong>: The stockkeeping unit of the variation.
-          This is a very important field if you want to keep an accurate track
-          of your inventory! For each unique variation which the inventory is
-          important, make sure the SKU is also unique.
-        </p>
-        <p>
-          <strong>variationPrice</strong>: The selling price of the product, in
-          Canadian Dollars. You may use any amount with the smallest currency
-          unit being $0.01 CAD.
-          <br />
-          Use numbers only. Do not use the '$' symbol.
-          <br />
-          This price includes any taxes that you are obligated to collect.
-        </p>
-        <p>
-          <strong>productId</strong>: A unique ID for the product. This is
-          automatically assigned by our system. In order words, you won't have a
-          productId if you're trying to import a new product.
-        </p>
-        <p>
-          <strong>variationId</strong>: A unique ID for the variation. Again,
-          this is automatically assigned by our system and you won't have this
-          field for new products.
-          <br />
-          Multiple products can have the same productId, but every single
-          product will always have different variationIds.
-        </p>
-
-        <p>
-          productIds and variationIds will become more important later once we
-          start looking at editing products.
-        </p>
-      </section>
-      <h2>Editing Exisiting Products</h2>
-      <p>
-        If you want to edit exisitng products, start by exporting a full list of
-        your products. This product export list will already be pre-populated
-        with productIds and variationIds (which we ignored for new products).
+        Editing inventory is much simpler than adding products. In fact, only
+        the "Variation ID" and "Location" columns are required. All the other
+        columns - Product Name, SKU, etc - are just for your own reference.
       </p>
       <p>
-        The logic of the upload controller works like this. First, it tries to
-        find a matching productId to the one you supplied. If nothing matches,
-        then it just creates a new product entirely. Note that this includes
-        typos!
+        There are two different types of Inventory Updates - Restocks and
+        Recounts. They work exactly the way you expect them to work, but here is
+        a detailed explanation anyway:
       </p>
-      <p></p>
-      <h4>Orignal Exported File</h4>
+      <h2>Restocks</h2>
+      <p>
+        99% of the time you want to import a restock rather than a recount.
+        Restocks reflect the number of items that you are bringing into (or
+        taking away from) a store.
+      </p>
+      <p>
+        If you are bringing 5 Work Less Play More Mugs to restock, then your
+        file would look like this:
+      </p>
       <Table striped bordered>
         <thead>
           <tr>
-            <th>productName</th>
-            <th>variationName</th>
-            <th>variationSku</th>
-            <th>variationPrice</th>
-            <th>productId</th>
-            <th>variationId</th>
+            <th>Product Name </th>
+            <th>Product ID</th>
+            <th>Variation Name </th>
+            <th>Variation SKU </th>
+            <th>Variation ID</th>
+            <th>Richmond Center</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Work Less Play More Mug</td>
+            <td>HOQJWMTY</td>
             <td>Work Less Play More Mug</td>
             <td>M-PLAYMORE</td>
-            <td>22.97</td>
-            <td className='text-success'>SM7LLAJADKQ5</td>
-            <td className='text-success'>DV5IX6WKEYLO</td>
+            <td>TACDBTVG</td>
+            <td>5</td>
           </tr>
         </tbody>
       </Table>
-
-      <h4>Your Edited File</h4>
-      <Table striped bordered>
-        <thead>
-          <tr>
-            <th>productName</th>
-            <th>variationName</th>
-            <th>variationSku</th>
-            <th>variationPrice</th>
-            <th>productId</th>
-            <th>variationId</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className='text-info'>Play More Work Less Mug</td>
-            <td>Play More Work Less Mug</td>
-            <td>M-WORKLESS</td>
-            <td>22.97</td>
-            <td className='text-success'>SM7LLAJADKQ5</td>
-            <td className='text-success'>DV5IX6WKEYLO</td>
-          </tr>
-        </tbody>
-      </Table>
-      <p>You will have one product called "Play More Work Less Mug"</p>
-      <Table striped bordered>
-        <thead>
-          <tr>
-            <th>productName</th>
-            <th>variationName</th>
-            <th>variationSku</th>
-            <th>variationPrice</th>
-            <th>productId</th>
-            <th>variationId</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className='text-info'>Play More Work Less Mug</td>
-            <td>Play More Work Less Mug</td>
-            <td>M-WORKLESS</td>
-            <td>22.97</td>
-            <td className='text-danger'>SM7LLAJADKQ78</td>
-            <td className='text-success'>DV5IX6WKEYLO</td>
-          </tr>
-        </tbody>
-      </Table>
+      <p>This means that:</p>
+      <ul>
+        <li>
+          It does not matter how much stock you have currently at the location.
+        </li>
+        <li>
+          It does not matter what time you upload the inventory restock file (as
+          long as you do it sometime).
+        </li>
+      </ul>
       <p>
-        Your original product "Work Less Play More Mug" will not be changed at
-        all, and you will have an additional new product called "Play More Work
-        Less Mug".
+        The restock file can also include negative numbers if you are removing
+        items from a store.
       </p>
-
-      <h3>Adding a new variation to a product</h3>
+      <h2>Recounts</h2>
       <p>
-        Once the productId is matched, then we look at the variationId. The same
-        logic applies. If we are able to find a match for the variationId, then
-        that specific product is edited. Otherwise, a new variation of the
-        product is created.
+        Recounts are usuallly performed once a year, or when need arises. The
+        assumption is that your inventory will not be too far off the value
+        indicated in the system throughout the year, and we only need to
+        re-align it once a year.
       </p>
-      <h4>Orignal Exported File</h4>
+      <p>
+        Depending on your product, you may find yourself requiring a few more
+        recounts throughout the year (eg. once per quarter instead of yearly).
+        Usually, we perform more recounts if the product is small, easily
+        misplaced, and high in value. Some telling signs, such as the system
+        showing a negative quantity, is also a sign that a recount should be
+        conducted.
+      </p>
+      <p>
+        If you are have recounted your stock of Work Less Play More Mugs and you
+        counted 15, then your file would look like this:
+      </p>
       <Table striped bordered>
         <thead>
           <tr>
-            <th>productName</th>
-            <th>variationName</th>
-            <th>variationSku</th>
-            <th>variationPrice</th>
-            <th>productId</th>
-            <th>variationId</th>
+            <th>Product Name </th>
+            <th>Product ID</th>
+            <th>Variation Name </th>
+            <th>Variation SKU </th>
+            <th>Variation ID</th>
+            <th>Richmond Center</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td>Large</td>
-            <td>T-AWESOME-L</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td className='text-success'>STQ5KN42WKF4</td>
-          </tr>
-          <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td>Medium</td>
-            <td>T-AWESOME-M</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td>CAQHRIQU3F2R</td>
-          </tr>
-          <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td>Small</td>
-            <td>T-AWESOME-S</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td>EGBWXAKOTEUT</td>
+            <td>Work Less Play More Mug</td>
+            <td>HOQJWMTY</td>
+            <td>Work Less Play More Mug</td>
+            <td>M-PLAYMORE</td>
+            <td>TACDBTVG</td>
+            <td>15</td>
           </tr>
         </tbody>
       </Table>
-      <h4>Your Edited File</h4>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>productName</th>
-            <th>variationName</th>
-            <th>variationSku</th>
-            <th>variationPrice</th>
-            <th>productId</th>
-            <th>variationId</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td className='text-info'>Extra Large</td>
-            <td>T-AWESOME-XL</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td className='text-success'>STQ5KN42WKF4</td>
-          </tr>
-          <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td>Medium</td>
-            <td>T-AWESOME-M</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td>CAQHRIQU3F2R</td>
-          </tr>
-          <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td>Small</td>
-            <td>T-AWESOME-S</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td>EGBWXAKOTEUT</td>
-          </tr>
-          <tr>
-            <td>Life is Awesome T-shirt</td>
-            <td className='text-info'>Extra Small</td>
-            <td>T-AWESOME-XS</td>
-            <td>24.97</td>
-            <td>PI5TFMASHAWC</td>
-            <td></td>
-          </tr>
-        </tbody>
-      </Table>
+      <p>When you perform a recount, make sure that:</p>
+      <ul>
+        <li>
+          It is performed before/after business hours (so that there is no
+          chance of the inventory being changed during the recount process).
+        </li>
+        <li>The recount file is uploaded as soon as possible.</li>
+      </ul>
       <p>
-        Your original product "Life is Awesome T-shirt" now has four variants:
-        Extra Large, Medium, Small, Extra Small. You do not have the Large
-        variant because it was changed to Extra Large.
+        Note: the 'quick edit' button on the Inventory page is a{' '}
+        <span>recount</span> function!
+      </p>
+      <h2>Recounts vs Restocks</h2>
+      <p>
+        If it sounds like you can just use a recount instead of a restock, you
+        are right. You can always download a copy of the current stock, add the
+        amount you are planning to restock, and then upload the file.
+      </p>
+      <p>
+        However, consider this case:
+        <br />
+        9AM: The store has 5 mugs in stock. You download a copy of your
+        inventory and it tells you 5. You are planning to bring in 10 more mugs,
+        so on the file you write 15 and you will upload this as a recount.
+        <br />
+        10AM - 1PM: 3 mugs were sold, and now there's actually only 2 left.
+        <br />
+        2PM: You finally have time to make a trip to the store to drop off the
+        mugs. After you drop them off, you go home and upload the file you
+        prepared.
+      </p>
+      <p>
+        There's actually only 2 + 10 = 12 mugs in the store, but your uploaded
+        file (and hence the database) says 15 . This is where inventory
+        inconsistencies start!
+      </p>
+      <p>
+        The key is that the restock function omits the time element of the
+        process. If you are bringing in 10 mugs, it doesn't matter what time you
+        perform the +10 addition - the answer is still correct.
+      </p>
+      <p>
+        We offer you tools to keep your inventory accurate, and you would be
+        doing yourself a lot of favours by using them.
       </p>
     </>
   )

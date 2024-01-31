@@ -23,7 +23,7 @@ import newDiscountEmail from './jobs_list/newDiscountEmail.js'
 import barcodeExport from './jobs_list/barcodeExport.js'
 // import copyOrders from './jobs_list/copyOrders.js'
 agendaWrapper(agenda, 'product import', productImport)
-agendaWrapper(agenda, 'inventory recount', inventoryImport)
+agendaWrapper(agenda, 'inventory import', inventoryImport)
 // inventoryImport(agenda)
 productExport(agenda)
 inventoryExport(agenda)

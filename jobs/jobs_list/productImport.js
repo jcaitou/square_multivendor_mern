@@ -95,7 +95,6 @@ export const productImport = async (jobAttrs) => {
       //this is a new product and product name is not empty
       if (!processedIds.includes(currProductName)) {
         processedIds.push(currProductName)
-        // var regex = new RegExp(string2, 'g')
         let currProduct = productUpdateData.filter((row) => {
           return currProductName == row.productName.trim()
         })

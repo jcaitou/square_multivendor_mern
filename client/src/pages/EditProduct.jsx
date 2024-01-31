@@ -1,15 +1,21 @@
-import { FormRow, StateBar } from '../components'
+import { FormRow, UncontrolledFormRow, StateBar } from '../components'
 import { RiEditLine, RiDeleteBinLine } from 'react-icons/ri'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { useLoaderData } from 'react-router-dom'
-import { Form, useNavigation, useNavigate, redirect } from 'react-router-dom'
-import { useState } from 'react'
+import {
+  Form,
+  useNavigation,
+  useNavigate,
+  redirect,
+  useSubmit,
+} from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import customFetch from '../utils/customFetch'
-import _ from 'lodash'
-import { Fragment } from 'react'
+// import _ from 'lodash'
+import { set, get, isEqual } from 'lodash'
 import { useQuery } from '@tanstack/react-query'
 import { useDashboardContext } from './DashboardLayout'
 import bwipjs from 'bwip-js'
@@ -28,7 +34,6 @@ export const singleProductQuery = (id) => {
 export const loader =
   (queryClient) =>
   async ({ params }) => {
-    console.log(params)
     try {
       await queryClient.ensureQueryData(singleProductQuery(params.id))
       return params.id
@@ -38,58 +43,175 @@ export const loader =
     }
   }
 
-// export const loader = async ({ params }) => {
-//   try {
-//     const { data } = await customFetch.get(`/products/${params.id}`)
-//     return data
-//   } catch (error) {
-//     toast.error(error.response.data.msg)
-//     return redirect('/dashboard/all-products')
-//   }
-// }
+export const action =
+  (queryClient) =>
+  async ({ params, request }) => {
+    const formData = await request.formData()
+    var data = {}
+    formData.forEach(function (value, key) {
+      set(data, key, value)
+    })
+
+    try {
+      await customFetch.patch(`/products/${params.id}`, data)
+      queryClient.invalidateQueries(['products'])
+      queryClient.invalidateQueries(['product', params.id])
+      queryClient.invalidateQueries(['inventory'])
+      toast.success('Product edited successfully')
+      return redirect('/dashboard/all-products')
+    } catch (error) {
+      toast.error(error?.response?.data?.msg)
+      return error
+    }
+  }
 
 const EditProduct = ({ queryClient }) => {
-  // const { object: product } = useLoaderData()
   const id = useLoaderData()
   const { user } = useDashboardContext()
   const userSku = user.skuId.toString(16).padStart(4, '0')
 
-  const {
-    data: { object: product },
-  } = useQuery(singleProductQuery(id))
-  const [productTitle, setProductTitle] = useState(product.itemData.name)
-  function generateInitialProductVariations(product) {
-    return product.itemData.variations.map((variation) => {
-      return {
-        id: variation.id,
-        isDeleted: variation.isDeleted,
-        presentAtAllLocations: variation.presentAtAllLocations,
-        type: variation.type,
-        updatedAt: variation.updatedAt,
-        version: variation.version,
-        itemVariationData: {
-          ...variation.itemVariationData,
-          sku: variation.itemVariationData.sku.slice(5),
-          priceMoney: {
-            amount: (
-              variation.itemVariationData.priceMoney.amount / 100
-            ).toFixed(2),
-            currency: 'CAD',
-          },
-        },
+  const { data: loaderData } = useQuery(singleProductQuery(id))
+  const { title, variations } = loaderData
+  const [productTitle, setProductTitle] = useState(title)
+  const [numVariations, setNumVariations] = useState(variations.length)
+  const [showStateBar, setShowStateBar] = useState(false)
+  const navigation = useNavigation()
+  const isSubmitting = navigation.state === 'submitting'
+  const [submitting, setSubmitting] = useState(false)
+
+  //delete helpers:
+  const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
+
+  //edit helpers:
+  const discardChanges = () => {
+    const form = document.getElementById('edit-product')
+    const formInputs = form.querySelectorAll('input')
+
+    setNumVariations(variations.length)
+
+    for (let i = 0; i < formInputs.length; i++) {
+      if (i < variations.length) {
+        const originalValue = get(loaderData, formInputs[i].name)
+        formInputs[i].value = originalValue
       }
-    })
+    }
+
+    setShowStateBar(false)
   }
 
-  const [productVariations, setProductVariations] = useState(
-    generateInitialProductVariations(product)
-  )
-  const [showStateBar, setShowStateBar] = useState(false)
-  const navigate = useNavigate()
-  // const navigation = useNavigation()
-  // const isSubmitting = navigation.state === 'submitting'
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  //check if form was changed every time an input is made:
+  const formChanged = () => {
+    const form = document.getElementById('edit-product')
+    let formData = new FormData(form)
+    var currentData = {}
+    formData.forEach(function (value, key) {
+      set(currentData, key, value)
+    })
 
+    const changesMade = !isEqual(currentData, loaderData)
+
+    if (changesMade) {
+      setShowStateBar(true)
+    } else {
+      setShowStateBar(false)
+    }
+  }
+  useEffect(() => {
+    formChanged()
+  })
+
+  return (
+    <>
+      <StateBar
+        showStateBar={showStateBar}
+        loading={isSubmitting || submitting}
+        discardAction={discardChanges}
+        form='edit-product'
+      ></StateBar>
+      <Wrapper>
+        <header>
+          <h4 className='form-title'>edit product</h4>
+          <button
+            type='submit'
+            className='btn delete-btn'
+            onClick={() => setConfirmDeleteModalShow(true)}
+          >
+            <RiDeleteBinLine />
+          </button>
+        </header>
+        <Form
+          method='patch'
+          className='form'
+          id='edit-product'
+          onChange={(e) => formChanged(e)}
+        >
+          <div className='form-center'>
+            <UncontrolledFormRow
+              type='text'
+              name='title'
+              labelText='product name'
+              defaultValue={productTitle}
+            />
+            {[...Array(numVariations).keys()].map((el, index) => {
+              return (
+                <VariationRow
+                  key={'variationNum' + index}
+                  el={el}
+                  index={index}
+                  variation={variations[index]}
+                  userSku={userSku}
+                  setNumVariations={setNumVariations}
+                  numVariations={numVariations}
+                  formChanged={formChanged}
+                />
+              )
+            })}
+
+            <button
+              type='button'
+              className='btn add-var-btn'
+              onClick={() => {
+                setNumVariations(numVariations + 1)
+              }}
+              disabled={isSubmitting || submitting}
+            >
+              <span>Add a Variation</span>
+            </button>
+            <button
+              type='submit'
+              className='btn btn-block form-btn '
+              disabled={isSubmitting || submitting}
+            >
+              {isSubmitting || submitting ? 'working...' : 'submit'}
+            </button>
+          </div>
+        </Form>
+      </Wrapper>
+      <ConfirmDeleteModal
+        setConfirmDeleteModalShow={setConfirmDeleteModalShow}
+        isSubmitting={isSubmitting}
+        submitting={submitting}
+        setSubmitting={setSubmitting}
+        queryClient={queryClient}
+        show={confirmDeleteModalShow}
+        id={id}
+        onHide={() => setConfirmDeleteModalShow(false)}
+      />
+    </>
+  )
+}
+
+function VariationRow({
+  el,
+  index,
+  variation,
+  userSku,
+  setNumVariations,
+  numVariations,
+  formChanged,
+  ...props
+}) {
+  const [sku, setSku] = useState(variation?.sku || '')
   //generate barcode:
   const renderBarcode = (sku) => {
     const barcode = []
@@ -113,234 +235,82 @@ const EditProduct = ({ queryClient }) => {
     barcode.push(<img key={key} src={canvas.toDataURL('image/png')}></img>)
     return barcode
   }
+  return (
+    <div className='variation-wrapper'>
+      <div className='form-variation'>
+        <UncontrolledFormRow
+          type='text'
+          name={`variations[${el}].name`}
+          labelText='variation name'
+          defaultValue={variation?.name}
+        />
+        <UncontrolledFormRow
+          type='text'
+          name={`variations[${el}].sku`}
+          labelText='SKU'
+          maxLength={25}
+          defaultValue={variation?.sku}
+          onChange={(e) => setSku(e.target.value)}
+        />
+        <UncontrolledFormRow
+          type='number'
+          name={`variations[${el}].price`}
+          labelText='price'
+          defaultValue={variation?.price}
+        />
+        <input
+          type='hidden'
+          id={`variations[${el}].id`}
+          name={`variations[${el}].id`}
+          value={variation?.id || `#variation_${el}`}
+        />
+        {index > 0 && (
+          <button
+            type='button'
+            onClick={() => {
+              setNumVariations(numVariations - 1)
+            }}
+          >
+            X
+          </button>
+        )}
+      </div>
+      {sku != '' && (
+        <div className='variation-barcode'>
+          {renderBarcode(`${userSku}-${sku}`)}
+        </div>
+      )}
+    </div>
+  )
+}
 
-  //delete helpers:
-  const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false)
+function ConfirmDeleteModal({
+  setConfirmDeleteModalShow,
+  isSubmitting,
+  submitting,
+  setSubmitting,
+  queryClient,
+  id,
+  ...props
+}) {
+  const navigate = useNavigate()
   const handleDeleteProduct = async () => {
     setConfirmDeleteModalShow(false)
     try {
-      setIsSubmitting(true)
-      let response = await customFetch.delete(`/products/${product.id}`)
+      setSubmitting(true)
+      let response = await customFetch.delete(`/products/${id}`)
       queryClient.invalidateQueries(['products'])
       queryClient.invalidateQueries(['inventory'])
-      setIsSubmitting(false)
+      setSubmitting(false)
       toast.success('Product deleted successfully')
       navigate('/dashboard/all-products', { replace: true })
     } catch (error) {
       toast.error(error?.response?.data?.msg)
-      setIsSubmitting(false)
+      setSubmitting(false)
       return error
     }
   }
 
-  //edit helpers:
-  const discardChanges = () => {
-    setProductTitle(product.itemData.name)
-    setProductVariations(generateInitialProductVariations(product))
-    setShowStateBar(false)
-  }
-
-  const handleEditProduct = (e, index, objectProperty) => {
-    setShowStateBar(true)
-    const newProductVariations = [...productVariations]
-    _.set(newProductVariations[index], objectProperty, e.target.value)
-
-    setProductVariations(newProductVariations)
-  }
-
-  const handleAddVariation = () => {
-    const newProductVariations = [...productVariations]
-    const newVariation = {
-      type: 'ITEM_VARIATION',
-      id: `#variation${Date.now()}${Math.floor(Math.random() * 10000)}`,
-      itemVariationData: {
-        itemId: product.id,
-        name: '',
-        sku: '',
-        pricingType: 'FIXED_PRICING',
-        priceMoney: {
-          amount: 0.0,
-          currency: 'CAD',
-        },
-        trackInventory: true,
-        availableForBooking: false,
-        sellable: true,
-        stockable: true,
-      },
-    }
-    newProductVariations.push(newVariation)
-    setProductVariations(newProductVariations)
-    setShowStateBar(true)
-  }
-
-  const handleDeleteVariation = (index) => {
-    const newProductVariations = productVariations.toSpliced(index, 1)
-    let newVars = newProductVariations.filter((el) => {
-      return el.id.includes('#variation')
-    }).length
-    if (
-      newVars == 0 &&
-      newProductVariations.length == product.itemData.variations.length
-    ) {
-      setShowStateBar(false)
-    } else {
-      setShowStateBar(true)
-    }
-    console.log(newVars)
-    setProductVariations(newProductVariations)
-  }
-
-  const handleEditProductSubmit = async (event) => {
-    event.preventDefault()
-
-    const productData = { ...product }
-    productData.itemData.name = productTitle
-    productData.itemData.variations = JSON.parse(
-      JSON.stringify(productVariations)
-    )
-
-    for (let i = 0; i < productData.itemData.variations.length; i++) {
-      productData.itemData.variations[i].itemVariationData.priceMoney.amount =
-        parseInt(
-          Number(
-            productData.itemData.variations[i].itemVariationData.priceMoney
-              .amount
-          ) * 100
-        )
-    }
-    try {
-      setIsSubmitting(true)
-      await customFetch.patch(`/products/${productData.id}`, productData)
-      queryClient.invalidateQueries(['products'])
-      queryClient.invalidateQueries(['product', id])
-      queryClient.invalidateQueries(['inventory'])
-      setIsSubmitting(false)
-      toast.success('Product edited successfully')
-      navigate('/dashboard/all-products', { replace: true })
-    } catch (error) {
-      toast.error(error?.response?.data?.msg)
-      setIsSubmitting(false)
-      return error
-    }
-  }
-
-  return (
-    <>
-      <StateBar
-        showStateBar={showStateBar}
-        loading={isSubmitting}
-        discardAction={discardChanges}
-        submitAction={handleEditProductSubmit}
-      ></StateBar>
-      <Wrapper>
-        <header>
-          <h4 className='form-title'>edit product</h4>
-          <button
-            type='submit'
-            className='btn delete-btn'
-            onClick={() => setConfirmDeleteModalShow(true)}
-          >
-            <RiDeleteBinLine />
-          </button>
-        </header>
-        <Form method='post' className='form' onSubmit={handleEditProductSubmit}>
-          <div className='form-center'>
-            <FormRow
-              type='text'
-              name='title'
-              labelText='product name'
-              value={productTitle}
-              onChange={(e) => {
-                setShowStateBar(true)
-                setProductTitle(e.target.value)
-              }}
-            />
-            {productVariations.map((variation, index) => (
-              <Fragment key={index}>
-                <div className='variation-wrapper'>
-                  <div className='form-variation'>
-                    <FormRow
-                      type='text'
-                      name='name'
-                      labelText='variation name'
-                      value={variation.itemVariationData.name}
-                      onChange={(e) =>
-                        handleEditProduct(e, index, 'itemVariationData.name')
-                      }
-                    />
-                    <FormRow
-                      type='text'
-                      name='sku'
-                      labelText='SKU'
-                      maxLength={25}
-                      value={variation.itemVariationData.sku}
-                      onChange={(e) =>
-                        handleEditProduct(e, index, 'itemVariationData.sku')
-                      }
-                    />
-                    <FormRow
-                      type='number'
-                      name='price'
-                      labelText='price'
-                      value={variation.itemVariationData.priceMoney.amount}
-                      onChange={(e) =>
-                        handleEditProduct(
-                          e,
-                          index,
-                          'itemVariationData.priceMoney.amount'
-                        )
-                      }
-                    />
-                    {index > 0 && (
-                      <div
-                        className='btn remove-var-btn'
-                        onClick={() => handleDeleteVariation(index)}
-                      >
-                        X
-                      </div>
-                    )}
-                  </div>
-
-                  {variation.itemVariationData.sku != '' && (
-                    <div className='variation-barcode'>
-                      {renderBarcode(
-                        `${userSku}-${variation.itemVariationData.sku}`
-                      )}
-                    </div>
-                  )}
-                </div>
-              </Fragment>
-            ))}
-
-            <button
-              type='button'
-              className='btn add-var-btn'
-              onClick={handleAddVariation}
-              disabled={isSubmitting}
-            >
-              <span>Add a Variation</span>
-            </button>
-            <button
-              type='submit'
-              className='btn btn-block form-btn '
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'working...' : 'submit'}
-            </button>
-          </div>
-        </Form>
-      </Wrapper>
-      <ConfirmDeleteModal
-        handleDeleteProduct={handleDeleteProduct}
-        isSubmitting={isSubmitting}
-        show={confirmDeleteModalShow}
-        onHide={() => setConfirmDeleteModalShow(false)}
-      />
-    </>
-  )
-}
-
-function ConfirmDeleteModal({ handleDeleteProduct, isSubmitting, ...props }) {
   return (
     <Modal
       {...props}
@@ -357,10 +327,13 @@ function ConfirmDeleteModal({ handleDeleteProduct, isSubmitting, ...props }) {
         <p>Are you sure you want to delete the selected product?</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={props.onHide} disabled={isSubmitting}>
+        <Button onClick={props.onHide} disabled={isSubmitting || submitting}>
           No
         </Button>
-        <Button onClick={handleDeleteProduct} disabled={isSubmitting}>
+        <Button
+          onClick={handleDeleteProduct}
+          disabled={isSubmitting || submitting}
+        >
           Yes
         </Button>
       </Modal.Footer>

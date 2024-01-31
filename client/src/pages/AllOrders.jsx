@@ -19,6 +19,7 @@ const allOrdersQuery = (searchValues, user) => {
   const locationsQueryKey =
     !locations || locations.length == 0 ? user.locations : locations
 
+  console.log(user)
   return {
     queryKey: [
       'orders',
@@ -28,23 +29,43 @@ const allOrdersQuery = (searchValues, user) => {
       locationsQueryKey,
     ],
     queryFn: async () => {
-      const { data } = await customFetch.get(
-        '/orders',
-        {
-          params: {
-            startDate,
-            endDate,
-            sort,
-            locations,
+      if (user.role === 'admin') {
+        const { data } = await customFetch.get(
+          '/orders/adm-all-orders',
+          {
+            params: {
+              startDate,
+              endDate,
+              sort,
+              locations,
+            },
           },
-        },
-        {
-          paramsSerializer: {
-            indexes: null,
+          {
+            paramsSerializer: {
+              indexes: null,
+            },
+          }
+        )
+        return data
+      } else {
+        const { data } = await customFetch.get(
+          '/orders',
+          {
+            params: {
+              startDate,
+              endDate,
+              sort,
+              locations,
+            },
           },
-        }
-      )
-      return data
+          {
+            paramsSerializer: {
+              indexes: null,
+            },
+          }
+        )
+        return data
+      }
     },
   }
 }

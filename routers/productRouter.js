@@ -1,8 +1,7 @@
 import { Router } from 'express'
 const router = Router()
 import {
-  validateProductCreateInput,
-  validateProductUpdateInput,
+  validateProductInput,
   validateProductIdParam,
 } from '../middleware/validationMiddleware.js'
 import { checkUserIsActive } from '../middleware/authMiddleware.js'
@@ -17,14 +16,14 @@ import {
 router
   .route('/')
   .get(getAllProducts)
-  .post(validateProductCreateInput, checkUserIsActive, upsertProduct)
+  .post(validateProductInput, checkUserIsActive, upsertProduct)
 router.route('/batch-delete').post(batchDeleteProducts)
 router
   .route('/:id')
   .get(getProduct)
   .patch(
     validateProductIdParam,
-    validateProductUpdateInput,
+    validateProductInput,
     checkUserIsActive,
     upsertProduct
   )

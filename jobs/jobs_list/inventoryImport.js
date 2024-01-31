@@ -22,6 +22,7 @@ export const inventoryImport = async (jobAttrs) => {
     filename: fileName,
     fileUrl,
     fileActionId,
+    isRecount = true,
   } = jobAttrs
 
   const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -66,13 +67,12 @@ export const inventoryImport = async (jobAttrs) => {
   let headerLocations = dataHeaders.filter((el) =>
     allLocationNames.includes(el)
   )
-  console.log(inventoryUpdateData)
   productLoop: for (let i = 0; i < inventoryUpdateData.length; i++) {
     let validEl = true
     let currUpdateItem = Object.entries(inventoryUpdateData[i])
-    console.log(currUpdateItem)
     let variationId = currUpdateItem.find((element) => {
-      return element[0].toUpperCase() == 'VARIATION ID'
+      const compareHeader = element[0].trim().toUpperCase()
+      return compareHeader == 'VARIATION ID' || compareHeader == 'VARIATIONID'
     })
 
     //check if catalog object exists
@@ -128,15 +128,29 @@ export const inventoryImport = async (jobAttrs) => {
         return location.name.toUpperCase() == el.toUpperCase()
       })
 
-      return {
-        type: 'PHYSICAL_COUNT',
-        physicalCount: {
-          catalogObjectId: variationId[1],
-          state: 'IN_STOCK',
-          locationId: locationId.id,
-          quantity: quantity[1],
-          occurredAt: today.toISOString(),
-        },
+      if (isRecount) {
+        return {
+          type: 'PHYSICAL_COUNT',
+          physicalCount: {
+            catalogObjectId: variationId[1],
+            state: 'IN_STOCK',
+            locationId: locationId.id,
+            quantity: quantity[1],
+            occurredAt: today.toISOString(),
+          },
+        }
+      } else {
+        return {
+          type: 'ADJUSTMENT',
+          adjustment: {
+            fromState: 'NONE',
+            toState: 'IN_STOCK',
+            locationId: locationId.id,
+            catalogObjectId: variationId[1],
+            quantity: quantity[1],
+            occurredAt: today.toISOString(),
+          },
+        }
       }
     })
 
@@ -173,7 +187,6 @@ export const inventoryImport = async (jobAttrs) => {
       }
     }
   } finally {
-    //console.log(resultsJSON)
     let headerTitles = Object.keys(resultsJSON[0])
     const csvWriter = createCsvWriter.createArrayCsvWriter({
       // path: `./uploads/${fileName.replace('Import-', 'Results-')}`,

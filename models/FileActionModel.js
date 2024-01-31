@@ -5,7 +5,6 @@ const FileActionSchema = new mongoose.Schema(
     fileType: {
       type: String,
       enum: Object.values(FILE_TYPE),
-      default: FILE_TYPE.PRODUCT_UPDATE,
     },
     fileName: String,
     fileUrl: String,

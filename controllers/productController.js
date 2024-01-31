@@ -54,7 +54,7 @@ export const getAllProducts = async (req, res) => {
 export const upsertProduct = async (req, res) => {
   const { id: productID } = req.params
   const key = nanoid()
-  const productData = req.body
+  const { title: productTitle, variations } = req.body
   const today = new Date(Date.now())
 
   const user = await User.findOne({ _id: req.user.userId })
@@ -74,7 +74,7 @@ export const upsertProduct = async (req, res) => {
     }
   })
 
-  let updateObj = productData
+  let updateObj
   if (productID) {
     //there was already an existing product, copy values from productData to existing product
     const productResponse = await squareClient.catalogApi.retrieveCatalogObject(
@@ -87,74 +87,106 @@ export const upsertProduct = async (req, res) => {
     if (itemVendor != req.user.name) {
       throw new UnauthorizedError('not authorized to access this route')
     }
+
     updateObj = productResponse.result.object
-    updateObj.itemData.name = productData.itemData.name
-    for (let i = 0; i < productData.itemData.variations.length; i++) {
+    updateObj.itemData.name = productTitle.trim()
+
+    for (let i = 0; i < variations.length; i++) {
       let isNewVariation = false
-      if (productData.itemData.variations[i].id.includes('#variation')) {
+      if (variations[i].id.includes('#variation')) {
         isNewVariation = true
       }
       if (!isNewVariation) {
         const currIndex = updateObj.itemData.variations.findIndex((el) => {
-          return el.id === productData.itemData.variations[i].id
+          return el.id === variations[i].id
         })
 
         //if the variation is not new, then update the name, SKU, and price of new obj
         updateObj.itemData.variations[
           currIndex
-        ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
+        ].itemVariationData.sku = `${userSku}-${variations[i].sku.trim()}`
         updateObj.itemData.variations[currIndex].itemVariationData.name =
-          productData.itemData.variations[i].itemVariationData.name
+          variations[i].name.trim()
         updateObj.itemData.variations[
           currIndex
         ].itemVariationData.priceMoney.amount =
-          productData.itemData.variations[i].itemVariationData.priceMoney.amount
+          Math.round(variations[i].price * 100) || 0
       } else {
         //update the old obj, then copy over to new obj
-        productData.itemData.variations[i].customAttributeValues = {
-          vendor_name: {
-            stringValue: req.user.name,
+        const newVariation = {
+          type: 'ITEM_VARIATION',
+          id: variations[i].id,
+          presentAtAllLocations: false,
+          presentAtLocationIds: vendorLocations,
+          customAttributeValues: {
+            vendor_name: {
+              stringValue: req.user.name,
+            },
+          },
+          itemVariationData: {
+            name: variations[i].name.trim() || productTitle.trim(),
+            sku: `${userSku}-${variations[i].sku.trim()}` || '',
+            pricingType: 'FIXED_PRICING',
+            priceMoney: {
+              amount: Math.round(variations[i].price * 100) || 0,
+              currency: 'CAD',
+            },
+            trackInventory: true,
+            locationOverrides: locationOverrides,
+            availableForBooking: false,
+            stockable: true,
           },
         }
-        productData.itemData.variations[
-          i
-        ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
-        productData.itemData.variations[i].itemVariationData.locationOverrides =
-          locationOverrides
-        productData.itemData.variations[i].presentAtAllLocations = false
-        productData.itemData.variations[i].presentAtLocationIds =
-          vendorLocations
 
         updateObj.itemData.variations = [
           ...updateObj.itemData.variations,
-          productData.itemData.variations[i],
+          newVariation,
         ]
       }
     }
   } else {
     //this is a new product
-    updateObj.customAttributeValues = {
-      vendor_name: {
-        stringValue: req.user.name,
-      },
-    }
-    updateObj.itemData.categoryId = req.user.squareId
-    updateObj.presentAtAllLocations = false
-    updateObj.presentAtLocationIds = vendorLocations
 
-    for (let i = 0; i < updateObj.itemData.variations.length; i++) {
-      updateObj.itemData.variations[i].customAttributeValues = {
+    const newProductVariations = variations.map((variation, index) => ({
+      type: 'ITEM_VARIATION',
+      id: `#variation${index}`,
+      presentAtAllLocations: false,
+      presentAtLocationIds: vendorLocations,
+      customAttributeValues: {
         vendor_name: {
           stringValue: req.user.name,
         },
-      }
-      updateObj.itemData.variations[
-        i
-      ].itemVariationData.sku = `${userSku}-${productData.itemData.variations[i].itemVariationData.sku}`
-      updateObj.itemData.variations[i].itemVariationData.locationOverrides =
-        locationOverrides
-      updateObj.itemData.variations[i].presentAtAllLocations = false
-      updateObj.itemData.variations[i].presentAtLocationIds = vendorLocations
+      },
+      itemVariationData: {
+        name: variation.name.trim() || productTitle.trim(),
+        sku: `${userSku}-${variation.sku.trim()}` || '',
+        pricingType: 'FIXED_PRICING',
+        priceMoney: {
+          amount: Math.round(variation.price * 100) || 0,
+          currency: 'CAD',
+        },
+        trackInventory: true,
+        locationOverrides: locationOverrides,
+        availableForBooking: false,
+        stockable: true,
+      },
+    }))
+
+    updateObj = {
+      type: 'ITEM',
+      id: '#newitem',
+      itemData: {
+        name: productTitle.trim(),
+        variations: newProductVariations,
+      },
+      categoryId: req.user.squareId,
+      presentAtAllLocations: false,
+      presentAtLocationIds: vendorLocations,
+      customAttributeValues: {
+        vendor_name: {
+          stringValue: req.user.name,
+        },
+      },
     }
   }
 
@@ -166,6 +198,7 @@ export const upsertProduct = async (req, res) => {
   const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
 
   // get the new variation IDs to initialize inventory to 0
+  //note: this part is currently not used
   if (response?.result?.idMappings) {
     const newVariationIds = response.result.idMappings.filter((el) => {
       var originalId = el.clientObjectId
@@ -223,29 +256,28 @@ export const getProduct = async (req, res, next) => {
     const parsedResponse = JSONBig.parse(
       JSONBig.stringify(retrieveResponse.result)
     )
-    res.status(StatusCodes.OK).json(parsedResponse)
+
+    //I only want to return very specific values to the vendor - just enough for them to edit it
+    const variations = retrieveResponse.result.object.itemData.variations.map(
+      (variation) => {
+        return {
+          id: variation.id,
+          name: variation.itemVariationData.name,
+          sku: variation.itemVariationData.sku.slice(5),
+          price: (
+            Number(variation.itemVariationData.priceMoney.amount) / 100
+          ).toFixed(2),
+        }
+      }
+    )
+    const title = retrieveResponse.result.object.itemData.name
+
+    res.status(StatusCodes.OK).json({ title, variations })
   } catch (error) {
     throw new NotFoundError(`no product with id : ${productID}`)
   }
   /*refactor above */
 }
-
-// export const updateProduct = async (req, res, next) => {
-//   const key = nanoid()
-//   const productData = req.body
-
-//   try {
-//     const response = await squareClient.catalogApi.upsertCatalogObject({
-//       idempotencyKey: key,
-//       object: productData,
-//     })
-//     const parsedResponse = JSONBig.parse(JSONBig.stringify(response.result))
-//     res.status(StatusCodes.OK).json({ parsedResponse })
-//   } catch (error) {
-//     console.log(error)
-//     throw new SquareApiError('Square API error trying to update product')
-//   }
-// }
 
 export const deleteProduct = async (req, res, next) => {
   const { id: productID } = req.params
