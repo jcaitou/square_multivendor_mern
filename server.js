@@ -15,6 +15,7 @@ import productRouter from './routers/productRouter.js'
 import inventoryRouter from './routers/inventoryRouter.js'
 import discountRouter from './routers/discountRouter.js'
 import orderRouter from './routers/orderRouter.js'
+import admorderRouter from './routers/admorderRouter.js'
 import authRouter from './routers/authRouter.js'
 import userRouter from './routers/userRouter.js'
 import uploadRouter from './routers/uploadRouter.js'
@@ -23,6 +24,7 @@ import webhookRouter from './routers/webhookRouter.js'
 import locationRouter from './routers/locationRouter.js'
 import contractRouter from './routers/contractRouter.js'
 import paymentRouter from './routers/paymentRouter.js'
+import payoutRouter from './routers/payoutRouter.js'
 
 //public
 import { dirname } from 'path'
@@ -60,11 +62,18 @@ app.use('/api/v1/products', authenticateUser, productRouter)
 app.use('/api/v1/inventory', authenticateUser, inventoryRouter)
 app.use('/api/v1/discounts', authenticateUser, discountRouter)
 app.use('/api/v1/orders', authenticateUser, orderRouter)
+app.use(
+  '/api/v1/admorders',
+  authenticateUser,
+  authorizePermissions('admin'),
+  admorderRouter
+)
 app.use('/api/v1/uploads', authenticateUser, uploadRouter)
 app.use('/api/v1/exports', authenticateUser, exportRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
 app.use('/api/v1/contracts', authenticateUser, contractRouter)
-app.use('/api/v1/payments', authenticateUser, paymentRouter) //currently not really used
+app.use('/api/v1/payments', authenticateUser, paymentRouter)
+app.use('/api/v1/payouts', authenticateUser, payoutRouter)
 app.use('/api/v1/locations', locationRouter)
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/webhooks', webhookRouter)

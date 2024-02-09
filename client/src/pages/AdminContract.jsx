@@ -78,7 +78,6 @@ const AdminContract = () => {
   const { user, storeLocations } = useDashboardContext()
 
   const { contract } = useQuery(singleContractQuery(id))?.data
-  console.log(contract)
 
   const contractLocation = storeLocations.find((location) => {
     return location._id == contract.location
@@ -95,7 +94,9 @@ const AdminContract = () => {
   return (
     <Wrapper>
       <Form method='post'>
-        <h2>Vendor Move-In</h2>
+        <h2>
+          {contract.started ? 'Vendor Contract Details' : 'Vendor Move-In'}
+        </h2>
 
         <div className='contract'>
           <div className='contract-field'>

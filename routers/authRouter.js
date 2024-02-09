@@ -7,11 +7,9 @@ import {
   registerSpecific,
   changePassword,
 } from '../controllers/authController.js'
-import { createContract } from '../controllers/contractController.js'
 import {
   validateRegisterInput,
   validateLoginInput,
-  validatePasswordInput,
   validatePasswordUpdateInput,
 } from '../middleware/validationMiddleware.js'
 import {

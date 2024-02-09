@@ -9,6 +9,7 @@ import mongoose from 'mongoose'
 import User from '../models/UserModel.js'
 import Contract from '../models/ContractModel.js'
 import RentPayment from '../models/RentPaymentModel.js'
+import Payout from '../models/PayoutModel.js'
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -52,26 +53,8 @@ export const validateProductInput = withValidationErrors([
 //   body('version').notEmpty().withMessage('version token is required'),
 // ])
 
-export const validateProductIdParam = withValidationErrors([
-  param('id').custom(async (value, { req }) => {
-    try {
-      const retrieveResponse =
-        await squareClient.catalogApi.retrieveCatalogObject(value, false)
-      const itemVendor =
-        retrieveResponse.result.object.customAttributeValues['vendor_name']
-          .stringValue
-      if (itemVendor != req.user.name) {
-        throw new UnauthorizedError('not authorized to access this route')
-      }
-    } catch (error) {
-      throw new NotFoundError(`no product with id : ${value}`)
-    }
-
-    // const isAdmin = req.user.role === 'admin'
-    // const isOwner = req.user.userId === job.createdBy.toString()
-    // if (!isAdmin && !isOwner)
-    //   throw new UnauthorizedError('not authorized to access this route')
-  }),
+export const validatePaymentInput = withValidationErrors([
+  body('reference').notEmpty().withMessage('reference is required'),
 ])
 
 export const validateRegisterInput = withValidationErrors([
@@ -88,14 +71,6 @@ export const validateRegisterInput = withValidationErrors([
       }
     }),
   // body('locations').notEmpty().withMessage('locations is required'),
-])
-
-export const validatePasswordInput = withValidationErrors([
-  body('password')
-    .notEmpty()
-    .withMessage('password is required')
-    .isLength({ min: 8 })
-    .withMessage('password must be at least 8 characters long'),
 ])
 
 export const validatePasswordUpdateInput = withValidationErrors([
@@ -154,30 +129,76 @@ export const validateOrderQueryInput = withValidationErrors([
   }),
 ])
 
-export const validateContractIdParam = withValidationErrors([
+/* validate ID params */
+export const validateProductIdParam = withValidationErrors([
   param('id').custom(async (value, { req }) => {
-    const isValidId = mongoose.Types.ObjectId.isValid(value)
-    if (!isValidId) throw new BadRequestError('invalid MongoDB id')
-    const contract = await Contract.findById(value)
-    if (!contract) throw new NotFoundError(`no job with id : ${value}`)
-
-    const isAdmin = req.user.role === 'admin'
-    const isOwner = req.user.userId === contract.vendor.toString()
-    if (!isAdmin && !isOwner)
-      throw new UnauthorizedError('not authorized to access this route')
+    try {
+      const retrieveResponse =
+        await squareClient.catalogApi.retrieveCatalogObject(value, false)
+      const itemVendor =
+        retrieveResponse.result.object.customAttributeValues['vendor_name']
+          .stringValue
+      if (itemVendor != req.user.name) {
+        throw new UnauthorizedError('not authorized to access this route')
+      }
+    } catch (error) {
+      throw new NotFoundError(`no product with id : ${value}`)
+    }
   }),
 ])
 
-export const validatePaymentIdParam = withValidationErrors([
-  param('id').custom(async (value, { req }) => {
-    const isValidId = mongoose.Types.ObjectId.isValid(value)
-    if (!isValidId) throw new BadRequestError('invalid MongoDB id')
-    const payment = await RentPayment.findById(value)
-    if (!payment) throw new NotFoundError(`no job with id : ${value}`)
+// export const validateContractIdParam = withValidationErrors([
+//   param('id').custom(async (value, { req }) => {
+//     const isValidId = mongoose.Types.ObjectId.isValid(value)
+//     if (!isValidId) throw new BadRequestError('invalid MongoDB id')
+//     const contract = await Contract.findById(value)
+//     if (!contract) throw new NotFoundError(`no job with id : ${value}`)
 
-    const isAdmin = req.user.role === 'admin'
-    const isOwner = req.user.userId === payment.vendor.toString()
-    if (!isAdmin && !isOwner)
-      throw new UnauthorizedError('not authorized to access this route')
-  }),
-])
+//     const isAdmin = req.user.role === 'admin'
+//     const isOwner = req.user.userId === contract.vendor.toString()
+//     if (!isAdmin && !isOwner)
+//       throw new UnauthorizedError('not authorized to access this route')
+//   }),
+// ])
+
+// export const validatePaymentIdParam = withValidationErrors([
+//   param('id').custom(async (value, { req }) => {
+//     const isValidId = mongoose.Types.ObjectId.isValid(value)
+//     if (!isValidId) throw new BadRequestError('invalid MongoDB id')
+//     const payment = await RentPayment.findById(value)
+//     if (!payment) throw new NotFoundError(`no payment with id : ${value}`)
+
+//     const isAdmin = req.user.role === 'admin'
+//     const isOwner = req.user.userId === payment.vendor.toString()
+//     if (!isAdmin && !isOwner)
+//       throw new UnauthorizedError('not authorized to access this route')
+//   }),
+// ])
+
+export const validateIdParam = (objType) => {
+  return withValidationErrors([
+    param('id').custom(async (value, { req }) => {
+      const isValidId = mongoose.Types.ObjectId.isValid(value)
+      if (!isValidId) throw new BadRequestError('invalid MongoDB id')
+      let findObj
+      switch (objType) {
+        case 'RentPayment':
+          findObj = await RentPayment.findById(value)
+          break
+        case 'Contract':
+          findObj = await Contract.findById(value)
+          break
+        case 'Payout':
+          findObj = await Payout.findById(value)
+          break
+      }
+      // const payment = await RentPayment.findById(value)
+      if (!findObj) throw new NotFoundError(`no ${objType} with id : ${value}`)
+
+      const isAdmin = req.user.role === 'admin'
+      const isOwner = req.user.userId === findObj.vendor.toString()
+      if (!isAdmin && !isOwner)
+        throw new UnauthorizedError('not authorized to access this route')
+    }),
+  ])
+}

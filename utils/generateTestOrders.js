@@ -230,13 +230,31 @@ export const generateRandomTestOrdersInner = async () => {
 
   //generate list of items:
   const allVendors = await User.find(
-    { role: 'user', active: true },
+    { role: 'user', active: true, locations: chosenLocation },
     { name: 1, email: 1, squareId: 1, locations: 1, settings: 1 }
   )
 
   let items = []
+  let count = 0
   console.log(items)
+
+  if (allVendors.length < 1) {
+    console.log(
+      `Random order was not generated due to no vendors at location ${day().format(
+        'MMM DD HH:mm'
+      )}`
+    )
+    return
+  }
   while (items.length === 0) {
+    if (count > 10) {
+      console.log(
+        `Random order was not generated due to no items ${day().format(
+          'MMM DD HH:mm'
+        )}`
+      )
+      return
+    }
     locationInd = getRandomInt(allLocations.length)
     chosenLocation = allLocations[locationInd]._id
     for (let i = 0; i < allVendors.length; i++) {
@@ -307,6 +325,7 @@ export const generateRandomTestOrdersInner = async () => {
         })
       }
     }
+    count = count + 1
   }
 
   //choose whether to use discount or not

@@ -9,23 +9,86 @@ import {
 } from '../errors/customError.js'
 import { nanoid } from 'nanoid'
 import JSONBig from 'json-bigint'
+import mongoose from 'mongoose'
+import Contract from '../models/ContractModel.js'
+import RentPayment from '../models/RentPaymentModel.js'
+import Payout from '../models/PayoutModel.js'
+import day from 'dayjs'
 
+//user can access these routes:
 export const getCurrentUser = async (req, res) => {
   const user = await User.findOne({ _id: req.user.userId })
   const userWithoutPassword = user.toJSON()
   res.status(StatusCodes.OK).json({ user: userWithoutPassword })
 }
 
+export const updateUserSettings = async (req, res) => {
+  const { key, value } = req.body
+  const user = await User.findOne({ _id: req.user.userId })
+  const settings = { ...user.settings }
+  settings[key] = value
+  const updatedUser = await User.findByIdAndUpdate(req.user.userId, {
+    settings: settings,
+  })
+  res.status(StatusCodes.OK).json({ msg: 'user updated' })
+}
+
+//only admin can access these routes:
 export const getAllUsers = async (req, res) => {
   const users = await User.find({}, { settings: 0, password: 0 })
   res.status(StatusCodes.OK).json({ users })
 }
 
-export const updateUser = async (req, res) => {
-  const obj = { ...req.body }
-  delete obj.password
-  const updatedUser = await User.findByIdAndUpdate(req.user.userId, obj)
-  res.status(StatusCodes.OK).json({ msg: 'user updated' })
+export const getAllUserStats = async (req, res) => {
+  // const receivables = await RentPayment.find()
+  const receivables = await RentPayment.aggregate([
+    { $sort: { forPeriodStart: 1 } },
+    {
+      $group: {
+        _id: {
+          $toString: '$vendor',
+        },
+        n: { $sum: 1 },
+        amount: { $sum: '$amountDue' },
+        firstReceivable: { $first: '$forPeriodStart' },
+      },
+    },
+  ])
+  const payouts = await Payout.aggregate([
+    {
+      $group: {
+        _id: {
+          $toString: '$vendor',
+        },
+        n: { $sum: 1 },
+        amount: { $sum: '$amountDue' },
+      },
+    },
+  ])
+
+  console.log(receivables)
+  const users = await User.find({}, { settings: 0, password: 0 })
+
+  const usersWithInfo = users.map((user) => {
+    console.log(user)
+    const receivable = receivables.find((el) => {
+      return el._id == user._id
+    })
+    const payout = payouts.find((el) => el._id == user._id)
+
+    return {
+      // ...user,
+      name: user.name,
+      role: user.role,
+      memberSince: receivable?.firstReceivable || user.createdAt,
+      active: user.active,
+      currentLocations: user.locations,
+      receivedFromUser: receivable?.amount || 0,
+      paidToUser: payout?.amount || 0,
+    }
+  })
+
+  res.status(StatusCodes.OK).json({ usersWithInfo })
 }
 
 //if user is not active, then the "create products" and other functions will not appear for them
@@ -38,14 +101,11 @@ export const activateDeactivateUser = async (req, res) => {
   })
 }
 
-export const updateUserSettings = async (req, res) => {
-  const { key, value } = req.body
-  const user = await User.findOne({ _id: req.user.userId })
-  const settings = { ...user.settings }
-  settings[key] = value
-  const updatedUser = await User.findByIdAndUpdate(req.user.userId, {
-    settings: settings,
-  })
+//currently not used as I used "update user settings" instead
+export const updateUser = async (req, res) => {
+  const obj = { ...req.body }
+  delete obj.password
+  const updatedUser = await User.findByIdAndUpdate(req.user.userId, obj)
   res.status(StatusCodes.OK).json({ msg: 'user updated' })
 }
 

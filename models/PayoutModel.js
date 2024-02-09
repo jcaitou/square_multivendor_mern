@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import day from 'dayjs'
 
-const RentPaymentSchema = new mongoose.Schema(
+const PayoutSchema = new mongoose.Schema(
   {
     contract: {
       type: mongoose.Types.ObjectId,
@@ -11,7 +11,7 @@ const RentPaymentSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: 'User',
     },
-    amountDue: Number,
+    amountToPay: Number,
     forPeriodStart: {
       type: Date,
       default: day().format('YYYY-MM-DD'),
@@ -27,10 +27,10 @@ const RentPaymentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    paymentDate: Date,
-    paymentRef: String,
+    payoutDate: Date,
+    payoutRef: String,
   },
   { timestamps: true }
 )
 
-export default mongoose.model('RentPayment', RentPaymentSchema)
+export default mongoose.model('Payout', PayoutSchema)

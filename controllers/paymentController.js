@@ -47,13 +47,13 @@ export const editPayment = async (req, res) => {
 }
 
 // this is used in authController - when new user is registered, initial payment is immediately added
-export const createPayment = async (
+export const createPayment = async ({
   contract,
   vendorId,
   amountDue,
   forPeriodStart,
-  forPeriodEnd = null
-) => {
+  forPeriodEnd = null,
+}) => {
   const paymentObj = {
     contract: contract,
     vendor: vendorId,

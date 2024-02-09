@@ -24,7 +24,6 @@ import barcodeExport from './jobs_list/barcodeExport.js'
 // import copyOrders from './jobs_list/copyOrders.js'
 agendaWrapper(agenda, 'product import', productImport)
 agendaWrapper(agenda, 'inventory import', inventoryImport)
-// inventoryImport(agenda)
 productExport(agenda)
 inventoryExport(agenda)
 orderExport(agenda)

@@ -6,27 +6,16 @@ import {
   getPayment,
   editPayment,
 } from '../controllers/paymentController.js'
-import {
-  validateRegisterInput,
-  validateLoginInput,
-  validatePasswordInput,
-  validatePasswordUpdateInput,
-  validatePaymentIdParam,
-} from '../middleware/validationMiddleware.js'
-import {
-  authorizePermissions,
-  authenticateUser,
-} from '../middleware/authMiddleware.js'
+import { validateIdParam } from '../middleware/validationMiddleware.js'
+import { authorizePermissions } from '../middleware/authMiddleware.js'
 
 router.route('/').get(getAllPaymentsVendor)
 router.route('/adm/').get([authorizePermissions('admin'), getAllPaymentsAdmin])
-// .post([authorizePermissions('admin'), createContract])
-// router.post('/register', authenticateUser, [
-//   authorizePermissions('admin'),
-//   validateRegisterInput,
-//   register,
-// ])
-router.route('/adm/:id').post([authorizePermissions('admin'), editPayment]) //edit payment (including mark paid)
-router.route('/:id').get(validatePaymentIdParam, getPayment)
+router
+  .route('/adm/:id')
+  .post(validateIdParam('Payment'), [
+    (authorizePermissions('admin'), editPayment),
+  ])
+router.route('/:id').get(validateIdParam('Payment'), getPayment)
 
 export default router

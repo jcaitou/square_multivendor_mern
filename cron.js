@@ -1,6 +1,7 @@
 import cron from 'node-cron'
 import mongoose from 'mongoose'
 import { copyOrders } from './tasks/copyOrders.js'
+import { generatePayables } from './tasks/generatePayables.js'
 import { generateReceivables } from './tasks/generateReceivables.js'
 import { generateRandomTestOrdersInner } from './utils/generateTestOrders.js'
 
@@ -13,18 +14,24 @@ try {
 }
 
 // //run once:
-copyOrders()
-// generateRandomTestOrdersInner()
+// await copyOrders()
+// await generateRandomTestOrdersInner()
 // await generateReceivables()
+// await generatePayables()
 // process.exit(0)
 
-// //this is needed in the future:
-// cron.schedule('*/20 7-23 * * *', () => {
-//   copyOrders()
-// })
+//this is needed in the future:
+cron.schedule('*/20 7-23 * * *', () => {
+  copyOrders()
+})
+cron.schedule('0 1 * * *', () => {
+  generateReceivables()
+})
+cron.schedule('0 2 * * *', () => {
+  generatePayables()
+})
 
-// //this is NOT needed in the future:
-// //generate one random order per day at 5PM
-// cron.schedule('0 17 * * *', () => {
-//   generateRandomTestOrdersInner()
-// })
+//this is NOT needed in the future:
+cron.schedule('18,27,42,59 10-20 * * *', () => {
+  generateRandomTestOrdersInner()
+})

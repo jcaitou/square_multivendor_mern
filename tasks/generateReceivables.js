@@ -7,10 +7,6 @@ import User from '../models/UserModel.js'
 import Location from '../models/LocationModel.js'
 import RentPayment from '../models/RentPaymentModel.js'
 import day from 'dayjs'
-// import isSameOrBefore from 'dayjs/plugin/isSameOrBefore.js'
-// import isSameOrAfter from 'dayjs/plugin/isSameOrAfter/js'
-// day.extend(isSameOrBefore)
-// day.extend(isSameOrAfter)
 import {
   BadRequestError,
   NotFoundError,
@@ -18,16 +14,11 @@ import {
   SquareApiError,
 } from '../errors/customError.js'
 
-//the following is for when you upload to render:
-// try {
-//   await mongoose.connect(process.env.MONGO_URL)
-//   console.log('Mongoose connected, cron is running...')
-//   await copyOrders()
-//   process.exit(0)
-// } catch (error) {
-//   console.log(error)
-//   process.exit(1)
-// }
+//cases that have not been accounted for:
+//non-renewed contract - pro-rata calculation of rent
+
+//cases that have not been tested:
+//if it will not be renewed - all 3 scenarios
 
 //this loops through all ACTIVE contracts and:
 //-generates new receivable object, if any
@@ -40,54 +31,66 @@ export const generateReceivables = async () => {
   for (let i = 0; i < activeContracts.length; i++) {
     const contractId = activeContracts[i]._id
 
-    // let payments = await RentPayment.aggregate([
-    //   { $match: { contract: contractId } },
-    //   { $sort: { $forPeriodStart: -1 } },
-    // ])
-    const payments = await RentPayment.find({
-      contract: contractId,
-    })
+    const payments = await RentPayment.findOne(
+      {
+        contract: contractId,
+      },
+      {},
+      { sort: { forPeriodEnd: -1 } }
+    )
+
     //need to sort by date (newest first) and only return the newest item
-    console.log(payments[0])
+    console.log(payments)
 
-    const mostRecentReceivable = payments[0]
-    const lastPeriodDate = day(mostRecentReceivable.forPeriodEnd)
+    //we calculate an arbitrary number of payouts starting from the start date
+    let calculationStartDate = day(activeContracts[i].startDate)
+    if (payments) {
+      calculationStartDate = day(payments.forPeriodEnd).add(1, 'day')
+    }
+    let calculationEndDate = calculationStartDate
+      .add(1, 'month')
+      .subtract(1, 'day')
+    console.log(
+      `next period: ${calculationStartDate.format(
+        'YYYY-MM-DD'
+      )} to ${calculationEndDate.format('YYYY-MM-DD')}`
+    )
 
-    //create the new payment object 7 days before the next period start
-    let newPayment
-    if (today.isAfter(lastPeriodDate.subtract(7, 'day'))) {
+    //create the new payment object 7 days before the next period start:
+    while (calculationEndDate.isBefore(today.add(7, 'day'), day)) {
+      let newPayment,
+        paymentObj = null,
+        updatedContract = null
+      // if (today.isAfter(lastPeriodDate.subtract(7, 'day'))) {
       console.log('need to create new payment item')
 
       //if the contract will NOT be renewed and there is less than 30 days left, this is a special case
       if (!activeContracts[i].willBeRenewed) {
         const contractEndDate = day(activeContracts[i].endDate)
-        if (lastPeriodDate.isSame(contractEndDate, 'day')) {
+        if (calculationEndDate.isSame(contractEndDate, 'day')) {
           //do nothing and just let the contract expire
         } else if (
-          lastPeriodDate.add(1, 'month').isSameOrBefore(contractEndDate, 'day')
+          calculationEndDate
+            .add(1, 'month')
+            .isSameOrBefore(contractEndDate, 'day')
         ) {
           //add the next period normally (same function as below)
-          const paymentObj = {
+          paymentObj = {
             contract: contractId,
             vendor: activeContracts[i].vendor,
             amountDue: activeContracts[i].monthlyRent,
-            forPeriodStart: day(lastPeriodDate.add(1, 'day')).format(
-              'YYYY-MM-DD'
-            ),
-            forPeriodEnd: day(lastPeriodDate)
-              .add(1, 'month')
-              .format('YYYY-MM-DD'),
+            forPeriodStart: calculationStartDate.format('YYYY-MM-DD'),
+            forPeriodEnd: calculationEndDate.format('YYYY-MM-DD'),
           }
-          newPayment = await RentPayment.create(paymentObj)
         } else if (
-          lastPeriodDate.add(1, 'month').isAfter(contractEndDate, 'day')
+          calculationEndDate.add(1, 'month').isAfter(contractEndDate, 'day')
         ) {
           //add the next period pro-rata with last day set as contractEndDate
         }
 
         //mark the contract as ended if we have passed the end date:
         if (today.isSameOrAfter(contractEndDate)) {
-          const updatedContract = await Contract.findByIdAndUpdate(
+          updatedContract = await Contract.findByIdAndUpdate(
             contractId,
             { ended: true },
             {
@@ -97,35 +100,41 @@ export const generateReceivables = async () => {
         }
       } else {
         //the contract will be renewed; just keep adding new payment objects
-        const nextEndPeriod = day(lastPeriodDate)
-          .add(1, 'month')
-          .format('YYYY-MM-DD')
-        const paymentObj = {
+        paymentObj = {
           contract: contractId,
           vendor: activeContracts[i].vendor,
           amountDue: activeContracts[i].monthlyRent,
-          forPeriodStart: day(lastPeriodDate.add(1, 'day')).format(
-            'YYYY-MM-DD'
-          ),
-          forPeriodEnd: nextEndPeriod,
+          forPeriodStart: calculationStartDate.format('YYYY-MM-DD'),
+          forPeriodEnd: calculationEndDate.format('YYYY-MM-DD'),
         }
-        newPayment = await RentPayment.create(paymentObj)
 
         //also extend the contractEndDate if willBeRenewed = true and we have hit the contractEndDate
-        const updatedContract = await Contract.findByIdAndUpdate(
+        updatedContract = await Contract.findByIdAndUpdate(
           contractId,
-          { endDate: nextEndPeriod },
+          { endDate: calculationEndDate.format('YYYY-MM-DD') },
           {
             new: true,
           }
         )
       }
+
+      if (paymentObj) {
+        console.log('create new payment')
+        newPayment = await RentPayment.create(paymentObj)
+      }
+
+      calculationStartDate = calculationEndDate.add(1, 'day')
+      calculationEndDate = calculationStartDate
+        .add(1, 'month')
+        .subtract(1, 'day')
+
+      console.log('newpayment', newPayment)
     }
   }
 
-  console.log(activeContracts)
-
-  console.log(`Copy Orders completed at ${day().format('MMM DD HH:mm')}`)
+  console.log(
+    `Generate Receivables completed at ${day().format('MMM DD HH:mm')}`
+  )
 
   return null
 }

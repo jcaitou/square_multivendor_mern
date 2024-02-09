@@ -1,6 +1,7 @@
 import { useLoaderData } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
+import formatCurrency from '../utils/formatCurrency'
 import { Order } from '../components'
 import Wrapper from '../assets/wrappers/OrdersContainer'
 import PageBtnContainer from '../components/PageBtnContainer'
@@ -14,29 +15,30 @@ import day from 'dayjs'
 import { userQuery } from './DashboardLayout'
 
 const allOrdersQuery = (searchValues, user) => {
-  const { startDate, endDate, sort, locations } = searchValues
+  const { startDate, endDate, sort, page, locations } = searchValues
 
   const locationsQueryKey =
     !locations || locations.length == 0 ? user.locations : locations
 
-  console.log(user)
   return {
     queryKey: [
       'orders',
       startDate ?? '',
       endDate ?? '',
       sort ?? 'dateDesc',
+      page ?? 1,
       locationsQueryKey,
     ],
     queryFn: async () => {
       if (user.role === 'admin') {
         const { data } = await customFetch.get(
-          '/orders/adm-all-orders',
+          '/admorders',
           {
             params: {
               startDate,
               endDate,
               sort,
+              page,
               locations,
             },
           },
@@ -55,6 +57,7 @@ const allOrdersQuery = (searchValues, user) => {
               startDate,
               endDate,
               sort,
+              page,
               locations,
             },
           },
@@ -107,11 +110,8 @@ const AllOrders = () => {
       monthToDateTotal,
     },
   } = useQuery(allOrdersQuery(searchValues, user))
-  const CADMoney = new Intl.NumberFormat('en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-  })
   const [exportOrdersModalShow, setExportOrdersModalShow] = useState(false)
+
   return (
     <AllOrdersContext.Provider value={{ searchValues }}>
       <Wrapper>
@@ -120,7 +120,7 @@ const AllOrders = () => {
           <div className='revenue-card'>
             <span>Selected Period and Location</span>
             <span className='revenue-money'>
-              {CADMoney.format(ordersMoneyTotal / 100)}
+              {formatCurrency(ordersMoneyTotal)}
             </span>
           </div>
           <div className='revenue-card'>
@@ -129,7 +129,7 @@ const AllOrders = () => {
               <span className='revenue-card-caption'>*over all Locations</span>
             </span>
             <span className='revenue-money'>
-              {CADMoney.format(monthToDateTotal / 100)}
+              {formatCurrency(monthToDateTotal)}
             </span>
           </div>
         </div>

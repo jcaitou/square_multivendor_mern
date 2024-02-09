@@ -44,3 +44,4 @@ export { default as ModalExportInventory } from './ModalExportInventory'
 
 export { default as HoverTooltip } from './HoverTooltip'
 export { default as AdminPaymentTable } from './AdminPaymentTable'
+export { default as SalesByVendorSearchContainer } from './SalesByVendorSearchContainer'

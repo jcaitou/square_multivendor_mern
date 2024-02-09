@@ -53,15 +53,6 @@ export const loader = (queryClient) => async () => {
   }
 }
 
-// export const loader = async () => {
-//   try {
-//     const { data } = await customFetch.get('/users/current-user')
-//     return data
-//   } catch (error) {
-//     return redirect('/')
-//   }
-// }
-
 const DashboardContext = createContext()
 
 const Dashboard = ({ isDarkThemeEnabled, queryClient }) => {

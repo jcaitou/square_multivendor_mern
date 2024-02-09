@@ -176,3 +176,7 @@ Need to build:
 same day on every month (or use 28th, if the start date is 29/30/31) - rent is due (& simulate payment right away)
 every 2 weeks (calculated using weekday) - issue payout
 -payouts
+
+-vendor signs a different contract at a different location
+
+-wait 2 weeks to test the auto payables/receivables generation

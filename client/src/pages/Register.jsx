@@ -1,19 +1,13 @@
 import { UncontrolledFormRow, Logo, FormRowSelect } from '../components'
 import Wrapper from '../assets/wrappers/RegisterAndLoginPage'
-import { Fragment } from 'react'
-import {
-  Form,
-  redirect,
-  useNavigate,
-  useNavigation,
-  Link,
-} from 'react-router-dom'
+import { Form, redirect, useNavigation } from 'react-router-dom'
 import customFetch from '../utils/customFetch'
 import { toast } from 'react-toastify'
 import { useDashboardContext } from './DashboardLayout'
 import { useQuery } from '@tanstack/react-query'
-import { useLoaderData } from 'react-router-dom'
 
+//we use query for register because its currently open to public
+//once its nested within dashboard, we can just use dashboard context and no need to usequery
 export const storeLocationsQuery = {
   queryKey: ['storeLocations'],
   queryFn: async () => {
@@ -21,6 +15,18 @@ export const storeLocationsQuery = {
     return data
   },
 }
+
+export const loader = (queryClient) => async () => {
+  try {
+    await queryClient.ensureQueryData(storeLocationsQuery)
+
+    return null
+  } catch (error) {
+    return redirect('/')
+  }
+}
+
+//delete above later
 
 export const action = async ({ request }) => {
   const formData = await request.formData()
@@ -36,22 +42,10 @@ export const action = async ({ request }) => {
   }
 }
 
-export const loader = (queryClient) => async () => {
-  try {
-    await queryClient.ensureQueryData(storeLocationsQuery)
-
-    return null
-  } catch (error) {
-    return redirect('/')
-  }
-}
-
 const Register = () => {
-  // const {data} = useLoaderData()
-  // console.log(data)
   const { locations: storeLocations } = useQuery(storeLocationsQuery)?.data
+  // const { storeLocations } = useDashboardContext()
 
-  const navigate = useNavigate()
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
 

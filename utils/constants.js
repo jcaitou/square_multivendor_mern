@@ -40,6 +40,8 @@ export const ORDERS_SORT_BY = {
 export const SALES_SORT_BY = {
   QTY_DESCENDING: 'qtyDesc',
   QTY_ASCENDING: 'qtyAsc',
+  REVENUE_DESCENDING: 'revDesc',
+  REVENUE_ASCENDING: 'revAsc',
   ASCENDING: 'a-z',
   DESCENDING: 'z-a',
 }

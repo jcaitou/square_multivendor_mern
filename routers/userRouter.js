@@ -7,18 +7,21 @@ import { authorizePermissions } from '../middleware/authMiddleware.js'
 import {
   getCurrentUser,
   getAllUsers,
+  getAllUserStats,
   updateUser,
   activateDeactivateUser,
   updateUserSettings,
   updateUserLocations,
 } from '../controllers/userController.js'
 
+//routes for logged in user
 router.get('/current-user', getCurrentUser)
-router.get('/all-users', [authorizePermissions('admin'), getAllUsers])
-// router.patch('/update-user', validateUpdateUserInput, updateUser)
-
 router.patch('/update-user-settings', updateUserSettings)
 
+//routes for admin only:
+router.get('/all-users', [authorizePermissions('admin'), getAllUsers])
+router.get('/user-stats', [authorizePermissions('admin'), getAllUserStats])
+// router.patch('/update-user', validateUpdateUserInput, updateUser)
 router.patch('/adm/activation', [
   authorizePermissions('admin'),
   activateDeactivateUser,

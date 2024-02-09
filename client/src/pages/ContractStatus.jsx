@@ -69,14 +69,15 @@ const ContractStatus = () => {
   const {
     data: { paymentsDue },
   } = useQuery(paymentsQuery)
-  // const contracts = data.contracts
   const [contractInd, setContractInd] = useState(0)
 
   const currLocation = storeLocations.find((location) => {
     return location._id == contracts[contractInd].location
   })
 
-  console.log(contracts)
+  const paymentsForSelectedLocation = paymentsDue.filter((el) => {
+    return el.contract._id === contracts[contractInd]._id
+  })
 
   if (contracts.length === 0) {
     return <h2>No contracts to display</h2>
@@ -88,7 +89,30 @@ const ContractStatus = () => {
       <div className='contract'>
         <div className='contract-field'>
           <label>Location:</label>
-          <span>{currLocation.name}</span>
+          {contracts.length > 1 ? (
+            <>
+              <select
+                name='contract-select'
+                id='contract-select'
+                onChange={(e) => {
+                  setContractInd(e.target.value)
+                }}
+              >
+                {contracts.map((el, index) => {
+                  const selectLocation = storeLocations.find((location) => {
+                    return location._id == el.location
+                  })
+                  return (
+                    <Fragment key={el._id}>
+                      <option value={index}>{selectLocation.name}</option>
+                    </Fragment>
+                  )
+                })}
+              </select>
+            </>
+          ) : (
+            <span>{currLocation.name}</span>
+          )}
         </div>
         <div className='contract-row'>
           <div className='contract-field'>
@@ -135,8 +159,8 @@ const ContractStatus = () => {
           </tr>
         </thead>
         <tbody>
-          {paymentsDue &&
-            paymentsDue.map((paymentObj) => {
+          {paymentsForSelectedLocation &&
+            paymentsForSelectedLocation.map((paymentObj) => {
               return (
                 <Fragment key={paymentObj._id}>
                   <tr>

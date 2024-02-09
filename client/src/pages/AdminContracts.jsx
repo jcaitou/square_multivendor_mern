@@ -1,6 +1,6 @@
 import Wrapper from '../assets/wrappers/ContractStatus'
 import { useDashboardContext } from '../pages/DashboardLayout'
-import { useOutletContext, Link, useNavigation } from 'react-router-dom'
+import { useOutletContext, Link } from 'react-router-dom'
 import customFetch from '../utils/customFetch'
 import { useQuery } from '@tanstack/react-query'
 import { Fragment } from 'react'
@@ -110,7 +110,7 @@ const AdminContracts = () => {
                     <td>
                       {' '}
                       <Link to={`./${contract._id}`} className='btn edit-btn'>
-                        Move In
+                        View
                       </Link>
                     </td>
                   </tr>

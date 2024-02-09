@@ -80,14 +80,14 @@ export const register = async (req, res, next) => {
 
   const vendorId = user.id
 
-  const contract = await createContractInner(vendorId, locationId)
+  const contract = await createContractInner({ vendorId, locationId })
 
-  const payment = await createPayment(
-    contract.id,
+  const payment = await createPayment({
+    contract: contract.id,
     vendorId,
-    contract.monthlyRent,
-    contract.startDate
-  )
+    amountDue: contract.monthlyRent,
+    forPeriodStart: contract.startDate,
+  })
 
   res.status(StatusCodes.CREATED).json({ msg: 'user created' })
 }

@@ -7,17 +7,8 @@ import {
   createContract,
   startContract,
 } from '../controllers/contractController.js'
-import {
-  validateRegisterInput,
-  validateLoginInput,
-  validatePasswordInput,
-  validatePasswordUpdateInput,
-  validateContractIdParam,
-} from '../middleware/validationMiddleware.js'
-import {
-  authorizePermissions,
-  authenticateUser,
-} from '../middleware/authMiddleware.js'
+import { validateIdParam } from '../middleware/validationMiddleware.js'
+import { authorizePermissions } from '../middleware/authMiddleware.js'
 
 router.route('/').get(getAllContractsVendor)
 
@@ -28,6 +19,8 @@ router
 
 router
   .route('/adm/start/:id') //saved /adm/:id route for editContract in case we ever need it
-  .post([authorizePermissions('admin'), startContract])
-router.route('/:id').get(validateContractIdParam, getContract)
+  .post(validateIdParam('Contract'), [
+    (authorizePermissions('admin'), startContract),
+  ])
+router.route('/:id').get(validateIdParam('Contract'), getContract)
 export default router

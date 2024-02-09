@@ -2,59 +2,21 @@ import { FormRowSelect } from '.'
 import Wrapper from '../assets/wrappers/DashboardFormPage'
 import { Form, useSubmit, Link } from 'react-router-dom'
 import { SALES_SORT_BY } from '../../../utils/constants'
-import { useItemSalesContext } from '../pages/ItemSales'
+import { useVendorSalesContext } from '../pages/VendorSales'
 import { useDashboardContext } from '../pages/DashboardLayout'
 import { SearchByDate, SearchByLocation } from '.'
 import { setReportDefaultPeriod } from '../utils/setReportDefaultPeriod'
 
-const SalesSearchContainer = () => {
-  const { searchValues } = useItemSalesContext()
+const SalesByVendorSearchContainer = () => {
+  const { searchValues } = useVendorSalesContext()
   const { startDate, endDate, sort, locations, vendorStatus } = searchValues
   const { user, storeLocations } = useDashboardContext()
   const submit = useSubmit()
 
-  console.log(searchValues)
-
   const resetLink = setReportDefaultPeriod(
-    '/dashboard/item-sales',
+    '/dashboard/admin/sales-by-vendor',
     user.settings.defaultReportPeriod
   )
-
-  const debounce = (onChange) => {
-    let timeout
-    return (e) => {
-      const form = e.currentTarget.form
-      clearTimeout(timeout)
-      timeout = setTimeout(() => {
-        onChange(form, e)
-      }, 1000)
-    }
-  }
-
-  const locationChangeAll = (e) => {
-    const locationInputs = document.querySelectorAll('input[name=locations]')
-    locationInputs.forEach((input) => {
-      input.checked = e.currentTarget.checked
-    })
-  }
-
-  const locationChange = (e) => {
-    const locationInputs = document.querySelectorAll('input[name=locations]')
-    const allLocationInput = document.querySelector(
-      'input[value=locations-all]'
-    )
-    let prop = true
-    for (let i = 0; i < locationInputs.length; i++) {
-      if (locationInputs[i].checked === false) {
-        prop = false
-        break
-      }
-    }
-    allLocationInput.checked = prop
-    debounce((form) => {
-      submit(form)
-    })
-  }
 
   const sortLabels = {
     qtyDesc: 'Quantity sold, most to least',
@@ -141,6 +103,7 @@ const SalesSearchContainer = () => {
               </div>
             </>
           )}
+
           <Link to={resetLink} className='btn form-btn delete-btn'>
             Reset Search Values
           </Link>
@@ -150,4 +113,4 @@ const SalesSearchContainer = () => {
   )
 }
 
-export default SalesSearchContainer
+export default SalesByVendorSearchContainer

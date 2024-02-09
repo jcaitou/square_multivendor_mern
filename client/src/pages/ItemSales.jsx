@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import customFetch from '../utils/customFetch'
+import formatCurrency from '../utils/formatCurrency'
 import Wrapper from '../assets/wrappers/ItemSales'
 import PageBtnContainer from '../components/PageBtnContainer'
 import { SalesSearchContainer } from '../components'
@@ -11,7 +12,7 @@ import { useDashboardContext } from './DashboardLayout'
 import { userQuery } from './DashboardLayout'
 
 const allItemSalesQuery = (params, user) => {
-  const { startDate, endDate, sort, locations, page } = params
+  const { startDate, endDate, sort, locations, vendorStatus, page } = params
   const locationsQueryKey =
     !locations || locations.length == 0 ? user.locations : locations
   return {
@@ -22,20 +23,36 @@ const allItemSalesQuery = (params, user) => {
       endDate ?? '',
       sort ?? 'qtyDesc',
       locationsQueryKey,
+      vendorStatus && vendorStatus !== 'all' ? vendorStatus : '',
     ],
     queryFn: async () => {
-      const { data } = await customFetch.get(
-        '/orders/sales',
-        {
-          params,
-        },
-        {
-          paramsSerializer: {
-            indexes: null,
+      if (user.role === 'admin') {
+        const { data } = await customFetch.get(
+          '/admorders/sales',
+          {
+            params,
           },
-        }
-      )
-      return data
+          {
+            paramsSerializer: {
+              indexes: null,
+            },
+          }
+        )
+        return data
+      } else {
+        const { data } = await customFetch.get(
+          '/orders/sales',
+          {
+            params,
+          },
+          {
+            paramsSerializer: {
+              indexes: null,
+            },
+          }
+        )
+        return data
+      }
     },
   }
 }
@@ -69,11 +86,9 @@ const ItemSales = () => {
   const {
     data: { currentPage, sales, numOfPages, totalItems },
   } = useQuery(allItemSalesQuery(searchValues, user))
-  const CADMoney = new Intl.NumberFormat('en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-  })
-  console.log(sales)
+
+  console.log(currentPage, sales, numOfPages, totalItems)
+
   return (
     <ItemSalesContext.Provider value={{ searchValues }}>
       <Wrapper>
@@ -92,17 +107,16 @@ const ItemSales = () => {
               <Fragment key={item._id}>
                 <div className='item-details'>
                   <span className='order-item-name'>
-                    {item.name}{' '}
-                    {user.role === 'admin' && ` (${item.vendor.name})`}
+                    {item.name} {user.role === 'admin' && ` (${item.vendor})`}
                   </span>
                   <span>{item.quantity}</span>
-                  <span>{CADMoney.format(item.basePrice / 100)}</span>
+                  <span>{formatCurrency(item.basePrice)}</span>
                   <span>
                     {item.discounts === 0
                       ? '-'
-                      : CADMoney.format(item.discounts / 100)}
+                      : formatCurrency(item.discounts)}
                   </span>
-                  <span>{CADMoney.format(item.price / 100)}</span>
+                  <span>{formatCurrency(item.price)}</span>
                 </div>
               </Fragment>
             )

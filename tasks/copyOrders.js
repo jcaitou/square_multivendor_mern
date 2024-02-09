@@ -63,9 +63,14 @@ export const copyOrders = async () => {
       searchOrders = await squareClient.ordersApi.searchOrders(ordersQuery)
     } catch (error) {
       console.log(ordersQuery)
-      throw new SquareApiError(
-        error?.errors[0].detail || 'error while searching orders'
-      )
+      console.log(error)
+      let errorMsg
+      if (error?.errors && error?.errors.length > 0) {
+        errorMsg = error?.errors[0].detail
+      } else {
+        errorMsg = 'error while searching orders'
+      }
+      throw new SquareApiError(errorMsg)
     }
 
     const allOrders = searchOrders.result.orders || []
@@ -96,9 +101,14 @@ export const copyOrders = async () => {
           )
         } catch (error) {
           console.log(item)
-          throw new SquareApiError(
-            error?.errors[0].detail || 'error while searching item'
-          )
+          console.log(error)
+          let errorMsg
+          if (error?.errors && error?.errors.length > 0) {
+            errorMsg = error?.errors[0].detail
+          } else {
+            errorMsg = 'error while searching item'
+          }
+          throw new SquareApiError(errorMsg)
         }
 
         let vendorName =

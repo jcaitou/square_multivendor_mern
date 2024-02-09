@@ -34,6 +34,11 @@ import {
   Guides,
   GuideProductUpload,
   GuideInventoryUpload,
+  AddContract,
+  VendorSales,
+  VendorPayouts,
+  AdminPayouts,
+  PayoutItem,
 } from './pages'
 import { ErrorElement, ScrollToTop } from './components'
 import { checkDefaultTheme } from './utils/checkDefaultTheme'
@@ -48,6 +53,8 @@ import { action as generateTestOrdersAction } from './pages/GenerateTestOrders' 
 import { action as feedbackAction } from './pages/Feedback'
 import { action as startContractAction } from './pages/AdminContract'
 import { action as editPaymentAction } from './pages/AdminPayment'
+import { action as addContractAction } from './pages/AddContract'
+import { action as editPayoutAction } from './pages/PayoutItem'
 
 import { loader as dashboardLoader } from './pages/DashboardLayout'
 import { loader as adminLayoutLoader } from './pages/AdminLayout'
@@ -71,6 +78,11 @@ import { loader as adminContractsLoader } from './pages/AdminContracts'
 import { loader as adminContractLoader } from './pages/AdminContract'
 import { loader as adminPaymentsLoader } from './pages/AdminPayments'
 import { loader as adminPaymentLoader } from './pages/AdminPayment'
+import { loader as adminPayoutsLoader } from './pages/AdminPayouts'
+import { loader as payoutLoader } from './pages/PayoutItem'
+
+import { loader as vendorSalesLoader } from './pages/VendorSales'
+import { loader as vendorPayoutsLoader } from './pages/VendorPayouts'
 
 checkDefaultTheme()
 
@@ -124,6 +136,12 @@ const router = createBrowserRouter([
             path: 'contract',
             element: <ContractStatus />,
             loader: contractStatusLoader(queryClient),
+            errorElement: <ErrorElement />,
+          },
+          {
+            path: 'payouts',
+            element: <VendorPayouts />,
+            loader: vendorPayoutsLoader(queryClient),
             errorElement: <ErrorElement />,
           },
           // { path: 'stats', element: <Stats />, loader: statsLoader },
@@ -253,6 +271,11 @@ const router = createBrowserRouter([
                 action: registerAction,
               },
               {
+                path: 'add-contract',
+                element: <AddContract />,
+                action: addContractAction(queryClient),
+              },
+              {
                 path: 'contracts',
                 element: <AdminContracts />,
                 loader: adminContractsLoader(queryClient),
@@ -275,6 +298,24 @@ const router = createBrowserRouter([
                 element: <AdminPayment />,
                 loader: adminPaymentLoader(queryClient),
                 action: editPaymentAction(queryClient),
+              },
+              {
+                path: 'payouts',
+                element: <AdminPayouts />,
+                loader: adminPayoutsLoader(queryClient),
+                errorElement: <ErrorElement />,
+              },
+              {
+                path: 'payouts/:id',
+                element: <PayoutItem />,
+                loader: payoutLoader(queryClient),
+                action: editPayoutAction(queryClient),
+              },
+              {
+                path: 'sales-by-vendor',
+                element: <VendorSales />,
+                loader: vendorSalesLoader(queryClient),
+                errorElement: <ErrorElement />,
               },
             ],
           },

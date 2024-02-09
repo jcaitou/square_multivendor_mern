@@ -9,6 +9,7 @@ import {
   UnauthorizedError,
 } from '../errors/customError.js'
 import { assignLocationInner } from '../controllers/locationController.js'
+import { createPayment } from './paymentController.js'
 
 export const getAllContractsVendor = async (req, res) => {
   const searchObj = { vendor: req.user.userId }
@@ -50,20 +51,20 @@ export const startContract = async (req, res) => {
 }
 
 // this is used in authController - when new user is registered, initial contract is immediately added
-export const createContractInner = async (
+export const createContractInner = async ({
   vendorId,
   locationId,
+  monthlyRent = null,
   contractType = null,
   startDate = null,
-  endDate = null
-) => {
+  endDate = null,
+}) => {
   const contractObj = {
     vendor: vendorId,
     location: locationId,
     renewable: true,
     willBeRenewed: true,
   }
-
   const existingContract = await Contract.find({
     vendor: vendorId,
     location: locationId,
@@ -74,6 +75,10 @@ export const createContractInner = async (
     throw new BadRequestError(
       `existing active contract already exists for this vendor and this location`
     )
+
+  if (monthlyRent) {
+    contractObj.monthlyRent = monthlyRent
+  }
 
   if (contractType) {
     contractObj.contractType = contractType
@@ -92,27 +97,25 @@ export const createContractInner = async (
 }
 
 export const createContract = async (req, res) => {
-  var locationId = res.locals?.locationId
-  var vendorId = res.locals?.vendorId
+  console.log({
+    ...req.body,
+    monthlyRent: Number(req.body.montlyRent) * 100,
+  })
+  console.log({
+    monthlyRent: Number(req.body.montlyRent) * 100,
+    ...req.body,
+  })
+  const contract = await createContractInner({
+    ...req.body,
+    monthlyRent: Number(req.body.montlyRent) * 100,
+  })
 
-  const { contractType, startDate, endDate } = req.body
-  if (!locationId) {
-    locationId = req.body.locationId
-  }
-  if (!vendorId) {
-    vendorId = req.body.vendorId
-  }
+  const payment = await createPayment({
+    contract: contract.id,
+    vendorId: req.body.vendorId,
+    amountDue: contract.monthlyRent,
+    forPeriodStart: contract.startDate,
+  })
 
-  const newContract = await createContractInner(
-    vendorId,
-    locationId,
-    (contractType = null),
-    (startDate = null),
-    (endDate = null)
-  )
-
-  console.log(newContract)
-  res.locals.locationId = newContract._id
-
-  return res.status(StatusCodes.OK).json({ newContract })
+  return res.status(StatusCodes.OK).json({ contract })
 }
