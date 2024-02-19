@@ -31,8 +31,6 @@ const VendorPayouts = () => {
     data: { payouts },
   } = useQuery(payoutsQuery)
 
-  console.log(payouts)
-
   if (payouts.length === 0) {
     return <h2>No payouts to display</h2>
   }

@@ -13,8 +13,6 @@ const SalesSearchContainer = () => {
   const { user, storeLocations } = useDashboardContext()
   const submit = useSubmit()
 
-  console.log(searchValues)
-
   const resetLink = setReportDefaultPeriod(
     '/dashboard/item-sales',
     user.settings.defaultReportPeriod

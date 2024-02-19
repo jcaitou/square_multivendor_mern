@@ -13,9 +13,11 @@ router.route('/').get(getAllPaymentsVendor)
 router.route('/adm/').get([authorizePermissions('admin'), getAllPaymentsAdmin])
 router
   .route('/adm/:id')
-  .post(validateIdParam('Payment'), [
-    (authorizePermissions('admin'), editPayment),
-  ])
-router.route('/:id').get(validateIdParam('Payment'), getPayment)
+  .post(
+    validateIdParam('RentPayment'),
+    authorizePermissions('admin'),
+    editPayment
+  )
+router.route('/:id').get(validateIdParam('RentPayment'), getPayment)
 
 export default router

@@ -11,15 +11,22 @@ import {
   authenticateUser,
 } from '../middleware/authMiddleware.js'
 
-router.get('/', getAllLocations)
-router.post('/create-location', authorizePermissions('admin'), createLocation)
+router.get('/', getAllLocations) //this is public because register requires this route (for open beta)
+router.post(
+  '/create-location',
+  authenticateUser,
+  authorizePermissions('admin'),
+  createLocation
+)
 router.post(
   '/assign-vendor-location',
+  authenticateUser,
   authorizePermissions('admin'),
   assignLocation
 )
 router.post(
   '/remove-vendor-location',
+  authenticateUser,
   authorizePermissions('admin'),
   removeLocation
 )

@@ -87,8 +87,6 @@ const ItemSales = () => {
     data: { currentPage, sales, numOfPages, totalItems },
   } = useQuery(allItemSalesQuery(searchValues, user))
 
-  console.log(currentPage, sales, numOfPages, totalItems)
-
   return (
     <ItemSalesContext.Provider value={{ searchValues }}>
       <Wrapper>

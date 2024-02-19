@@ -261,7 +261,7 @@ export const removeLocation = async (req, res) => {
     })
   }
 
-  // MAKING THE ITEM SELLABLE IN SQUARE
+  // MAKING THE ITEM UNSELLABLE IN SQUARE
   let searchQuery = {
     customAttributeFilters: [
       {

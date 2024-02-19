@@ -65,8 +65,6 @@ const PayoutItem = () => {
     data: { payout },
   } = useQuery(singlePayoutQuery(id))
 
-  console.log(payout)
-
   const navigation = useNavigation()
   const isSubmitting = navigation.state === 'submitting'
   const { user } = useOutletContext()
