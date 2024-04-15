@@ -31,6 +31,19 @@ const VendorPayouts = () => {
     data: { payouts },
   } = useQuery(payoutsQuery)
 
+  payouts.sort((a, b) => {
+    const locationA = a.contract.location.toUpperCase() // ignore upper and lowercase
+    const locationB = b.contract.location.toUpperCase() // ignore upper and lowercase
+    if (locationA < locationB) {
+      return -1
+    }
+    if (locationA > locationB) {
+      return 1
+    }
+    // names must be equal
+    return 0
+  })
+
   if (payouts.length === 0) {
     return <h2>No payouts to display</h2>
   }
